@@ -24,14 +24,14 @@ namespace Velora.Player
         [SerializeField] private float _jumpForce = 7f;
 
         [Header("Look")]
-        [SerializeField] private float _mouseSensitivity = 2f;
+        [SerializeField] private float _mouseSensitivity = 0.15f;
         [SerializeField] private float _maxLookAngle = 89f;
+        [SerializeField] private float _lookDeadZone = 2f;
 
         private CharacterController _controller;
         private Transform _cameraTransform;
 
         private Vector2 _moveInput;
-        private Vector2 _lookInput;
         private bool _isSprinting;
         private float _verticalVelocity;
         private float _cameraPitch;
@@ -44,6 +44,9 @@ namespace Velora.Player
         {
             _controller = GetComponent<CharacterController>();
             _cameraTransform = GetComponentInChildren<Camera>().transform;
+
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
         }
 
         private void Update()
@@ -55,30 +58,37 @@ namespace Velora.Player
         }
 
         // --- Input System コールバック ---
-        // PlayerInput コンポーネントの Send Messages / Invoke Unity Events から呼ばれる
+        // PlayerInput の Broadcast Messages から呼ばれる（InputValue シグネチャ）
 
-        public void OnMove(InputAction.CallbackContext context)
+        public void OnMove(InputValue value)
         {
-            _moveInput = context.ReadValue<Vector2>();
+            _moveInput = value.Get<Vector2>();
         }
 
-        public void OnLook(InputAction.CallbackContext context)
+        public void OnJump(InputValue value)
         {
-            _lookInput = context.ReadValue<Vector2>();
-        }
-
-        public void OnJump(InputAction.CallbackContext context)
-        {
-            if (context.performed && IsGrounded)
+            if (value.isPressed && IsGrounded)
             {
                 _verticalVelocity = _jumpForce;
             }
         }
 
-        public void OnSprint(InputAction.CallbackContext context)
+        public void OnSprint(InputValue value)
         {
-            _isSprinting = context.performed || context.started;
-            if (context.canceled) _isSprinting = false;
+            _isSprinting = value.isPressed;
+        }
+
+        /// <summary>
+        /// 外部からカメラ回転にオフセットを加える。
+        /// WeaponController のリコイル適用・復帰で使用する。
+        /// FPSController がカメラ回転の状態を一元管理しているため、
+        /// 外部から直接 Transform を操作すると UpdateLook で上書きされてしまう。
+        /// </summary>
+        public void AddCameraRecoil(float pitchDelta, float yawDelta)
+        {
+            _cameraPitch += pitchDelta;
+            _cameraPitch = Mathf.Clamp(_cameraPitch, -_maxLookAngle, _maxLookAngle);
+            transform.Rotate(Vector3.up * yawDelta);
         }
 
         private void UpdateGroundCheck()
@@ -108,10 +118,22 @@ namespace Velora.Player
             _controller.Move(finalVelocity * Time.deltaTime);
         }
 
+        /// <summary>
+        /// Mouse.current.delta を毎フレーム直接読み取る。
+        /// macOS のカーソルロック時にマウスセンサーノイズ（1〜2px 程度）が
+        /// 持続的に発生するため、デッドゾーンで除去する。
+        /// delta はフレーム間のピクセル移動量なので Time.deltaTime は掛けない。
+        /// </summary>
         private void UpdateLook()
         {
-            float mouseX = _lookInput.x * _mouseSensitivity * Time.deltaTime;
-            float mouseY = _lookInput.y * _mouseSensitivity * Time.deltaTime;
+            var mouse = Mouse.current;
+            if (mouse == null) return;
+
+            Vector2 delta = mouse.delta.ReadValue();
+            if (delta.sqrMagnitude < _lookDeadZone * _lookDeadZone) return;
+
+            float mouseX = delta.x * _mouseSensitivity;
+            float mouseY = delta.y * _mouseSensitivity;
 
             _cameraPitch -= mouseY;
             _cameraPitch = Mathf.Clamp(_cameraPitch, -_maxLookAngle, _maxLookAngle);
