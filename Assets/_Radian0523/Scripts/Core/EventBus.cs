@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Velora.Core
 {
@@ -101,4 +102,30 @@ namespace Velora.Core
     public readonly struct WeaponFiredEvent { }
 
     public readonly struct UpgradeSelectedEvent { }
+
+    public readonly struct EnemyDiedEvent
+    {
+        public int ScoreValue { get; }
+        public Vector3 Position { get; }
+
+        public EnemyDiedEvent(int scoreValue, Vector3 position)
+        {
+            ScoreValue = scoreValue;
+            Position = position;
+        }
+    }
+
+    public readonly struct EnemyDamagedEvent
+    {
+        public float Damage { get; }
+        public Vector3 HitPosition { get; }
+        public bool IsHeadshot { get; }
+
+        public EnemyDamagedEvent(float damage, Vector3 hitPosition, bool isHeadshot)
+        {
+            Damage = damage;
+            HitPosition = hitPosition;
+            IsHeadshot = isHeadshot;
+        }
+    }
 }
