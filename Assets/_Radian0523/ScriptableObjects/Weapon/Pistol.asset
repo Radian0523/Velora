@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 751b3278cfc104efc83129411a59b497, type: 3}
+  m_Name: Pistol
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.Data.WeaponData
+  _weaponName: Pistol
+  _weaponType: 0
+  _damage: 10
+  _fireRate: 10
+  _maxAmmo: 30
+  _reloadTime: 1.5
+  _headshotMultiplier: 2
+  _spreadAngle: 1
+  _adsSpreadAngle: 0.2
+  _recoilPattern: {fileID: 11400000, guid: 73692d7bb6e1347a2bf196cf24e24d58, type: 2}
+  _adsFieldOfView: 45
+  _projectileSpeed: 50
+  _projectilePrefab: {fileID: 0}
+  _muzzleFlashPrefab: {fileID: 8590451330835685401, guid: e101a4ada3a5d4cd48f3f74b9207dd24, type: 3}
+  _impactEffectPrefab: {fileID: 8446651104369974411, guid: 7b480ee653174434cb7cc41fdbbe1d42, type: 3}
+  _kickBackDistance: 0.05
+  _kickUpAngle: 3
+  _kickDuration: 0.1
+  _kickVibrato: 1
+  _fireSound: {fileID: 0}
