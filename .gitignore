@@ -37,6 +37,8 @@ Assets/Resources/DOTweenSettings.asset
 
 # Claude Code
 .claude/
+CLAUDE.md
+DEVELOPMENT.md
 
 # OS
 .DS_Store
