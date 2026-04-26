@@ -23,6 +23,21 @@ MemoryCaptures/
 *.opendb
 *.VC.db
 
+# External assets (Asset Store / third-party)
+# .meta ファイルは GUID 保持のため追跡し、アセット本体は除外する
+Assets/_External/**
+!Assets/_External/**/
+!Assets/_External/**/*.meta
+
+# DOTween (Asset Store)
+Assets/Plugins/Demigiant/**
+!Assets/Plugins/Demigiant/**/
+!Assets/Plugins/Demigiant/**/*.meta
+Assets/Resources/DOTweenSettings.asset
+
+# Claude Code
+.claude/
+
 # OS
 .DS_Store
 Thumbs.db
