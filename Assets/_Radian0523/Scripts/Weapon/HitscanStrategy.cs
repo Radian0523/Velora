@@ -19,6 +19,7 @@ namespace Velora.Weapon
         {
             var direction = ApplySpread(muzzle.forward, spreadAngle);
 
+            // TODO: カメラの位置から、カメラの方向にraycastするようにする。crosshairの部分にちゃんと当たるため
             // QueryTriggerInteraction.Collide でヘッドショット用の Trigger Collider もヒット対象にする
             if (Physics.Raycast(muzzle.position, direction, out var hit, MaxRayDistance, hitMask,
                 QueryTriggerInteraction.Collide))

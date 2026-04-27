@@ -1,9 +1,11 @@
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 using Cysharp.Threading.Tasks;
 using Velora.Battle;
 using Velora.Core;
 using Velora.Data;
+using Velora.UI;
 
 namespace Velora.Enemy
 {
@@ -11,6 +13,7 @@ namespace Velora.Enemy
     /// 敵の MonoBehaviour。EnemyModel（ロジック）と EnemyStateMachine（AI）を統合し、
     /// IDamageable を実装して武器からのダメージを受け付ける。
     /// Initialize で EnemyData を受け取り、BehaviorType に応じて攻撃方式を自動選択する。
+    /// ObjectPool 再利用に対応し、ReturnToPool でコールバック経由でプールに返却する。
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
     public class EnemyController : MonoBehaviour, IDamageable
@@ -23,11 +26,22 @@ namespace Velora.Enemy
         public IAttackBehavior AttackBehavior { get; private set; }
 
         private EnemyStateMachine _stateMachine;
+        private EnemyHPBarView _hpBarView;
         private Collider _collider;
+        private Action<EnemyController> _returnCallback;
+
+        /// <summary>
+        /// プール返却時のコールバックを設定する。WaveDirector が生成直後に呼び出す。
+        /// </summary>
+        public void SetReturnCallback(Action<EnemyController> callback)
+        {
+            _returnCallback = callback;
+        }
 
         /// <summary>
         /// 敵を初期化する。WaveDirector やスポナーから呼び出す想定。
         /// EnemyData のパラメータから Model を構築し、BehaviorType で攻撃方式を自動選択する。
+        /// DeathState が Agent 停止・Collider 無効化を行うため、再利用時にここでリセットする。
         /// </summary>
         public void Initialize(EnemyData data, Transform playerTransform, IDamageable playerDamageable)
         {
@@ -36,15 +50,23 @@ namespace Velora.Enemy
             PlayerDamageable = playerDamageable;
 
             Agent = GetComponent<NavMeshAgent>();
-            Agent.speed = data.MoveSpeed;
             _collider = GetComponent<Collider>();
 
+            // DeathState が無効化した状態をリセット（プール再利用時に必要）
+            Agent.isStopped = false;
+            Agent.ResetPath();
+            Agent.speed = data.MoveSpeed;
+            SetColliderEnabled(true);
+
+            // EnemyModel は readonly _maxHealth を持つため、データが変わる場合は毎回 new する
             Model = new EnemyModel(data.MaxHealth, data.StaggerThreshold);
             AttackBehavior = SelectBehavior(data.BehaviorType);
 
+            _hpBarView = GetComponentInChildren<EnemyHPBarView>();
             _stateMachine = new EnemyStateMachine(this);
             RegisterStates();
             SubscribeModelEvents();
+            _hpBarView?.Initialize(Model);
 
             _stateMachine.ChangeState(EnemyState.Spawn).Forget();
         }
@@ -80,11 +102,23 @@ namespace Velora.Enemy
         }
 
         /// <summary>
-        /// プール返却処理。ObjectPool 連携は WaveDirector 実装時に接続する。
+        /// プール返却処理。イベント購読を解除し、ステートマシンをクリアしてから
+        /// コールバック経由で ObjectPool に返却する。
         /// </summary>
         public void ReturnToPool()
         {
-            gameObject.SetActive(false);
+            _hpBarView?.Cleanup();
+            UnsubscribeModelEvents();
+            _stateMachine = null;
+
+            if (_returnCallback != null)
+            {
+                _returnCallback.Invoke(this);
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
         }
 
         // --- 内部処理 ---

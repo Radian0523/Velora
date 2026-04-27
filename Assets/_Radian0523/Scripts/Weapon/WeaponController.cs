@@ -276,7 +276,7 @@ namespace Velora.Weapon
             }
 
             ApplyWeaponKick();
-            ApplyRecoil();
+            // ApplyRecoil();
 
             OnAmmoChanged?.Invoke(_currentAmmo, _currentWeaponData.MaxAmmo);
             OnFired?.Invoke();
