@@ -24,7 +24,7 @@ namespace Velora.Weapon
             if (Physics.Raycast(muzzle.position, direction, out var hit, MaxRayDistance, hitMask,
                 QueryTriggerInteraction.Collide))
             {
-                if (hit.collider.TryGetComponent<IDamageable>(out var damageable))
+                if (hit.collider.GetComponentInParent<IDamageable>() is IDamageable damageable)
                 {
                     bool isHeadshot = hit.collider.CompareTag("Headshot");
                     float damage = data.Damage * (isHeadshot ? data.HeadshotMultiplier : 1f);

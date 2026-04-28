@@ -65,7 +65,7 @@ namespace Velora.Weapon
             // hitMask に含まれないレイヤーは無視する
             if ((_hitMask.value & (1 << collision.gameObject.layer)) == 0) return;
 
-            if (collision.gameObject.TryGetComponent<IDamageable>(out var damageable))
+            if (collision.gameObject.GetComponentInParent<IDamageable>() is IDamageable damageable)
             {
                 var contact = collision.GetContact(0);
                 damageable.TakeDamage(_weaponData.Damage, contact.point, false);
