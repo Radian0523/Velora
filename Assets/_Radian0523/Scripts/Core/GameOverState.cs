@@ -1,13 +1,24 @@
 using Cysharp.Threading.Tasks;
+using Velora.UI;
 
 namespace Velora.Core
 {
     /// <summary>
-    /// ゲームオーバーステート（Phase 6 で本実装予定）。
-    /// 現時点では即座に完了する。Result シーンへの遷移などは今後追加する。
+    /// ゲームオーバーステート。
+    /// ResultPresenter.Show(isGameOver: true) を呼び出してリザルト画面を表示する。
     /// </summary>
     public class GameOverState : GameStateBase
     {
-        public override UniTask Enter() => UniTask.CompletedTask;
+        private readonly ResultPresenter _resultPresenter;
+
+        public GameOverState(ResultPresenter resultPresenter)
+        {
+            _resultPresenter = resultPresenter;
+        }
+
+        public override async UniTask Enter()
+        {
+            await _resultPresenter.Show(isGameOver: true);
+        }
     }
 }

@@ -1,13 +1,27 @@
 using Cysharp.Threading.Tasks;
+using Velora.UI;
 
 namespace Velora.Core
 {
     /// <summary>
-    /// アップグレード選択ステート（Phase 5 で本実装予定）。
-    /// 現時点では即座に完了し、次の BattleReady ステートへ進む。
+    /// アップグレード選択ステート。
+    /// UpgradeSelectPresenter.ShowAndWait() を await することで、
+    /// プレイヤーがカードを選ぶまでゲームフローをここで一時停止する。
+    /// UniTaskCompletionSource によるシグナル待機は、
+    /// ポーリングやコルーチン管理より意図を明示的に表現できる。
     /// </summary>
     public class UpgradeSelectState : GameStateBase
     {
-        public override UniTask Enter() => UniTask.CompletedTask;
+        private readonly UpgradeSelectPresenter _presenter;
+
+        public UpgradeSelectState(UpgradeSelectPresenter presenter)
+        {
+            _presenter = presenter;
+        }
+
+        public override async UniTask Enter()
+        {
+            await _presenter.ShowAndWait();
+        }
     }
 }

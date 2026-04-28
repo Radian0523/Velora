@@ -3,13 +3,16 @@ using Cysharp.Threading.Tasks;
 using Velora.Data;
 using Velora.Enemy;
 using Velora.Player;
+using Velora.UI;
+using Velora.Upgrade;
 using Velora.Wave;
+using Velora.Weapon;
 
 namespace Velora.Core
 {
     /// <summary>
     /// Battle シーンのオーケストレーター。
-    /// PlayerModel・WaveDirector・GameFlowManager を生成・接続し、
+    /// PlayerModel・WaveDirector・GameFlowManager・各 Presenter を生成・接続し、
     /// 「BattleReady → BattleInProgress → WaveCleared → UpgradeSelect → 次Wave」
     /// のゲームループを駆動する。各システム間の依存を一箇所で管理し、
     /// 個々のクラスの疎結合を維持する。
@@ -20,22 +23,36 @@ namespace Velora.Core
         [SerializeField] private PlayerDamageReceiver _playerDamageReceiver;
         [SerializeField] private float _playerMaxHealth = 100f;
 
+        [Header("武器")]
+        [SerializeField] private WeaponController _weaponController;
+
         [Header("ウェーブ")]
         [SerializeField] private EnemyController _enemyPrefab;
         [SerializeField] private WaveData[] _waveDataList;
         [SerializeField] private SpawnPointManager _spawnPointManager;
         [SerializeField] private Transform _poolParent;
 
+        [Header("アップグレード")]
+        [SerializeField] private UpgradeData[] _upgradeDataList;
+
         [Header("UI")]
         [SerializeField] private WaveEffectView _waveEffectView;
+
+        [Header("UI Presenter")]
+        [SerializeField] private HudPresenter _hudPresenter;
+        [SerializeField] private UpgradeSelectPresenter _upgradeSelectPresenter;
+        [SerializeField] private ResultPresenter _resultPresenter;
 
         private PlayerModel _playerModel;
         private WaveDirector _waveDirector;
         private GameFlowManager _gameFlowManager;
+        private ScoreManager _scoreManager;
+        private UpgradeManager _upgradeManager;
 
         private void Start()
         {
             InitializePlayer();
+            InitializeScore();
             InitializeWaveDirector();
             InitializeGameFlowManager();
             SubscribeEvents();
@@ -46,18 +63,32 @@ namespace Velora.Core
         private void Update()
         {
             _gameFlowManager?.Update();
+            _scoreManager?.UpdateSurvivalTime(Time.deltaTime);
         }
 
         private void OnDestroy()
         {
             UnsubscribeEvents();
             _waveDirector?.Dispose();
+            _scoreManager?.Dispose();
         }
 
         private void InitializePlayer()
         {
             _playerModel = new PlayerModel(_playerMaxHealth);
             _playerDamageReceiver.Initialize(_playerModel);
+        }
+
+        private void InitializeScore()
+        {
+            _scoreManager = new ScoreManager();
+            _upgradeManager = new UpgradeManager(_upgradeDataList);
+
+            // Presenter の配線は全システム初期化後に行う。
+            // _playerModel は InitializePlayer() で生成済みであることが前提。
+            _hudPresenter.Initialize(_playerModel, _weaponController);
+            _upgradeSelectPresenter.Initialize(_upgradeManager, _playerModel);
+            _resultPresenter.Initialize(_scoreManager);
         }
 
         private void InitializeWaveDirector()
@@ -89,15 +120,15 @@ namespace Velora.Core
 
             _gameFlowManager.RegisterState(
                 GameState.UpgradeSelect,
-                new UpgradeSelectState());
+                new UpgradeSelectState(_upgradeSelectPresenter));
 
             _gameFlowManager.RegisterState(
                 GameState.GameOver,
-                new GameOverState());
+                new GameOverState(_resultPresenter));
 
             _gameFlowManager.RegisterState(
                 GameState.Result,
-                new ResultState());
+                new ResultState(_resultPresenter));
         }
 
         private void SubscribeEvents()
@@ -159,7 +190,6 @@ namespace Velora.Core
         private async UniTaskVoid RunAllWavesClearSequence()
         {
             await _gameFlowManager.ChangeState(GameState.WaveCleared);
-            // Phase 6 で Result シーンへの遷移を実装
             await _gameFlowManager.ChangeState(GameState.Result);
         }
 
