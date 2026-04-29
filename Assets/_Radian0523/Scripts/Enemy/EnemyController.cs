@@ -87,7 +87,9 @@ namespace Velora.Enemy
         {
             if (Model == null || Model.IsDead) return;
 
+            Debug.Log($"[TakeDamage] {name} HP before:{Model.CurrentHealth}");
             Model.TakeDamage(damage);
+            Debug.Log($"[TakeDamage] {name} HP after: {Model.CurrentHealth},HPBar: {_hpBarView != null}");
             EventBus.Publish(new EnemyDamagedEvent(damage, hitPoint, isHeadshot));
         }
 

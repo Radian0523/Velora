@@ -7,7 +7,7 @@ namespace Velora.UI
     /// <summary>
     /// 敵の頭上に表示するワールドスペース HP バー（View 層）。
     /// EnemyController が Initialize / Cleanup を呼び出し、
-    /// EnemyModel.OnHealthChanged を購読して fillAmount を更新する。
+    /// EnemyModel.OnHealthChanged を購読して RectTransform の幅を更新する。
     /// ビルボード処理で常にカメラ正面を向く。
     /// </summary>
     public class EnemyHPBarView : MonoBehaviour
@@ -15,6 +15,7 @@ namespace Velora.UI
         [SerializeField] private Image _fillImage;
 
         private EnemyModel _model;
+        private RectTransform _fillRect;
 
         /// <summary>
         /// EnemyController.Initialize から呼び出す。
@@ -23,8 +24,9 @@ namespace Velora.UI
         public void Initialize(EnemyModel model)
         {
             _model = model;
+            _fillRect = _fillImage.rectTransform;
             _model.OnHealthChanged += HandleHealthChanged;
-            _fillImage.fillAmount = 1f;
+            SetFillNormalized(1f);
         }
 
         /// <summary>
@@ -53,7 +55,18 @@ namespace Velora.UI
 
         private void HandleHealthChanged(float currentHealth, float maxHealth)
         {
-            _fillImage.fillAmount = maxHealth > 0f ? currentHealth / maxHealth : 0f;
+            float normalized = maxHealth > 0f ? currentHealth / maxHealth : 0f;
+            SetFillNormalized(normalized);
+        }
+
+        /// <summary>
+        /// anchorMax.x を 0〜1 で変化させることで HP バーの幅を制御する。
+        /// fillAmount はスプライト未設定の Image では見た目に反映されないため、
+        /// RectTransform のアンカーを直接操作する方式を採用している。
+        /// </summary>
+        private void SetFillNormalized(float normalized)
+        {
+            _fillRect.anchorMax = new Vector2(normalized, _fillRect.anchorMax.y);
         }
     }
 }

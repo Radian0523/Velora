@@ -15,7 +15,7 @@ MonoBehaviour:
   _weaponName: Pistol
   _weaponType: 0
   _damage: 10
-  _fireRate: 10
+  _fireRate: 2
   _maxAmmo: 30
   _reloadTime: 1.5
   _headshotMultiplier: 2

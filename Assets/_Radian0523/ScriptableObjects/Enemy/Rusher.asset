@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ffdd2fe3f1504b15ae8b243e698df03, type: 3}
   m_Name: Rusher
   m_EditorClassIdentifier: Assembly-CSharp::Velora.Data.EnemyData
-  _enemyName: 
+  _enemyName: Rusher
   _behaviorType: 0
   _maxHealth: 100
   _moveSpeed: 3.5
