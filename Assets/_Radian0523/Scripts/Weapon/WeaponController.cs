@@ -269,7 +269,6 @@ namespace Velora.Weapon
             }
 
             ApplyWeaponKick();
-            // ApplyRecoil();
 
             OnAmmoChanged?.Invoke(_currentAmmo, _currentWeaponData.MaxAmmo);
             OnFired?.Invoke();
@@ -374,7 +373,6 @@ namespace Velora.Weapon
             CancelReload();
             _reloadCts = new CancellationTokenSource();
 
-            Debug.Log("Start Reloading");
             _isReloading = true;
             OnReloadStateChanged?.Invoke(true);
 
@@ -393,7 +391,6 @@ namespace Velora.Weapon
             }
             finally
             {
-                Debug.Log("End Reloading");
                 _isReloading = false;
                 OnReloadStateChanged?.Invoke(false);
             }

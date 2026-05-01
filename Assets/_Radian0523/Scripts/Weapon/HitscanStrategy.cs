@@ -15,13 +15,12 @@ namespace Velora.Weapon
     {
         private const float MaxRayDistance = 200f;
 
-        public UniTask<FireResult> Fire(WeaponData data, Transform muzzle, LayerMask hitMask, float spreadAngle)
+        public UniTask<FireResult> Fire(WeaponData data, Transform origin, LayerMask hitMask, float spreadAngle)
         {
-            var direction = ApplySpread(muzzle.forward, spreadAngle);
+            var direction = ApplySpread(origin.forward, spreadAngle);
 
-            // TODO: カメラの位置から、カメラの方向にraycastするようにする。crosshairの部分にちゃんと当たるため
             // QueryTriggerInteraction.Collide でヘッドショット用の Trigger Collider もヒット対象にする
-            if (Physics.Raycast(muzzle.position, direction, out var hit, MaxRayDistance, hitMask,
+            if (Physics.Raycast(origin.position, direction, out var hit, MaxRayDistance, hitMask,
                 QueryTriggerInteraction.Collide))
             {
                 if (hit.collider.GetComponentInParent<IDamageable>() is IDamageable damageable)

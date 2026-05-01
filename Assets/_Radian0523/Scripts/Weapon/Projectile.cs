@@ -14,10 +14,9 @@ namespace Velora.Weapon
     [RequireComponent(typeof(Rigidbody))]
     public class Projectile : MonoBehaviour
     {
-        private const float MaxLifetime = 5f;
-
         private Rigidbody _rigidbody;
         private float _spawnTime;
+        private float _maxLifetime;
         private LayerMask _hitMask;
         private WeaponData _weaponData;
         private ObjectPool<Projectile> _pool;
@@ -40,6 +39,7 @@ namespace Velora.Weapon
         {
             _hitMask = hitMask;
             _weaponData = weaponData;
+            _maxLifetime = weaponData.ProjectileMaxLifetime;
             _pool = pool;
             _impactEffectPool = impactEffectPool;
             _spawnTime = Time.time;
@@ -52,7 +52,7 @@ namespace Velora.Weapon
         {
             if (!_isActive) return;
 
-            if (Time.time - _spawnTime >= MaxLifetime)
+            if (Time.time - _spawnTime >= _maxLifetime)
             {
                 ReturnToPool();
             }

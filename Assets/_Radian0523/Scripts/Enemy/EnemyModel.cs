@@ -41,7 +41,6 @@ namespace Velora.Enemy
 
             _currentHealth = Mathf.Max(0f, _currentHealth - amount);
             OnDamaged?.Invoke(amount);
-            Debug.Log(OnHealthChanged == null ? "OnHealthChanged is null" : "OnHealthChanged has subscribers");
             OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
 
             if (IsDead)

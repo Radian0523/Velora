@@ -37,6 +37,7 @@ namespace Velora.Data
 
         [Header("Projectile 専用")]
         [SerializeField] private float _projectileSpeed = 50f;
+        [SerializeField] private float _projectileMaxLifetime = 5f;
         [SerializeField] private GameObject _projectilePrefab;
 
         [Header("エフェクト")]
@@ -64,6 +65,7 @@ namespace Velora.Data
         public RecoilData RecoilPattern => _recoilPattern;
         public float AdsFieldOfView => _adsFieldOfView;
         public float ProjectileSpeed => _projectileSpeed;
+        public float ProjectileMaxLifetime => _projectileMaxLifetime;
         public GameObject ProjectilePrefab => _projectilePrefab;
         public GameObject MuzzleFlashPrefab => _muzzleFlashPrefab;
         public GameObject ImpactEffectPrefab => _impactEffectPrefab;

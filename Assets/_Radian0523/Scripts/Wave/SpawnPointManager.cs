@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -11,30 +12,33 @@ namespace Velora.Wave
     public class SpawnPointManager : MonoBehaviour
     {
         [SerializeField] private Transform[] _spawnPoints;
+        [SerializeField] private float _minSpawnDistance = 15f;
 
-        private const float MinSpawnDistance = 15f;
         private const float NavMeshSampleRadius = 5f;
+
+        // 候補インデックスのキャッシュ（毎フレーム呼ばれないため GC 許容）
+        private readonly List<int> _candidates = new();
 
         public int SpawnPointCount => _spawnPoints.Length;
 
         /// <summary>
-        /// プレイヤー位置から MinSpawnDistance 以上離れたポイントをランダムに返す。
+        /// プレイヤー位置から _minSpawnDistance 以上離れたポイントをランダムに返す。
         /// 全ポイントが近い場合は最も遠いポイントをフォールバックとして使用する。
         /// 最終的に NavMesh 上にスナップし、到達不能な場所へのスポーンを防ぐ。
         /// </summary>
         public Vector3 GetSpawnPosition(Vector3 playerPosition)
         {
+            _candidates.Clear();
             int farthestIndex = 0;
             float farthestDistance = 0f;
 
-            // MinSpawnDistance 以上のポイントを数えつつ、最遠も記録する
-            int candidateCount = 0;
             for (int i = 0; i < _spawnPoints.Length; i++)
             {
                 float distance = Vector3.Distance(_spawnPoints[i].position, playerPosition);
-                if (distance >= MinSpawnDistance)
+
+                if (distance >= _minSpawnDistance)
                 {
-                    candidateCount++;
+                    _candidates.Add(i);
                 }
                 if (distance > farthestDistance)
                 {
@@ -43,33 +47,12 @@ namespace Velora.Wave
                 }
             }
 
-            Vector3 selectedPosition;
+            // 条件を満たす候補からランダム選択。なければ最遠をフォールバック
+            int selectedIndex = _candidates.Count > 0
+                ? _candidates[Random.Range(0, _candidates.Count)]
+                : farthestIndex;
 
-            if (candidateCount > 0)
-            {
-                // 条件を満たすポイントからランダム選択
-                int randomTarget = Random.Range(0, candidateCount);
-                int current = 0;
-                selectedPosition = _spawnPoints[farthestIndex].position;
-
-                for (int i = 0; i < _spawnPoints.Length; i++)
-                {
-                    float distance = Vector3.Distance(_spawnPoints[i].position, playerPosition);
-                    if (distance >= MinSpawnDistance)
-                    {
-                        if (current == randomTarget)
-                        {
-                            selectedPosition = _spawnPoints[i].position;
-                            break;
-                        }
-                        current++;
-                    }
-                }
-            }
-            else
-            {
-                selectedPosition = _spawnPoints[farthestIndex].position;
-            }
+            Vector3 selectedPosition = _spawnPoints[selectedIndex].position;
 
             // NavMesh 上にスナップして到達不能な位置へのスポーンを防止
             if (NavMesh.SamplePosition(selectedPosition, out NavMeshHit hit, NavMeshSampleRadius, NavMesh.AllAreas))

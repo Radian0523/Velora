@@ -13,6 +13,6 @@ namespace Velora.Weapon
     {
         /// <param name="spreadAngle">適用する拡散角。ADS 状態に応じて呼び出し側が決定する。</param>
         /// <returns>ヒット情報。エフェクト生成は呼び出し側が FireResult を基に行う。</returns>
-        UniTask<FireResult> Fire(WeaponData data, Transform muzzle, LayerMask hitMask, float spreadAngle);
+        UniTask<FireResult> Fire(WeaponData data, Transform origin, LayerMask hitMask, float spreadAngle);
     }
 }

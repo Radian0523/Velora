@@ -9,8 +9,7 @@ namespace Velora.UI
     /// <summary>
     /// EnemyDamagedEvent を購読し、ワールド座標をスクリーン変換した位置に
     /// ダメージ数字を浮かび上がらせる View 層。
-    /// Instantiate を使うためガベージが発生するが、Phase 5 の範囲では許容する。
-    /// 本番改善時は ObjectPool に差し替える。
+    /// ObjectPool で TextMeshProUGUI を再利用し、Instantiate/Destroy のコストを回避する。
     /// </summary>
     public class DamageNumberView : MonoBehaviour
     {
@@ -27,17 +26,24 @@ namespace Velora.UI
 
         private Camera _mainCamera;
         private RectTransform _canvasRect;
+        private ObjectPool<TextMeshProUGUI> _pool;
+
+        private const int PoolInitialSize = 5;
+        private const int PoolMaxSize = 20;
 
         private void Start()
         {
             _mainCamera = Camera.main;
             _canvasRect = _canvas.GetComponent<RectTransform>();
+            _pool = new ObjectPool<TextMeshProUGUI>(
+                _damageNumberPrefab, _canvas.transform, PoolInitialSize, PoolMaxSize);
             EventBus.Subscribe<EnemyDamagedEvent>(HandleEnemyDamaged);
         }
 
         private void OnDestroy()
         {
             EventBus.Unsubscribe<EnemyDamagedEvent>(HandleEnemyDamaged);
+            _pool?.Clear();
         }
 
         private void HandleEnemyDamaged(EnemyDamagedEvent e)
@@ -47,9 +53,13 @@ namespace Velora.UI
 
         private void SpawnDamageNumber(float damage, Vector3 worldPosition, bool isHeadshot)
         {
-            if (_mainCamera == null || _damageNumberPrefab == null) return;
+            if (_mainCamera == null || _pool == null) return;
 
-            var instance = Instantiate(_damageNumberPrefab, _canvas.transform);
+            var instance = _pool.Get();
+
+            // プールから取り出した際に前回の DOTween をキャンセルし、状態をリセットする
+            instance.DOKill();
+            instance.alpha = 1f;
             instance.text = Mathf.RoundToInt(damage).ToString();
             instance.color = isHeadshot ? _headshotColor : _normalHitColor;
 
@@ -65,13 +75,13 @@ namespace Velora.UI
             var rect = instance.rectTransform;
             rect.anchoredPosition = localPoint;
 
-            // 上方向に浮き上がりながらフェードアウト
+            // 上方向に浮き上がりながらフェードアウトし、完了後にプールへ返却
             rect.DOAnchorPosY(localPoint.y + _floatDistance, _duration)
                 .SetEase(Ease.OutCubic);
 
             instance.DOFade(0f, _duration)
                 .SetEase(Ease.InQuad)
-                .OnComplete(() => Destroy(instance.gameObject));
+                .OnComplete(() => _pool.Return(instance));
         }
     }
 }
