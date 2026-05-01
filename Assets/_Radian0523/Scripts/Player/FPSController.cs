@@ -122,6 +122,7 @@ namespace Velora.Player
         /// Mouse.current.delta を毎フレーム直接読み取る。
         /// macOS のカーソルロック時にマウスセンサーノイズ（1〜2px 程度）が
         /// 持続的に発生するため、デッドゾーンで除去する。
+        /// 細かいエイムできなかったので一旦コメントアウト
         /// delta はフレーム間のピクセル移動量なので Time.deltaTime は掛けない。
         /// </summary>
         private void UpdateLook()
@@ -130,7 +131,7 @@ namespace Velora.Player
             if (mouse == null) return;
 
             Vector2 delta = mouse.delta.ReadValue();
-            if (delta.sqrMagnitude < _lookDeadZone * _lookDeadZone) return;
+            // if (delta.sqrMagnitude < _lookDeadZone * _lookDeadZone) return;
 
             float mouseX = delta.x * _mouseSensitivity;
             float mouseY = delta.y * _mouseSensitivity;
