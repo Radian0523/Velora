@@ -27,6 +27,7 @@ namespace Velora.Weapon
         [SerializeField] private Camera _playerCamera;
         [SerializeField] private FPSController _fpsController;
         [SerializeField] private LayerMask _hitMask;
+        [SerializeField] private ParticleSystem _muzzleFlashVfx;
 
         [Header("ADS")]
         [SerializeField] private float _defaultFieldOfView = 60f;
@@ -46,8 +47,7 @@ namespace Velora.Weapon
         private int _consecutiveShotCount;
         private Vector2 _recoilCameraOffset;
 
-        // エフェクトプール: 武器ごとにプールを生成し、武器切替時に入れ替える
-        private ObjectPool<PooledEffect> _muzzleFlashPool;
+        // 着弾エフェクトプール: 武器ごとにプールを生成し、武器切替時に入れ替える
         private ObjectPool<PooledEffect> _impactEffectPool;
 
         private const int EffectPoolInitialSize = 3;
@@ -177,10 +177,6 @@ namespace Velora.Weapon
         /// </summary>
         private void InitializeEffectPools()
         {
-            _muzzleFlashPool = CreateEffectPool(
-                _currentWeaponData.MuzzleFlashPrefab,
-                $"Pool_{_currentWeaponData.WeaponName}_MuzzleFlash");
-
             _impactEffectPool = CreateEffectPool(
                 _currentWeaponData.ImpactEffectPrefab,
                 $"Pool_{_currentWeaponData.WeaponName}_ImpactEffect");
@@ -211,9 +207,6 @@ namespace Velora.Weapon
 
         private void CleanupEffectPools()
         {
-            _muzzleFlashPool?.Clear();
-            _muzzleFlashPool = null;
-
             _impactEffectPool?.Clear();
             _impactEffectPool = null;
         }
@@ -287,11 +280,8 @@ namespace Velora.Weapon
 
         private void SpawnMuzzleFlash()
         {
-            if (_muzzleFlashPool == null) return;
-
-            var flash = _muzzleFlashPool.Get();
-            flash.Initialize(_muzzleFlashPool);
-            flash.transform.SetPositionAndRotation(_muzzlePoint.position, _muzzlePoint.rotation);
+            if (_muzzleFlashVfx == null) return;
+            _muzzleFlashVfx.Play();
         }
 
         private void SpawnImpactEffect(FireResult result)

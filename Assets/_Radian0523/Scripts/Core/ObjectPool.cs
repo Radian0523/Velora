@@ -58,6 +58,8 @@ namespace Velora.Core
         /// </summary>
         public void Return(T instance)
         {
+            // 使用中に別の親へ移されたオブジェクトをプール階層に戻す
+            instance.transform.SetParent(_parent);
             instance.gameObject.SetActive(false);
 
             if (_pool.Count < _maxSize)
