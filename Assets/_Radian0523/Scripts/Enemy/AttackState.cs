@@ -48,7 +48,15 @@ namespace Velora.Enemy
         private async UniTaskVoid ExecuteAttack()
         {
             _isAttacking = true;
-            Controller.PlayAnimation(EnemyController.AnimAttack);
+
+            // Ranged はチャージ完了後に自前でアニメーションを発火するため、
+            // AttackState ではアニメーション再生を Behavior に委ねる。
+            // Rusher は Attack 前に即座に再生する。
+            if (Controller.AttackBehavior is not RangedAttack)
+            {
+                Controller.PlayAnimation(EnemyController.AnimAttack);
+            }
+
             await Controller.AttackBehavior.Attack(Controller);
             Controller.PlayAnimation(EnemyController.AnimIdle);
             _isAttacking = false;

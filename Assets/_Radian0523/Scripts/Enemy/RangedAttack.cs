@@ -16,6 +16,7 @@ namespace Velora.Enemy
     /// </summary>
     public class RangedAttack : IAttackBehavior
     {
+        private const float AttackAnimationDuration = 0.5f;
         private const float ChargeHeightOffset = 2.0f;
         private const float PlayerEyeHeightOffset = 1.5f;
         private const int PoolInitialSize = 5;
@@ -72,6 +73,9 @@ namespace Velora.Enemy
                 return;
             }
 
+            // 発射の瞬間に攻撃アニメーションを再生する
+            controller.PlayAnimation(EnemyController.AnimAttack);
+
             // チャージ位置からプレイヤーの目線に向かって放出する
             var targetPoint = controller.PlayerTransform.position
                             + Vector3.up * PlayerEyeHeightOffset;
@@ -84,6 +88,12 @@ namespace Velora.Enemy
                 data.ProjectileMaxLifetime,
                 data.ProjectileMaxRange,
                 _pool);
+
+            // 攻撃アニメーションの再生時間を確保してから AttackState に制御を返す。
+            // これがないと AttackState が即座に AnimIdle で上書きしてしまう。
+            await UniTask.Delay(
+                TimeSpan.FromSeconds(AttackAnimationDuration),
+                cancellationToken: controller.destroyCancellationToken);
         }
 
         /// <summary>
