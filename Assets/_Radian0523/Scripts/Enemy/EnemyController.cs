@@ -22,6 +22,8 @@ namespace Velora.Enemy
         // AnimatorController 側にトランジションを組む必要がなく、
         // ステートマシンのコードが全遷移を一元管理できる。
         private const float DefaultTransitionDuration = 0.15f;
+        private const float LookAtSpeed = 5f;
+        private const float MaxHeadAngle = 70f;
 
         public static readonly int AnimIdle = Animator.StringToHash("CombatIdle");
         public static readonly int AnimRun = Animator.StringToHash("Run");
@@ -38,10 +40,13 @@ namespace Velora.Enemy
         public IAttackBehavior AttackBehavior { get; private set; }
         public Vector3 SpawnPosition { get; private set; }
 
+        [SerializeField] private Transform _headBone;
+
         private EnemyStateMachine _stateMachine;
         private EnemyHPBarView _hpBarView;
         private Collider _collider;
         private Action<EnemyController> _returnCallback;
+        private float _lookAtWeight;
 
         /// <summary>
         /// プール返却時のコールバックを設定する。WaveDirector が生成直後に呼び出す。
@@ -72,6 +77,7 @@ namespace Velora.Enemy
             Agent.ResetPath();
             Agent.speed = data.MoveSpeed;
             SetColliderEnabled(true);
+            _lookAtWeight = 0f;
 
             // EnemyModel は readonly _maxHealth を持つため、データが変わる場合は毎回 new する
             Model = new EnemyModel(data.MaxHealth, data.StaggerThreshold);
@@ -89,6 +95,16 @@ namespace Velora.Enemy
         private void Update()
         {
             _stateMachine?.Update();
+        }
+
+        /// <summary>
+        /// Generic リグのため OnAnimatorIK / SetLookAtPosition は使用不可。
+        /// Animator がボーン回転を確定した後に上書きし、
+        /// Chase・Attack 中のみ頭をプレイヤー方向に向ける。
+        /// </summary>
+        private void LateUpdate()
+        {
+            ApplyHeadLookAt();
         }
 
         private void OnDestroy()
@@ -142,6 +158,38 @@ namespace Velora.Enemy
             {
                 gameObject.SetActive(false);
             }
+        }
+
+        // --- ヘッドルック ---
+
+        private void ApplyHeadLookAt()
+        {
+            if (_headBone == null || _stateMachine == null || PlayerTransform == null) return;
+
+            // Death・Stagger ではアニメーションを完全に優先する。
+            // 補間を待つと死亡演出の頭ボーンが上書きされ、アニメーションが停止して見える。
+            EnemyState current = _stateMachine.CurrentState;
+            if (current == EnemyState.Death || current == EnemyState.Stagger)
+            {
+                _lookAtWeight = 0f;
+                return;
+            }
+
+            bool isTrackingState = current == EnemyState.Chase
+                                || current == EnemyState.Attack;
+
+            Vector3 directionToPlayer = (PlayerTransform.position - _headBone.position).normalized;
+            float angleFromForward = Vector3.Angle(transform.forward, directionToPlayer);
+
+            // 追跡ステートかつ体の正面から MaxHeadAngle 以内の場合のみ頭を向ける。
+            // 角度が範囲外の場合は weight を 0 に戻し、首が不自然に回りすぎるのを防ぐ。
+            float targetWeight = (isTrackingState && angleFromForward <= MaxHeadAngle) ? 1f : 0f;
+            _lookAtWeight = Mathf.MoveTowards(_lookAtWeight, targetWeight, LookAtSpeed * Time.deltaTime);
+
+            if (_lookAtWeight <= 0f) return;
+
+            Quaternion lookRotation = Quaternion.LookRotation(directionToPlayer);
+            _headBone.rotation = Quaternion.Slerp(_headBone.rotation, lookRotation, _lookAtWeight);
         }
 
         // --- 内部処理 ---

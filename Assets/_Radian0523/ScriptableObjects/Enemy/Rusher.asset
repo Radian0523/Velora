@@ -25,6 +25,6 @@ MonoBehaviour:
   _preferredRange: 12
   _minRetreatRange: 5
   _deathEffectPrefab: {fileID: 0}
-  _spawnEffectPrefab: {fileID: 0}
+  _spawnEffectPrefab: {fileID: 3377181292992421420, guid: 12820c008196d478f9a2cd51dcd7c625, type: 3}
   _spawnWeight: 1
   _scoreValue: 100

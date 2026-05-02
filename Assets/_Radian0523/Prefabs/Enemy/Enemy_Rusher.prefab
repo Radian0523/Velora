@@ -71,6 +71,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 789235964db2d4af0b10f5b9546ae997, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Velora.Enemy.EnemyController
+  _headBone: {fileID: 8409399260724270243}
 --- !u!136 &741096838926493576
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -185,7 +186,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &9075808952388304915
 Transform:
   m_ObjectHideFlags: 0
@@ -480,13 +481,51 @@ PrefabInstance:
       propertyPath: m_Name
       value: RandomModularRobots_Prefab
       objectReference: {fileID: 0}
+    - target: {fileID: 5007658567523843798, guid: 5cae6d7d0922fd44e8c052d92fe9a0ce, type: 3}
+      propertyPath: m_TagString
+      value: Headshot
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5007658567523843798, guid: 5cae6d7d0922fd44e8c052d92fe9a0ce, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1578730182858493989}
   m_SourcePrefab: {fileID: 100100000, guid: 5cae6d7d0922fd44e8c052d92fe9a0ce, type: 3}
+--- !u!1 &1199973825843927572 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5007658567523843798, guid: 5cae6d7d0922fd44e8c052d92fe9a0ce, type: 3}
+  m_PrefabInstance: {fileID: 6186238592411673794}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &1578730182858493989
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1199973825843927572}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.6, y: 0.36, z: 0.45}
+  m_Center: {x: 0, y: 0.1, z: 0}
 --- !u!4 &8166907826508271420 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2634395073816603646, guid: 5cae6d7d0922fd44e8c052d92fe9a0ce, type: 3}
+  m_PrefabInstance: {fileID: 6186238592411673794}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8409399260724270243 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2408826755136991329, guid: 5cae6d7d0922fd44e8c052d92fe9a0ce, type: 3}
   m_PrefabInstance: {fileID: 6186238592411673794}
   m_PrefabAsset: {fileID: 0}
