@@ -5,7 +5,7 @@ namespace Velora.Enemy
 {
     /// <summary>
     /// スポーン演出待機ステート。
-    /// タイマー経過後に Idle へ遷移する。演出は Prefab 未設定でもスキップされる。
+    /// タイマー経過後に Patrol へ遷移する。演出は Prefab 未設定でもスキップされる。
     /// </summary>
     public class SpawnState : EnemyStateBase
     {
@@ -36,7 +36,7 @@ namespace Velora.Enemy
             _timer += Time.deltaTime;
             if (_timer >= SpawnAnimationDuration)
             {
-                StateMachine.ChangeState(EnemyState.Idle).Forget();
+                StateMachine.ChangeState(EnemyState.Patrol).Forget();
             }
         }
 

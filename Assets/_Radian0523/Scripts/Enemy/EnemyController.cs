@@ -36,6 +36,7 @@ namespace Velora.Enemy
         public Transform PlayerTransform { get; private set; }
         public IDamageable PlayerDamageable { get; private set; }
         public IAttackBehavior AttackBehavior { get; private set; }
+        public Vector3 SpawnPosition { get; private set; }
 
         private EnemyStateMachine _stateMachine;
         private EnemyHPBarView _hpBarView;
@@ -60,6 +61,7 @@ namespace Velora.Enemy
             Data = data;
             PlayerTransform = playerTransform;
             PlayerDamageable = playerDamageable;
+            SpawnPosition = transform.position;
 
             Agent = GetComponent<NavMeshAgent>();
             Animator = GetComponentInChildren<Animator>();
@@ -163,6 +165,7 @@ namespace Velora.Enemy
         {
             _stateMachine.RegisterState(EnemyState.Spawn, new SpawnState());
             _stateMachine.RegisterState(EnemyState.Idle, new IdleState());
+            _stateMachine.RegisterState(EnemyState.Patrol, new PatrolState());
             _stateMachine.RegisterState(EnemyState.Chase, new ChaseState());
             _stateMachine.RegisterState(EnemyState.Attack, new AttackState());
             _stateMachine.RegisterState(EnemyState.Stagger, new StaggerState());

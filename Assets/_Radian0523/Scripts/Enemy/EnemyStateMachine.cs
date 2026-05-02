@@ -8,6 +8,7 @@ namespace Velora.Enemy
     {
         Spawn,
         Idle,
+        Patrol,
         Chase,
         Attack,
         Stagger,
