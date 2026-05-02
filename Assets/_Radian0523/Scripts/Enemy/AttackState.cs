@@ -48,7 +48,9 @@ namespace Velora.Enemy
         private async UniTaskVoid ExecuteAttack()
         {
             _isAttacking = true;
+            Controller.PlayAnimation(EnemyController.AnimAttack);
             await Controller.AttackBehavior.Attack(Controller);
+            Controller.PlayAnimation(EnemyController.AnimIdle);
             _isAttacking = false;
             _lastAttackTime = Time.time;
         }

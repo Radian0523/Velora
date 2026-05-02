@@ -11,6 +11,7 @@ namespace Velora.Enemy
         public override UniTask Enter()
         {
             Controller.Agent.isStopped = true;
+            Controller.PlayAnimation(EnemyController.AnimIdle);
             return UniTask.CompletedTask;
         }
 

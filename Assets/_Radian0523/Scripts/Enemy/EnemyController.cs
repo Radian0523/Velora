@@ -18,9 +18,21 @@ namespace Velora.Enemy
     [RequireComponent(typeof(NavMeshAgent))]
     public class EnemyController : MonoBehaviour, IDamageable
     {
+        // CrossFadeInFixedTime で直接ステート名を指定するため、
+        // AnimatorController 側にトランジションを組む必要がなく、
+        // ステートマシンのコードが全遷移を一元管理できる。
+        private const float DefaultTransitionDuration = 0.15f;
+
+        public static readonly int AnimIdle = Animator.StringToHash("CombatIdle");
+        public static readonly int AnimRun = Animator.StringToHash("Run");
+        public static readonly int AnimAttack = Animator.StringToHash("BasicAttack");
+        public static readonly int AnimGetHit = Animator.StringToHash("GetHit");
+        public static readonly int AnimDeath = Animator.StringToHash("Death");
+
         public EnemyData Data { get; private set; }
         public EnemyModel Model { get; private set; }
         public NavMeshAgent Agent { get; private set; }
+        public Animator Animator { get; private set; }
         public Transform PlayerTransform { get; private set; }
         public IDamageable PlayerDamageable { get; private set; }
         public IAttackBehavior AttackBehavior { get; private set; }
@@ -50,6 +62,7 @@ namespace Velora.Enemy
             PlayerDamageable = playerDamageable;
 
             Agent = GetComponent<NavMeshAgent>();
+            Animator = GetComponentInChildren<Animator>();
             _collider = GetComponent<Collider>();
 
             // DeathState が無効化した状態をリセット（プール再利用時に必要）
@@ -92,6 +105,14 @@ namespace Velora.Enemy
         }
 
         // --- 外部 API ---
+
+        public void PlayAnimation(int stateHash, float transitionDuration = DefaultTransitionDuration)
+        {
+            if (Animator != null)
+            {
+                Animator.CrossFadeInFixedTime(stateHash, transitionDuration);
+            }
+        }
 
         public void SetColliderEnabled(bool enabled)
         {

@@ -15,6 +15,7 @@ namespace Velora.Enemy
         {
             _timer = 0f;
             Controller.Agent.isStopped = true;
+            Controller.PlayAnimation(EnemyController.AnimGetHit);
             return UniTask.CompletedTask;
         }
 

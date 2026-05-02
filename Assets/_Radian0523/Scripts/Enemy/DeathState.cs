@@ -8,7 +8,8 @@ namespace Velora.Enemy
     /// </summary>
     public class DeathState : EnemyStateBase
     {
-        private const float DeathSequenceDuration = 1f;
+        // Death クリップは 54 フレーム @30fps ≒ 1.8s
+        private const float DeathSequenceDuration = 1.8f;
 
         private float _timer;
         private bool _isReturned;
@@ -19,6 +20,7 @@ namespace Velora.Enemy
             _isReturned = false;
             Controller.Agent.isStopped = true;
             Controller.SetColliderEnabled(false);
+            Controller.PlayAnimation(EnemyController.AnimDeath);
 
             if (Controller.Data.DeathEffectPrefab != null)
             {

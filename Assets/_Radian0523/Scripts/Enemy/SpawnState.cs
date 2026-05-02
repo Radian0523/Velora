@@ -17,6 +17,7 @@ namespace Velora.Enemy
         {
             _timer = 0f;
             Controller.Agent.isStopped = true;
+            Controller.PlayAnimation(EnemyController.AnimIdle);
 
             if (Controller.Data.SpawnEffectPrefab != null)
             {
