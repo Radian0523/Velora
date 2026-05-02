@@ -61,13 +61,6 @@ namespace Velora.Core
             InitializeGameFlowManager();
             SubscribeEvents();
 
-            // CommonUIDirector が存在する場合はフェードインで開始演出を行う。
-            // エディタで Battle シーンを直接再生した場合は CommonUI がないためスキップ。
-            if (CommonUIDirector.Instance != null)
-            {
-                CommonUIDirector.Instance.FadeView.FadeIn().Forget();
-            }
-
             RunBattleFlow().Forget();
         }
 

@@ -28,10 +28,12 @@ namespace Velora.UI
         public async UniTask FadeOut(float duration = DefaultDuration)
         {
             _canvasGroup.blocksRaycasts = true;
-            await _canvasGroup.DOFade(1f, duration)
+            _canvasGroup.DOKill();
+            _canvasGroup.DOFade(1f, duration)
                 .SetUpdate(true)
-                .SetEase(Ease.Linear)
-                .AsyncWaitForCompletion();
+                .SetEase(Ease.Linear);
+            await UniTask.Delay(
+                System.TimeSpan.FromSeconds(duration), ignoreTimeScale: true);
         }
 
         /// <summary>
@@ -40,10 +42,12 @@ namespace Velora.UI
         /// </summary>
         public async UniTask FadeIn(float duration = DefaultDuration)
         {
-            await _canvasGroup.DOFade(0f, duration)
+            _canvasGroup.DOKill();
+            _canvasGroup.DOFade(0f, duration)
                 .SetUpdate(true)
-                .SetEase(Ease.Linear)
-                .AsyncWaitForCompletion();
+                .SetEase(Ease.Linear);
+            await UniTask.Delay(
+                System.TimeSpan.FromSeconds(duration), ignoreTimeScale: true);
             _canvasGroup.blocksRaycasts = false;
         }
     }

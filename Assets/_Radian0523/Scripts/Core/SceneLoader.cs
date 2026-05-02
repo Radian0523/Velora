@@ -30,15 +30,18 @@ namespace Velora.Core
 
         /// <summary>
         /// Additive でロードしたシーンをアンロードする。
+        /// SceneManager の実際のロード状態で判定することで、
+        /// Bootstrap 等で SceneLoader を介さずロードされたシーンも正しくアンロードできる。
         /// </summary>
         public async UniTask UnloadScene(string sceneName)
         {
-            if (_loadedScenes.Contains(sceneName))
+            var scene = SceneManager.GetSceneByName(sceneName);
+            if (scene.isLoaded)
             {
-                var op = SceneManager.UnloadSceneAsync(sceneName);
+                var op = SceneManager.UnloadSceneAsync(scene);
                 await UniTask.WaitUntil(() => op.isDone);
-                _loadedScenes.Remove(sceneName);
             }
+            _loadedScenes.Remove(sceneName);
         }
 
         /// <summary>
