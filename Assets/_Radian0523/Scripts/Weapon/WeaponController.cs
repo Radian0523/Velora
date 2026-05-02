@@ -78,6 +78,16 @@ namespace Velora.Weapon
         {
             if (_currentWeaponData == null) return;
 
+            // UI 操作中（カーソルアンロック時）は武器操作を停止し、
+            // 保持中の入力状態をリセットする。アップグレード選択やリザルト画面の
+            // ボタンクリックで弾が発射されるのを防ぐ。
+            if (Cursor.lockState != CursorLockMode.Locked)
+            {
+                _isFireHeld = false;
+                _isAiming = false;
+                return;
+            }
+
             TryAutoFire();
             UpdateRecoilRecovery();
             UpdateAdsFieldOfView();
@@ -94,6 +104,8 @@ namespace Velora.Weapon
 
         public void OnFire(InputValue value)
         {
+            if (Cursor.lockState != CursorLockMode.Locked) return;
+
             _isFireHeld = value.isPressed;
             if (_isFireHeld)
             {
@@ -107,12 +119,16 @@ namespace Velora.Weapon
 
         public void OnAim(InputValue value)
         {
+            if (Cursor.lockState != CursorLockMode.Locked) return;
+
             _isAiming = value.isPressed;
             OnAimStateChanged?.Invoke(_isAiming);
         }
 
         public void OnReload(InputValue value)
         {
+            if (Cursor.lockState != CursorLockMode.Locked) return;
+
             if (value.isPressed)
             {
                 StartReload().Forget();

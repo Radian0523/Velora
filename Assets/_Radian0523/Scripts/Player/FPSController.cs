@@ -51,6 +51,10 @@ namespace Velora.Player
 
         private void Update()
         {
+            // UI 操作中（カーソルアンロック時）は入力処理を停止する。
+            // アップグレード選択・リザルト画面等でプレイヤーが動かないようにする。
+            if (Cursor.lockState != CursorLockMode.Locked) return;
+
             UpdateGroundCheck();
             UpdateGravity();
             UpdateMovement();

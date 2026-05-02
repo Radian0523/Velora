@@ -11,6 +11,10 @@ namespace Velora.UI
     /// ShowAndWait() は UniTaskCompletionSource でカード選択まで待機し、
     /// 呼び出し元（UpgradeSelectState）に選択完了を await させる。
     /// これにより State のコードが「選択を待つ」という意図を明確に表現できる。
+    ///
+    /// 表示中はカーソルをアンロックし、FPSController の入力処理を自動停止させる。
+    /// FPSController は Cursor.lockState を参照して入力スキップを判断するため、
+    /// ここでカーソル状態を切り替えるだけで移動・視点操作が連動して停止する。
     /// </summary>
     public class UpgradeSelectPresenter : MonoBehaviour
     {
@@ -34,11 +38,11 @@ namespace Velora.UI
         {
             _cts = new UniTaskCompletionSource();
 
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
             var choices = _upgradeManager.GetRandomChoices();
             _view.DisplayChoices(choices);
-
-            // DisplayChoices() 内でカードの OnSelected 購読が開始される。
-            // ここでは View 全体のイベントを購読し、選択完了のシグナルを待つ。
             _view.OnUpgradeSelected += HandleSelected;
 
             await _cts.Task;
@@ -49,6 +53,10 @@ namespace Velora.UI
             _view.OnUpgradeSelected -= HandleSelected;
             _upgradeManager.ApplyUpgrade(data, _playerModel);
             _view.Hide();
+
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+
             _cts.TrySetResult();
         }
     }
