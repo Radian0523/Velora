@@ -20,6 +20,9 @@ namespace Velora.Data
         [SerializeField] private string _weaponName;
         [SerializeField] private WeaponType _weaponType;
 
+        [Header("モデル")]
+        [SerializeField] private GameObject _modelPrefab;
+
         [Header("戦闘パラメータ")]
         [SerializeField] private float _damage = 10f;
         [SerializeField] private float _fireRate = 10f;
@@ -40,6 +43,9 @@ namespace Velora.Data
         [SerializeField] private float _projectileMaxLifetime = 5f;
         [SerializeField] private GameObject _projectilePrefab;
 
+        [Header("UI")]
+        [SerializeField] private Sprite _icon;
+
         [Header("エフェクト")]
         [SerializeField] private GameObject _muzzleFlashPrefab;
         [SerializeField] private GameObject _impactEffectPrefab;
@@ -55,6 +61,7 @@ namespace Velora.Data
 
         public string WeaponName => _weaponName;
         public WeaponType WeaponType => _weaponType;
+        public GameObject ModelPrefab => _modelPrefab;
         public float Damage => _damage;
         public float FireRate => _fireRate;
         public int MaxAmmo => _maxAmmo;
@@ -73,6 +80,7 @@ namespace Velora.Data
         public float KickUpAngle => _kickUpAngle;
         public float KickDuration => _kickDuration;
         public int KickVibrato => _kickVibrato;
+        public Sprite Icon => _icon;
         public AudioClip FireSound => _fireSound;
     }
 }

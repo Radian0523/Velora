@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 using Velora.Core;
 using Velora.Data;
 using Velora.Player;
@@ -15,15 +17,22 @@ namespace Velora.Weapon
     /// 各武器の射撃方式は IFireStrategy で差し替え可能（ストラテジーパターン）。
     /// エフェクト生成は Strategy から分離し、WeaponController が一元管理する。
     /// これにより射撃ロジック（Strategy）と視覚演出（Controller）の責務が分離される。
+    ///
+    /// 武器モデルは WeaponData.ModelPrefab から生成し、_modelRegistry で管理する。
+    /// 初期武器は _initialWeapons（Inspector 設定）から Start 時に登録。
+    /// ランタイムでは AddWeapon() でピックアップ経由の武器追加に対応する。
     /// </summary>
     public class WeaponController : MonoBehaviour
     {
-        [Header("武器データ")]
-        [SerializeField] private WeaponData[] _weapons;
+        [Header("武器データ（初期装備）")]
+        [FormerlySerializedAs("_weapons")]
+        [SerializeField] private WeaponData[] _initialWeapons;
+
+        // ランタイムで管理する所持武器リスト。
+        // 初期装備 + ピックアップで追加された武器を保持する。
+        private readonly List<WeaponData> _ownedWeapons = new();
 
         [Header("参照")]
-        [SerializeField] private Transform _muzzlePoint;
-        [SerializeField] private Transform _weaponModel;
         [SerializeField] private Camera _playerCamera;
         [SerializeField] private FPSController _fpsController;
         [SerializeField] private LayerMask _hitMask;
@@ -41,6 +50,12 @@ namespace Velora.Weapon
         private bool _isReloading;
         private bool _isAiming;
         private bool _isFireHeld;
+        private bool _isSwitching;
+
+        // 武器モデル管理: WeaponData → 生成済み WeaponModelView のマッピング。
+        // Start 時に全武器分を生成し、切替時は SetActive で表示を切り替える。
+        private readonly Dictionary<WeaponData, WeaponModelView> _modelRegistry = new();
+        private WeaponModelView _activeModelView;
 
         // リコイル: カメラに適用した実際の pitch/yaw オフセットを追跡し、
         // 射撃停止後に逆方向へ復帰させる
@@ -53,22 +68,40 @@ namespace Velora.Weapon
         private const int EffectPoolInitialSize = 3;
         private const int EffectPoolMaxSize = 10;
 
+        // 武器切替演出パラメータ
+        private const float SwitchSlideOffset = -0.4f;
+        private const float SwitchOutDuration = 0.15f;
+        private const float SwitchInDuration = 0.2f;
+
         private CancellationTokenSource _reloadCts;
 
         // UI Presenter が購読するイベント
         public event Action<int, int> OnAmmoChanged;
         public event Action<bool> OnReloadStateChanged;
         public event Action<WeaponData> OnWeaponSwitched;
+        public event Action<WeaponData> OnWeaponAdded;
         public event Action<bool> OnAimStateChanged;
         public event Action OnFired;
 
         public WeaponData CurrentWeaponData => _currentWeaponData;
+        public IReadOnlyList<WeaponData> Weapons => _ownedWeapons;
+        public int CurrentWeaponIndex => _currentWeaponIndex;
         public bool IsAiming => _isAiming;
         public int CurrentAmmo => _currentAmmo;
 
         private void Start()
         {
-            if (_weapons != null && _weapons.Length > 0)
+            if (_initialWeapons == null || _initialWeapons.Length == 0) return;
+
+            // Inspector で設定された初期武器をランタイムリストに登録し、
+            // モデルを事前生成して非アクティブで待機させる。
+            foreach (var weaponData in _initialWeapons)
+            {
+                if (weaponData == null) continue;
+                RegisterWeapon(weaponData);
+            }
+
+            if (_ownedWeapons.Count > 0)
             {
                 EquipWeapon(0);
             }
@@ -97,6 +130,15 @@ namespace Velora.Weapon
         {
             CancelReload();
             CleanupEffectPools();
+
+            foreach (var kvp in _modelRegistry)
+            {
+                if (kvp.Value != null)
+                {
+                    Destroy(kvp.Value.gameObject);
+                }
+            }
+            _modelRegistry.Clear();
         }
 
         // --- Input System コールバック ---
@@ -138,10 +180,10 @@ namespace Velora.Weapon
         public void OnWeaponScroll(InputValue value)
         {
             float scroll = value.Get<float>();
-            if (scroll == 0f || _weapons == null || _weapons.Length <= 1) return;
+            if (scroll == 0f || _ownedWeapons.Count <= 1) return;
 
             int direction = scroll > 0f ? 1 : -1;
-            int nextIndex = (_currentWeaponIndex + direction + _weapons.Length) % _weapons.Length;
+            int nextIndex = (_currentWeaponIndex + direction + _ownedWeapons.Count) % _ownedWeapons.Count;
             EquipWeapon(nextIndex);
         }
 
@@ -152,19 +194,80 @@ namespace Velora.Weapon
         public void OnWeapon5(InputValue value) { if (value.isPressed) EquipWeapon(4); }
         public void OnWeapon6(InputValue value) { if (value.isPressed) EquipWeapon(5); }
 
+        // --- 武器登録・追加 ---
+
+        /// <summary>
+        /// 武器をランタイムリストに登録し、モデルを生成して _modelRegistry に追加する。
+        /// Start() からの初期登録と AddWeapon() からのピックアップ追加で共用する。
+        /// </summary>
+        private void RegisterWeapon(WeaponData weaponData)
+        {
+            if (_ownedWeapons.Contains(weaponData)) return;
+
+            _ownedWeapons.Add(weaponData);
+
+            if (weaponData.ModelPrefab != null)
+            {
+                var modelInstance = Instantiate(weaponData.ModelPrefab, transform);
+                var modelView = modelInstance.GetComponent<WeaponModelView>();
+                modelInstance.SetActive(false);
+                _modelRegistry[weaponData] = modelView;
+            }
+        }
+
+        /// <summary>
+        /// ピックアップ経由でランタイムに武器を追加する。
+        /// 既に所持済みの場合は false を返す。
+        /// 追加成功時は OnWeaponAdded イベントを発火し、自動的に新武器に切り替える。
+        /// </summary>
+        public bool AddWeapon(WeaponData weaponData)
+        {
+            if (weaponData == null) return false;
+            if (_ownedWeapons.Contains(weaponData)) return false;
+
+            RegisterWeapon(weaponData);
+            OnWeaponAdded?.Invoke(weaponData);
+
+            // 追加した武器に即座に切り替える
+            EquipWeapon(_ownedWeapons.Count - 1);
+            return true;
+        }
+
         // --- 武器切替 ---
 
         private void EquipWeapon(int index)
         {
-            if (_weapons == null || index < 0 || index >= _weapons.Length) return;
-            if (_weapons[index] == null) return;
-            if (_currentWeaponData == _weapons[index]) return;
+            if (_isSwitching) return;
+            if (index < 0 || index >= _ownedWeapons.Count) return;
+            if (_ownedWeapons[index] == null) return;
+            if (_currentWeaponData == _ownedWeapons[index]) return;
+
+            SwitchWeapon(index).Forget();
+        }
+
+        /// <summary>
+        /// 武器切替の非同期シーケンス。
+        /// ADS 解除 → リロードキャンセル → エフェクトプール入替 →
+        /// スライドアウト/イン演出 → イベント通知 の順で実行する。
+        /// _isSwitching フラグで連打による重複実行を防ぐ。
+        /// </summary>
+        private async UniTaskVoid SwitchWeapon(int index)
+        {
+            _isSwitching = true;
+
+            if (_isAiming)
+            {
+                _isAiming = false;
+                OnAimStateChanged?.Invoke(false);
+            }
 
             CancelReload();
             CleanupEffectPools();
 
+            var previousModelView = _activeModelView;
+
             _currentWeaponIndex = index;
-            _currentWeaponData = _weapons[index];
+            _currentWeaponData = _ownedWeapons[index];
             _currentAmmo = _currentWeaponData.MaxAmmo;
             _lastFireTime = 0f;
             _consecutiveShotCount = 0;
@@ -181,8 +284,51 @@ namespace Velora.Weapon
                 _ => new HitscanStrategy()
             };
 
+            _modelRegistry.TryGetValue(_currentWeaponData, out var incomingView);
+
+            await PlaySwitchAnimation(previousModelView, incomingView);
+
+            _activeModelView = incomingView;
+            _isSwitching = false;
+
             OnWeaponSwitched?.Invoke(_currentWeaponData);
             OnAmmoChanged?.Invoke(_currentAmmo, _currentWeaponData.MaxAmmo);
+        }
+
+        /// <summary>
+        /// 武器切替のスライド演出。
+        /// 旧武器を下方向にスライドアウトした後、新武器を下から上にスライドインさせる。
+        /// DOTween の Ease で加減速をつけ、自然な動きにする。
+        /// </summary>
+        private async UniTask PlaySwitchAnimation(WeaponModelView outgoing, WeaponModelView incoming)
+        {
+            // 旧武器: 下にスライドアウト
+            if (outgoing != null)
+            {
+                var outRest = outgoing.RestLocalPosition;
+                await outgoing.transform
+                    .DOLocalMoveY(outRest.y + SwitchSlideOffset, SwitchOutDuration)
+                    .SetEase(Ease.InQuad)
+                    .SetLink(outgoing.gameObject)
+                    .AsyncWaitForCompletion();
+
+                outgoing.transform.localPosition = outRest;
+                outgoing.gameObject.SetActive(false);
+            }
+
+            // 新武器: 下から登場
+            if (incoming != null)
+            {
+                var inRest = incoming.RestLocalPosition;
+                incoming.transform.localPosition = new Vector3(inRest.x, inRest.y + SwitchSlideOffset, inRest.z);
+                incoming.gameObject.SetActive(true);
+
+                await incoming.transform
+                    .DOLocalMove(inRest, SwitchInDuration)
+                    .SetEase(Ease.OutQuad)
+                    .SetLink(incoming.gameObject)
+                    .AsyncWaitForCompletion();
+            }
         }
 
         // --- エフェクトプール ---
@@ -249,7 +395,7 @@ namespace Velora.Weapon
 
         private void TryFire()
         {
-            if (_isReloading || _currentWeaponData == null) return;
+            if (_isSwitching || _isReloading || _currentWeaponData == null) return;
 
             if (_currentAmmo <= 0)
             {
@@ -274,7 +420,7 @@ namespace Velora.Weapon
                 : _currentWeaponData.SpreadAngle;
 
             // 弾道はカメラ中心から発射し、クロスヘアが指す方向に飛ぶ。
-            // マズルフラッシュは銃口(_muzzlePoint)に表示する。
+            // マズルフラッシュは銃口(WeaponModelView.MuzzlePoint)に表示する。
             var result = await _fireStrategy.Fire(_currentWeaponData, _playerCamera.transform, _hitMask, spreadAngle);
 
             SpawnMuzzleFlash();
@@ -293,9 +439,19 @@ namespace Velora.Weapon
 
         // --- 視覚フィードバック ---
 
+        /// <summary>
+        /// マズルフラッシュを現在の武器モデルの銃口位置にスナップしてから再生する。
+        /// 共有 VFX を使い回すことでプール不要にしつつ、武器ごとに正しい位置で表示する。
+        /// </summary>
         private void SpawnMuzzleFlash()
         {
             if (_muzzleFlashVfx == null) return;
+
+            if (_activeModelView != null && _activeModelView.MuzzlePoint != null)
+            {
+                _muzzleFlashVfx.transform.position = _activeModelView.MuzzlePoint.position;
+            }
+
             _muzzleFlashVfx.Play();
         }
 
@@ -315,16 +471,17 @@ namespace Velora.Weapon
         /// </summary>
         private void ApplyWeaponKick()
         {
-            if (_weaponModel == null || _currentWeaponData == null) return;
+            if (_activeModelView == null || _currentWeaponData == null) return;
 
-            _weaponModel.DOComplete();
+            var modelTransform = _activeModelView.transform;
+            modelTransform.DOComplete();
 
-            _weaponModel.DOPunchPosition(
+            modelTransform.DOPunchPosition(
                 Vector3.back * _currentWeaponData.KickBackDistance,
                 _currentWeaponData.KickDuration,
                 _currentWeaponData.KickVibrato);
 
-            _weaponModel.DOPunchRotation(
+            modelTransform.DOPunchRotation(
                 Vector3.right * -_currentWeaponData.KickUpAngle,
                 _currentWeaponData.KickDuration,
                 _currentWeaponData.KickVibrato);
@@ -383,7 +540,7 @@ namespace Velora.Weapon
         /// </summary>
         private async UniTask StartReload()
         {
-            if (_isReloading || _currentWeaponData == null) return;
+            if (_isSwitching || _isReloading || _currentWeaponData == null) return;
             if (_currentAmmo >= _currentWeaponData.MaxAmmo) return;
 
             CancelReload();

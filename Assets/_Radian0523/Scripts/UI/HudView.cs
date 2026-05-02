@@ -7,7 +7,7 @@ namespace Velora.UI
 {
     /// <summary>
     /// バトル中の HUD を表示する View 層。
-    /// HP スライダー・弾数・ウェーブ数のみ保持し、ロジックを一切持たない。
+    /// HP・弾数・ウェーブ数・武器バーを保持し、ロジックを一切持たない。
     /// Presenter からのデータを受け取って表示するだけの責務。
     /// </summary>
     public class HudView : MonoBehaviour
@@ -21,6 +21,9 @@ namespace Velora.UI
 
         [Header("ウェーブ")]
         [SerializeField] private TextMeshProUGUI _waveText;
+
+        [Header("武器バー")]
+        [SerializeField] private WeaponBarView _weaponBar;
 
         private const float HealthSliderAnimDuration = 0.3f;
 
@@ -46,6 +49,21 @@ namespace Velora.UI
         public void ShowWaveNumber(int waveNumber)
         {
             _waveText.text = $"WAVE {waveNumber}";
+        }
+
+        public void InitializeWeaponBar()
+        {
+            _weaponBar.Initialize();
+        }
+
+        public void AssignWeaponToSlot(Sprite icon)
+        {
+            _weaponBar.AssignWeapon(icon);
+        }
+
+        public void SelectWeaponSlot(int index)
+        {
+            _weaponBar.SelectSlot(index);
         }
     }
 }

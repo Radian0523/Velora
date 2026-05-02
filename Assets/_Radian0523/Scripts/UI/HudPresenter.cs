@@ -45,6 +45,15 @@ namespace Velora.UI
             // WeaponController.Start() が先に走って EquipWeapon(0) が発火した場合でも
             // OnWeaponSwitched を購読しておくことで初期弾数を取り逃さない。
             _weaponController.OnWeaponSwitched += HandleWeaponSwitched;
+            _weaponController.OnWeaponAdded += HandleWeaponAdded;
+
+            // 空スロットを生成した後、所持済み武器のアイコンを左から順に割り当てる
+            _hudView.InitializeWeaponBar();
+            foreach (var weapon in _weaponController.Weapons)
+            {
+                _hudView.AssignWeaponToSlot(weapon.Icon);
+            }
+            _hudView.SelectWeaponSlot(_weaponController.CurrentWeaponIndex);
 
             EventBus.Subscribe<WaveStartedEvent>(HandleWaveStarted);
         }
@@ -61,6 +70,7 @@ namespace Velora.UI
                 _weaponController.OnAmmoChanged -= HandleAmmoChanged;
                 _weaponController.OnReloadStateChanged -= HandleReloadStateChanged;
                 _weaponController.OnWeaponSwitched -= HandleWeaponSwitched;
+                _weaponController.OnWeaponAdded -= HandleWeaponAdded;
             }
 
             EventBus.Unsubscribe<WaveStartedEvent>(HandleWaveStarted);
@@ -93,6 +103,12 @@ namespace Velora.UI
         {
             _isReloading = false;
             _hudView.UpdateAmmoDisplay(_weaponController.CurrentAmmo, weaponData.MaxAmmo, false);
+            _hudView.SelectWeaponSlot(_weaponController.CurrentWeaponIndex);
+        }
+
+        private void HandleWeaponAdded(WeaponData weaponData)
+        {
+            _hudView.AssignWeaponToSlot(weaponData.Icon);
         }
 
         private void HandleWaveStarted(WaveStartedEvent e)

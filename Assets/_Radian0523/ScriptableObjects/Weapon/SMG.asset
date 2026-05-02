@@ -10,28 +10,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 751b3278cfc104efc83129411a59b497, type: 3}
-  m_Name: Pistol
+  m_Name: SMG
   m_EditorClassIdentifier: Assembly-CSharp::Velora.Data.WeaponData
-  _weaponName: Pistol
+  _weaponName: SMG
   _weaponType: 0
-  _modelPrefab: {fileID: 1233992181619504068, guid: d0c68bc0b8c06467a95a4fd6cb124aa0, type: 3}
-  _damage: 10
-  _fireRate: 2
-  _maxAmmo: 30
-  _reloadTime: 1.5
+  _modelPrefab: {fileID: 8925119037014118478, guid: f36490d6a300749ec95c8cee63abc4ff, type: 3}
+  _damage: 7
+  _fireRate: 12
+  _maxAmmo: 40
+  _reloadTime: 2
   _headshotMultiplier: 2
-  _spreadAngle: 1
-  _adsSpreadAngle: 0.2
+  _spreadAngle: 2.5
+  _adsSpreadAngle: 0.8
   _recoilPattern: {fileID: 11400000, guid: 73692d7bb6e1347a2bf196cf24e24d58, type: 2}
-  _adsFieldOfView: 45
+  _adsFieldOfView: 50
   _projectileSpeed: 50
   _projectileMaxLifetime: 5
   _projectilePrefab: {fileID: 0}
-  _icon: {fileID: 21300000, guid: b14f0eefb39a746e8a5de33ddd3ed691, type: 3}
+  _icon: {fileID: 0}
   _muzzleFlashPrefab: {fileID: 8590451330835685401, guid: e101a4ada3a5d4cd48f3f74b9207dd24, type: 3}
   _impactEffectPrefab: {fileID: 8446651104369974411, guid: 7b480ee653174434cb7cc41fdbbe1d42, type: 3}
-  _kickBackDistance: 0.05
-  _kickUpAngle: 3
-  _kickDuration: 0.1
+  _kickBackDistance: 0.03
+  _kickUpAngle: 2
+  _kickDuration: 0.08
   _kickVibrato: 1
   _fireSound: {fileID: 0}
