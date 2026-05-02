@@ -37,7 +37,7 @@
                     "name": "Aim",
                     "type": "Button",
                     "id": "a1b2c3d4-1111-4444-aaaa-000000000002",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -224,7 +224,7 @@
                     "name": "",
                     "id": "b1000001-0002-4000-a000-000000000001",
                     "path": "<Mouse>/rightButton",
-                    "interactions": "",
+                    "interactions": "Press(behavior=2)",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "Aim",
