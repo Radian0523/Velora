@@ -37,6 +37,12 @@ namespace Velora.Data
         [Header("Ranged 専用")]
         [SerializeField] private float _preferredRange = 12f;
         [SerializeField] private float _minRetreatRange = 5f;
+        [SerializeField] private float _chargeTime = 0.3f;
+        [SerializeField] private float _projectileSpeed = 15f;
+        [SerializeField] private float _projectileMaxLifetime = 5f;
+        [SerializeField] private float _projectileMaxRange = 30f;
+        [SerializeField] private GameObject _projectilePrefab;
+        [SerializeField] private GameObject _chargeEffectPrefab;
 
         [Header("外見")]
         [Tooltip("T_ColorAtlas の列（0〜2）。色系統を切り替える")]
@@ -64,6 +70,12 @@ namespace Velora.Data
         public float StaggerDuration => _staggerDuration;
         public float PreferredRange => _preferredRange;
         public float MinRetreatRange => _minRetreatRange;
+        public float ChargeTime => _chargeTime;
+        public float ProjectileSpeed => _projectileSpeed;
+        public float ProjectileMaxLifetime => _projectileMaxLifetime;
+        public float ProjectileMaxRange => _projectileMaxRange;
+        public GameObject ProjectilePrefab => _projectilePrefab;
+        public GameObject ChargeEffectPrefab => _chargeEffectPrefab;
         public int ColorColumn => _colorColumn;
         public int ColorRow => _colorRow;
         public GameObject DeathEffectPrefab => _deathEffectPrefab;

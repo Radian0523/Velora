@@ -24,6 +24,11 @@ MonoBehaviour:
   _staggerDuration: 0.5
   _preferredRange: 12
   _minRetreatRange: 5
+  _projectileSpeed: 15
+  _projectileMaxLifetime: 5
+  _projectileMaxRange: 30
+  _projectilePrefab: {fileID: 8022568643572862970, guid: a17734174090f4a84a8caad39c12844d, type: 3}
+  _chargeEffectPrefab: {fileID: 7131401307255788800, guid: 4401205a7c0d043c9b3df924f73a8710, type: 3}
   _colorColumn: 1
   _colorRow: 0
   _deathEffectPrefab: {fileID: 0}
