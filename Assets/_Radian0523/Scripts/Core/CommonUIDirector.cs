@@ -56,13 +56,13 @@ namespace Velora.Core
         /// SceneLoader.TransitionTo に FadeView のデリゲートを渡すことで、
         /// 呼び出し側がフェード処理の詳細を知らなくてよい。
         /// </summary>
-        public async UniTask TransitionToScene(string newSceneAddress, string currentSceneAddress = null)
+        public async UniTask TransitionToScene(string newSceneName, string currentSceneName = null)
         {
             await SceneLoader.TransitionTo(
-                newSceneAddress,
+                newSceneName,
                 () => _fadeView.FadeOut(),
                 () => _fadeView.FadeIn(),
-                currentSceneAddress);
+                currentSceneName);
         }
     }
 }
