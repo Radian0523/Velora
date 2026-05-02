@@ -58,7 +58,13 @@ namespace Velora.Enemy
             }
 
             await Controller.AttackBehavior.Attack(Controller);
-            Controller.PlayAnimation(EnemyController.AnimIdle);
+
+            // 攻撃中に死亡した場合、DeathState の AnimDeath を上書きしないようにする
+            if (!Controller.Model.IsDead)
+            {
+                Controller.PlayAnimation(EnemyController.AnimIdle);
+            }
+
             _isAttacking = false;
             _lastAttackTime = Time.time;
         }
