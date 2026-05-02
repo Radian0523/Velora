@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2026825286088927040}
   - component: {fileID: 9125785520455508347}
   - component: {fileID: 741096838926493576}
+  - component: {fileID: 5694836134029660992}
   m_Layer: 0
   m_Name: Enemy_Rusher
   m_TagString: Untagged
@@ -95,6 +96,32 @@ CapsuleCollider:
   m_Height: 1.299446
   m_Direction: 1
   m_Center: {x: 0, y: -0.350277, z: 0}
+--- !u!114 &5694836134029660992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2194666305347465694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b909eb873499144b5b8a8fc5bfa1564d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.Enemy.EnemyDissolveController
+  _renderers:
+  - {fileID: 5347300503894668904}
+  - {fileID: 2349905388221464698}
+  - {fileID: 8181319932051313982}
+  - {fileID: 8180322611693618116}
+  - {fileID: 2179845218161714902}
+  - {fileID: 6822182401540510488}
+  _materialMappings:
+  - _original: {fileID: 2100000, guid: 8536272d3f22c2d43aeb3d99746c647b, type: 2}
+    _dissolve: {fileID: 2100000, guid: edfc369279f20491f9fb2d9ea9fa7a68, type: 2}
+  - _original: {fileID: 2100000, guid: b155bbc5f87677d47a8fcce7466463d3, type: 2}
+    _dissolve: {fileID: 2100000, guid: 5d8dc8fbefe8c406db042e3b7ff08c7e, type: 2}
+  - _original: {fileID: 2100000, guid: 2720665c21f05274db9141f181e17de4, type: 2}
+    _dissolve: {fileID: 2100000, guid: 939f6ce8a0635400091ecd89e2d33743, type: 2}
 --- !u!1 &2582374120645980748
 GameObject:
   m_ObjectHideFlags: 0
@@ -519,9 +546,39 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.6, y: 0.36, z: 0.45}
   m_Center: {x: 0, y: 0.1, z: 0}
+--- !u!137 &2179845218161714902 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5447581574908232212, guid: 5cae6d7d0922fd44e8c052d92fe9a0ce, type: 3}
+  m_PrefabInstance: {fileID: 6186238592411673794}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &2349905388221464698 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 8450272122486727864, guid: 5cae6d7d0922fd44e8c052d92fe9a0ce, type: 3}
+  m_PrefabInstance: {fileID: 6186238592411673794}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &5347300503894668904 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2300356735655350954, guid: 5cae6d7d0922fd44e8c052d92fe9a0ce, type: 3}
+  m_PrefabInstance: {fileID: 6186238592411673794}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &6822182401540510488 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 825475426649176026, guid: 5cae6d7d0922fd44e8c052d92fe9a0ce, type: 3}
+  m_PrefabInstance: {fileID: 6186238592411673794}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8166907826508271420 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2634395073816603646, guid: 5cae6d7d0922fd44e8c052d92fe9a0ce, type: 3}
+  m_PrefabInstance: {fileID: 6186238592411673794}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &8180322611693618116 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2621014906662201094, guid: 5cae6d7d0922fd44e8c052d92fe9a0ce, type: 3}
+  m_PrefabInstance: {fileID: 6186238592411673794}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &8181319932051313982 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2616604684802028028, guid: 5cae6d7d0922fd44e8c052d92fe9a0ce, type: 3}
   m_PrefabInstance: {fileID: 6186238592411673794}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &8409399260724270243 stripped

@@ -38,6 +38,7 @@ namespace Velora.Enemy
         public Transform PlayerTransform { get; private set; }
         public IDamageable PlayerDamageable { get; private set; }
         public IAttackBehavior AttackBehavior { get; private set; }
+        public EnemyDissolveController DissolveController { get; private set; }
         public Vector3 SpawnPosition { get; private set; }
 
         [SerializeField] private Transform _headBone;
@@ -71,6 +72,9 @@ namespace Velora.Enemy
             Agent = GetComponent<NavMeshAgent>();
             Animator = GetComponentInChildren<Animator>();
             _collider = GetComponent<Collider>();
+
+            DissolveController = GetComponent<EnemyDissolveController>();
+            DissolveController?.ResetDissolve();
 
             // DeathState が無効化した状態をリセット（プール再利用時に必要）
             Agent.isStopped = false;
