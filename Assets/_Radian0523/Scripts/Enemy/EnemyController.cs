@@ -25,6 +25,12 @@ namespace Velora.Enemy
         private const float LookAtSpeed = 5f;
         private const float MaxHeadAngle = 70f;
 
+        // T_ColorAtlas の UV オフセット定数（Custom_OffsetShader 準拠）
+        private static readonly float[] ColorColumnOffsets = { 0f, 0.205078125f, 0.41015625f };
+        private const float ColorRowStep = 0.03125f;
+        private const string OffsetMaterialName = "M_AtlasOffset";
+        private static readonly int UVOffsetProperty = Shader.PropertyToID("_UV_Offset");
+
         public static readonly int AnimIdle = Animator.StringToHash("CombatIdle");
         public static readonly int AnimRun = Animator.StringToHash("Run");
         public static readonly int AnimAttack = Animator.StringToHash("BasicAttack");
@@ -86,6 +92,7 @@ namespace Velora.Enemy
             // EnemyModel は readonly _maxHealth を持つため、データが変わる場合は毎回 new する
             Model = new EnemyModel(data.MaxHealth, data.StaggerThreshold);
             AttackBehavior = SelectBehavior(data.BehaviorType);
+            ApplyColorOffset(data);
 
             _hpBarView = GetComponentInChildren<EnemyHPBarView>();
             _stateMachine = new EnemyStateMachine(this);
@@ -194,6 +201,33 @@ namespace Velora.Enemy
 
             Quaternion lookRotation = Quaternion.LookRotation(directionToPlayer);
             _headBone.rotation = Quaternion.Slerp(_headBone.rotation, lookRotation, _lookAtWeight);
+        }
+
+        // --- 外見 ---
+
+        /// <summary>
+        /// EnemyData のカラー設定に基づき、全 SkinnedMeshRenderer の M_AtlasOffset マテリアルに
+        /// UV オフセットを適用する。アセット付属の T_ColorAtlas テクスチャアトラスの
+        /// 列(色系統)と行(色合い)を指定することで敵タイプごとの外見を差別化する。
+        /// </summary>
+        private void ApplyColorOffset(EnemyData data)
+        {
+            float x = ColorColumnOffsets[Mathf.Clamp(data.ColorColumn, 0, 2)];
+            float y = data.ColorRow * ColorRowStep;
+            var offset = new Vector2(x, y);
+
+            var renderers = GetComponentsInChildren<SkinnedMeshRenderer>();
+            foreach (var renderer in renderers)
+            {
+                var materials = renderer.materials;
+                for (int i = 0; i < materials.Length; i++)
+                {
+                    if (materials[i].name.Contains(OffsetMaterialName))
+                    {
+                        materials[i].SetVector(UVOffsetProperty, offset);
+                    }
+                }
+            }
         }
 
         // --- 内部処理 ---

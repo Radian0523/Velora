@@ -38,6 +38,12 @@ namespace Velora.Data
         [SerializeField] private float _preferredRange = 12f;
         [SerializeField] private float _minRetreatRange = 5f;
 
+        [Header("外見")]
+        [Tooltip("T_ColorAtlas の列（0〜2）。色系統を切り替える")]
+        [SerializeField, Range(0, 2)] private int _colorColumn;
+        [Tooltip("T_ColorAtlas の行（0〜31）。色合いを切り替える")]
+        [SerializeField, Range(0, 31)] private int _colorRow;
+
         [Header("エフェクト")]
         [SerializeField] private GameObject _deathEffectPrefab;
         [SerializeField] private GameObject _spawnEffectPrefab;
@@ -58,6 +64,8 @@ namespace Velora.Data
         public float StaggerDuration => _staggerDuration;
         public float PreferredRange => _preferredRange;
         public float MinRetreatRange => _minRetreatRange;
+        public int ColorColumn => _colorColumn;
+        public int ColorRow => _colorRow;
         public GameObject DeathEffectPrefab => _deathEffectPrefab;
         public GameObject SpawnEffectPrefab => _spawnEffectPrefab;
         public float SpawnWeight => _spawnWeight;

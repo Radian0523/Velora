@@ -24,6 +24,8 @@ MonoBehaviour:
   _staggerDuration: 0.5
   _preferredRange: 12
   _minRetreatRange: 5
+  _colorColumn: 1
+  _colorRow: 0
   _deathEffectPrefab: {fileID: 0}
   _spawnEffectPrefab: {fileID: 0}
   _spawnWeight: 1

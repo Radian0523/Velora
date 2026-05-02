@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Velora.Data.EnemyData
   _enemyName: Rusher
   _behaviorType: 0
+  _prefab: {fileID: 9125785520455508347, guid: e4e84698e3ed34ae5be3c0f66caa03c5, type: 3}
   _maxHealth: 100
   _moveSpeed: 3.5
   _attackDamage: 10
