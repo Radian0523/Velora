@@ -12,6 +12,7 @@ namespace Velora.Enemy
         private const float SpawnAnimationDuration = 0.5f;
 
         private float _timer;
+        private GameObject _spawnEffect;
 
         public override UniTask Enter()
         {
@@ -21,7 +22,7 @@ namespace Velora.Enemy
 
             if (Controller.Data.SpawnEffectPrefab != null)
             {
-                Object.Instantiate(
+                _spawnEffect = Object.Instantiate(
                     Controller.Data.SpawnEffectPrefab,
                     Controller.transform.position,
                     Quaternion.identity);
@@ -37,6 +38,31 @@ namespace Velora.Enemy
             {
                 StateMachine.ChangeState(EnemyState.Idle).Forget();
             }
+        }
+
+        public override UniTask Exit()
+        {
+            StopSpawnEffect();
+            return UniTask.CompletedTask;
+        }
+
+        /// <summary>
+        /// ParticleSystem.Stop() で新規放出を停止し、既存パーティクルは寿命まで自然に消える。
+        /// 全パーティクル消滅後に GameObject を自動破棄するため、手動の Destroy タイミング管理が不要。
+        /// </summary>
+        private void StopSpawnEffect()
+        {
+            if (_spawnEffect == null) return;
+
+            var particles = _spawnEffect.GetComponentsInChildren<ParticleSystem>();
+            foreach (var ps in particles)
+            {
+                var main = ps.main;
+                main.stopAction = ParticleSystemStopAction.Destroy;
+                ps.Stop(false, ParticleSystemStopBehavior.StopEmitting);
+            }
+
+            _spawnEffect = null;
         }
     }
 }
