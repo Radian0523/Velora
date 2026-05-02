@@ -3363,7 +3363,7 @@ Camera:
   field of view: 60
   orthographic: 0
   orthographic size: 5
-  m_Depth: 0
+  m_Depth: -2
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 256
@@ -4420,6 +4420,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.UpgradeSelectPresenter
   _view: {fileID: 1364938952}
+  _hudRaycaster: {fileID: 1308589431}
+  _crosshairView: {fileID: 1005004109}
 --- !u!114 &1364938952
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4515,7 +4517,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 10
+  m_SortingOrder: 200
   m_TargetDisplay: 0
 --- !u!224 &1364938957
 RectTransform:

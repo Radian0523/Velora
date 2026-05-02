@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 using Velora.Data;
 using Velora.Player;
 using Velora.Upgrade;
@@ -19,6 +20,8 @@ namespace Velora.UI
     public class UpgradeSelectPresenter : MonoBehaviour
     {
         [SerializeField] private UpgradeSelectView _view;
+        [SerializeField] private GraphicRaycaster _hudRaycaster;
+        [SerializeField] private CrosshairView _crosshairView;
 
         private UpgradeManager _upgradeManager;
         private PlayerModel _playerModel;
@@ -41,6 +44,12 @@ namespace Velora.UI
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
 
+            // HUD の GraphicRaycaster を無効化して、UpgradeSelect Canvas への
+            // レイキャスト到達を保証する。Screen Space Overlay 同士では
+            // sortingOrder が高い Canvas のレイキャストが優先されるため、
+            // HUD 側を止めないとカードクリックに干渉する場合がある。
+            SetHudInteraction(false);
+
             var choices = _upgradeManager.GetRandomChoices();
             _view.DisplayChoices(choices);
             _view.OnUpgradeSelected += HandleSelected;
@@ -53,11 +62,25 @@ namespace Velora.UI
             _view.OnUpgradeSelected -= HandleSelected;
             _upgradeManager.ApplyUpgrade(data, _playerModel);
             _view.Hide();
+            SetHudInteraction(true);
 
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
             _cts.TrySetResult();
+        }
+
+        private void SetHudInteraction(bool enabled)
+        {
+            if (_hudRaycaster != null)
+            {
+                _hudRaycaster.enabled = enabled;
+            }
+
+            if (_crosshairView != null)
+            {
+                _crosshairView.SetVisible(enabled);
+            }
         }
     }
 }

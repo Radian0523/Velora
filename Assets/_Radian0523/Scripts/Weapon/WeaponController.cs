@@ -126,9 +126,14 @@ namespace Velora.Weapon
             {
                 _isFireHeld = false;
                 _isAiming = false;
+                // UI 表示中は武器カメラを無効化し、EventSystem との干渉を防ぐ。
+                // URP Camera Stack に Overlay Camera が active で残っていると、
+                // GraphicRaycaster のポインタ判定に影響する場合がある。
+                SetWeaponCameraEnabled(false);
                 return;
             }
 
+            SetWeaponCameraEnabled(true);
             TryAutoFire();
             UpdateRecoilRecovery();
             UpdateAdsFieldOfView();
@@ -599,6 +604,14 @@ namespace Velora.Weapon
         }
 
         // --- ADS FOV ---
+
+        private void SetWeaponCameraEnabled(bool enabled)
+        {
+            if (_weaponCamera != null && _weaponCamera.enabled != enabled)
+            {
+                _weaponCamera.enabled = enabled;
+            }
+        }
 
         /// <summary>
         /// ADS 中はカメラ FOV を武器ごとの設定値に滑らかに遷移させる。

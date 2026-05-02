@@ -47,6 +47,8 @@ namespace Velora.UI
         {
             gameObject.SetActive(true);
             _canvasGroup.alpha = 0f;
+            _canvasGroup.interactable = true;
+            _canvasGroup.blocksRaycasts = true;
             _canvasGroup.DOFade(1f, _fadeInDuration);
 
             int cardCount = Mathf.Min(_cardViews.Length, choices.Count);
@@ -81,6 +83,8 @@ namespace Velora.UI
                 card.OnSelected -= HandleCardSelected;
             }
 
+            _canvasGroup.interactable = false;
+            _canvasGroup.blocksRaycasts = false;
             _canvasGroup.DOFade(0f, _fadeOutDuration)
                 .OnComplete(() => gameObject.SetActive(false));
         }
