@@ -1,9 +1,9 @@
+using System;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Velora.UI
@@ -12,6 +12,7 @@ namespace Velora.UI
     /// リザルト画面の View 層。
     /// スコア・キル数・生存時間を DOTween でカウントアップ表示して
     /// プレイヤーに達成感を与える演出を実現する。
+    /// ボタン操作はイベントで Presenter に委譲し、View はナビゲーションロジックを持たない。
     /// </summary>
     public class ResultView : MonoBehaviour
     {
@@ -31,6 +32,9 @@ namespace Velora.UI
         [SerializeField] private float _countUpDuration = 1.5f;
         [SerializeField] private CanvasGroup _canvasGroup;
 
+        public event Action OnRetryClicked;
+        public event Action OnTitleClicked;
+
         private void Awake()
         {
             _retryButton.onClick.AddListener(HandleRetry);
@@ -48,6 +52,9 @@ namespace Velora.UI
             _canvasGroup.alpha = 0f;
             _retryButton.interactable = false;
             _titleButton.interactable = false;
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
 
             _titleText.text = data.IsGameOver ? "GAME OVER" : "CLEAR";
 
@@ -75,16 +82,7 @@ namespace Velora.UI
             _titleButton.interactable = true;
         }
 
-        private void HandleRetry()
-        {
-            // シーン全体をリロードすることでゲームの完全リセットを保証する。
-            // ゲームループをコードでリセットするよりシンプルで確実な方法。
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
-
-        private void HandleTitle()
-        {
-            // Phase 6 でタイトルシーン遷移を実装予定
-        }
+        private void HandleRetry() => OnRetryClicked?.Invoke();
+        private void HandleTitle() => OnTitleClicked?.Invoke();
     }
 }

@@ -239,7 +239,7 @@ namespace Velora.Enemy
 
         private void HandleDeath()
         {
-            EventBus.Publish(new EnemyDiedEvent(Data.ScoreValue, transform.position));
+            EventBus.Publish(new EnemyDiedEvent(Data.ScoreValue, transform.position, Data.EnemyName));
             _stateMachine.ChangeState(EnemyState.Death).Forget();
         }
 

@@ -8,6 +8,7 @@ namespace Velora.UI
     /// リザルト画面の Presenter。
     /// ScoreManager から統計データを収集して ResultData を構築し、
     /// ResultView に渡す。GameOverState と ResultState の両方から使用される。
+    /// Retry / Title ボタンのナビゲーション処理を担当する。
     /// </summary>
     public class ResultPresenter : MonoBehaviour
     {
@@ -18,6 +19,17 @@ namespace Velora.UI
         public void Initialize(ScoreManager scoreManager)
         {
             _scoreManager = scoreManager;
+            _resultView.OnRetryClicked += HandleRetry;
+            _resultView.OnTitleClicked += HandleTitle;
+        }
+
+        private void OnDestroy()
+        {
+            if (_resultView != null)
+            {
+                _resultView.OnRetryClicked -= HandleRetry;
+                _resultView.OnTitleClicked -= HandleTitle;
+            }
         }
 
         /// <summary>
@@ -34,6 +46,32 @@ namespace Velora.UI
                 isGameOver);
 
             await _resultView.ShowResult(data);
+        }
+
+        private void HandleRetry()
+        {
+            TransitionToRetry().Forget();
+        }
+
+        private void HandleTitle()
+        {
+            TransitionToTitle().Forget();
+        }
+
+        private async UniTaskVoid TransitionToRetry()
+        {
+            if (CommonUIDirector.Instance != null)
+            {
+                await CommonUIDirector.Instance.TransitionToScene("BattleScene", "BattleScene");
+            }
+        }
+
+        private async UniTaskVoid TransitionToTitle()
+        {
+            if (CommonUIDirector.Instance != null)
+            {
+                await CommonUIDirector.Instance.TransitionToScene("TitleScene", "BattleScene");
+            }
         }
     }
 }

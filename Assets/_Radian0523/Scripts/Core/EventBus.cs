@@ -107,11 +107,13 @@ namespace Velora.Core
     {
         public int ScoreValue { get; }
         public Vector3 Position { get; }
+        public string EnemyName { get; }
 
-        public EnemyDiedEvent(int scoreValue, Vector3 position)
+        public EnemyDiedEvent(int scoreValue, Vector3 position, string enemyName)
         {
             ScoreValue = scoreValue;
             Position = position;
+            EnemyName = enemyName;
         }
     }
 
