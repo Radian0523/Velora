@@ -34,6 +34,7 @@ namespace Velora.Weapon
 
         [Header("参照")]
         [SerializeField] private Camera _playerCamera;
+        [SerializeField] private Camera _weaponCamera;
         [SerializeField] private FPSController _fpsController;
         [SerializeField] private LayerMask _hitMask;
         [SerializeField] private ParticleSystem _muzzleFlashVfx;
@@ -92,6 +93,13 @@ namespace Velora.Weapon
         private void Start()
         {
             if (_initialWeapons == null || _initialWeapons.Length == 0) return;
+
+            // マズルフラッシュは武器カメラで描画するため Weapon レイヤーに設定。
+            // メインカメラの Culling Mask から除外されていても正しく表示される。
+            if (_muzzleFlashVfx != null)
+            {
+                SetLayerRecursive(_muzzleFlashVfx.gameObject, LayerMask.NameToLayer("Weapon"));
+            }
 
             // Inspector で設定された初期武器をランタイムリストに登録し、
             // モデルを事前生成して非アクティブで待機させる。
@@ -197,6 +205,19 @@ namespace Velora.Weapon
         // --- 武器登録・追加 ---
 
         /// <summary>
+        /// 武器モデルとその子オブジェクト全体のレイヤーを一括設定する。
+        /// 武器カメラの Culling Mask と一致させるため、Weapon レイヤーに統一する。
+        /// </summary>
+        private static void SetLayerRecursive(GameObject go, int layer)
+        {
+            go.layer = layer;
+            foreach (Transform child in go.transform)
+            {
+                SetLayerRecursive(child.gameObject, layer);
+            }
+        }
+
+        /// <summary>
         /// 武器をランタイムリストに登録し、モデルを生成して _modelRegistry に追加する。
         /// Start() からの初期登録と AddWeapon() からのピックアップ追加で共用する。
         /// </summary>
@@ -209,6 +230,7 @@ namespace Velora.Weapon
             if (weaponData.ModelPrefab != null)
             {
                 var modelInstance = Instantiate(weaponData.ModelPrefab, transform);
+                SetLayerRecursive(modelInstance, LayerMask.NameToLayer("Weapon"));
                 var modelView = modelInstance.GetComponent<WeaponModelView>();
                 modelInstance.SetActive(false);
                 _modelRegistry[weaponData] = modelView;
@@ -581,6 +603,8 @@ namespace Velora.Weapon
         /// <summary>
         /// ADS 中はカメラ FOV を武器ごとの設定値に滑らかに遷移させる。
         /// Lerp による補間で急激な視界変化を防ぐ。
+        /// 武器カメラの FOV もメインカメラと同期させ、
+        /// ADS 時にズーム感が武器モデルにも反映されるようにする。
         /// </summary>
         private void UpdateAdsFieldOfView()
         {
@@ -590,10 +614,17 @@ namespace Velora.Weapon
                 ? _currentWeaponData.AdsFieldOfView
                 : _defaultFieldOfView;
 
-            _playerCamera.fieldOfView = Mathf.Lerp(
+            float newFov = Mathf.Lerp(
                 _playerCamera.fieldOfView,
                 targetFov,
                 _adsFovLerpSpeed * Time.deltaTime);
+
+            _playerCamera.fieldOfView = newFov;
+
+            if (_weaponCamera != null)
+            {
+                _weaponCamera.fieldOfView = newFov;
+            }
         }
     }
 }
