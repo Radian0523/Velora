@@ -24,6 +24,7 @@ MonoBehaviour:
   _staggerDuration: 0.5
   _preferredRange: 12
   _minRetreatRange: 5
+  _chargeTime: 1
   _projectileSpeed: 15
   _projectileMaxLifetime: 5
   _projectileMaxRange: 30
