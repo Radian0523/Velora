@@ -117,6 +117,18 @@ namespace Velora.Core
         }
     }
 
+    public readonly struct PlayerHealthChangedEvent
+    {
+        public float Current { get; }
+        public float Max { get; }
+
+        public PlayerHealthChangedEvent(float current, float max)
+        {
+            Current = current;
+            Max = max;
+        }
+    }
+
     public readonly struct EnemyDamagedEvent
     {
         public float Damage { get; }

@@ -1,7 +1,5 @@
-using DG.Tweening;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Velora.UI
 {
@@ -13,8 +11,7 @@ namespace Velora.UI
     public class HudView : MonoBehaviour
     {
         [Header("HP")]
-        [SerializeField] private Slider _healthSlider;
-        [SerializeField] private TextMeshProUGUI _healthText;
+        [SerializeField] private HealthBarView _healthBar;
 
         [Header("弾数")]
         [SerializeField] private TextMeshProUGUI _ammoText;
@@ -25,20 +22,9 @@ namespace Velora.UI
         [Header("武器バー")]
         [SerializeField] private WeaponBarView _weaponBar;
 
-        private const float HealthSliderAnimDuration = 0.3f;
-
         public void UpdateHealthBar(float current, float max)
         {
-            float normalized = max > 0f ? current / max : 0f;
-
-            // スライダーを DOTween でアニメーションさせることで
-            // HP 変化が視覚的にわかりやすくなり、いきなり変化する違和感を防ぐ
-            _healthSlider.DOValue(normalized, HealthSliderAnimDuration).SetEase(Ease.OutQuad);
-
-            if (_healthText != null)
-            {
-                _healthText.text = $"{Mathf.CeilToInt(current)} / {Mathf.CeilToInt(max)}";
-            }
+            _healthBar.UpdateHealth(current, max);
         }
 
         public void UpdateAmmoDisplay(int current, int max, bool isReloading)
