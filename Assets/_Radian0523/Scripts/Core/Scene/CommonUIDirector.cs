@@ -27,10 +27,14 @@ namespace Velora.Core
         [Header("Font")]
         [SerializeField] private FontThemeData[] _fontThemes;
 
+        [Header("UI Sound")]
+        [SerializeField] private UISoundData _uiSoundData;
+
         public FadeView FadeView => _fadeView;
         public SceneLoader SceneLoader { get; private set; }
         public AudioManager AudioManager { get; private set; }
         public FontThemeService FontThemeService { get; private set; }
+        public UISoundData UISoundData => _uiSoundData;
         public PausePresenter PausePresenter => _pausePresenter;
 
         private void Awake()

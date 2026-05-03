@@ -31,6 +31,16 @@ namespace Velora.UI
             ApplyFont();
         }
 
+        /// <summary>
+        /// CommonUIDirector と同一シーンに配置される場合、OnEnable 時点で
+        /// Instance が未初期化のため ApplyFont がスキップされることがある。
+        /// Start は全 Awake 完了後に呼ばれるため、確実にフォントを適用できる。
+        /// </summary>
+        private void Start()
+        {
+            ApplyFont();
+        }
+
         private void OnDisable()
         {
             EventBus.Unsubscribe<FontThemeChangedEvent>(OnThemeChanged);

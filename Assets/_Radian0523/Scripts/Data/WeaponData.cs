@@ -58,6 +58,7 @@ namespace Velora.Data
 
         [Header("サウンド")]
         [SerializeField] private AudioClip _fireSound;
+        [SerializeField] private AudioClip _reloadSound;
 
         public string WeaponName => _weaponName;
         public WeaponType WeaponType => _weaponType;
@@ -82,5 +83,6 @@ namespace Velora.Data
         public int KickVibrato => _kickVibrato;
         public Sprite Icon => _icon;
         public AudioClip FireSound => _fireSound;
+        public AudioClip ReloadSound => _reloadSound;
     }
 }

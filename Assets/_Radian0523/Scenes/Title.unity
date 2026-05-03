@@ -196,6 +196,7 @@ GameObject:
   - component: {fileID: 238912753}
   - component: {fileID: 238912752}
   - component: {fileID: 238912754}
+  - component: {fileID: 238912757}
   m_Layer: 0
   m_Name: StartButton
   m_TagString: Untagged
@@ -325,6 +326,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &238912757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 238912751}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0938c71fc42fd44b29d45bf4daa93820, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.UIClickSound
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0

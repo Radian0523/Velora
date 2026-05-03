@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Velora.Data.FontThemeData
   _languageKey: 
   _displayName: 
-  _headingFont: {fileID: 0}
-  _bodyFont: {fileID: 0}
-  _numberFont: {fileID: 0}
+  _headingFont: {fileID: 11400000, guid: 923c09b7fecd8438f96db0e5137267f0, type: 2}
+  _bodyFont: {fileID: 11400000, guid: 923c09b7fecd8438f96db0e5137267f0, type: 2}
+  _numberFont: {fileID: 11400000, guid: 923c09b7fecd8438f96db0e5137267f0, type: 2}

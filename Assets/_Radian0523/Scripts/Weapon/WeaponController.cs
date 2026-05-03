@@ -462,6 +462,7 @@ namespace Velora.Weapon
             var result = await _fireStrategy.Fire(_currentWeaponData, _playerCamera.transform, _hitMask, spreadAngle);
 
             SpawnMuzzleFlash();
+            PlayFireSound();
 
             if (result.DidHit)
             {
@@ -500,6 +501,18 @@ namespace Velora.Weapon
             var effect = _impactEffectPool.Get();
             effect.Initialize(_impactEffectPool);
             effect.transform.SetPositionAndRotation(result.HitPoint, Quaternion.LookRotation(result.HitNormal));
+        }
+
+        private void PlayFireSound()
+        {
+            if (_currentWeaponData?.FireSound == null) return;
+            CommonUIDirector.Instance?.AudioManager?.PlaySE(_currentWeaponData.FireSound);
+        }
+
+        private void PlayReloadSound()
+        {
+            if (_currentWeaponData?.ReloadSound == null) return;
+            CommonUIDirector.Instance?.AudioManager?.PlaySE(_currentWeaponData.ReloadSound);
         }
 
         /// <summary>
@@ -586,6 +599,7 @@ namespace Velora.Weapon
 
             _isReloading = true;
             OnReloadStateChanged?.Invoke(true);
+            PlayReloadSound();
 
             try
             {
