@@ -2,6 +2,7 @@
   "dependencies": {
     "com.coplaydev.unity-mcp": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity",
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+    "io.github.hatayama.uloopmcp": "https://github.com/hatayama/unity-cli-loop.git?path=/Packages/src",
     "com.unity.addressables": "2.9.1",
     "com.unity.ai.navigation": "2.0.10",
     "com.unity.cloud.gltfast": "6.18.0",

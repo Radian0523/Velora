@@ -282,6 +282,17 @@
       },
       "url": "https://packages.unity.com"
     },
+    "io.github.hatayama.uloopmcp": {
+      "version": "https://github.com/hatayama/unity-cli-loop.git?path=/Packages/src",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.test-framework": "1.1.33",
+        "com.unity.ugui": "1.0.0",
+        "com.unity.nuget.newtonsoft-json": "3.2.1"
+      },
+      "hash": "0bc78dfa0b852a54b40dbe01d929756f82a43576"
+    },
     "jp.hadashikick.vcontainer": {
       "version": "https://github.com/hadashiA/VContainer.git?path=VContainer/Assets/VContainer",
       "depth": 0,
