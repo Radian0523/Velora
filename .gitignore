@@ -41,6 +41,9 @@ Assets/Resources/DOTweenSettings.asset
 CLAUDE.md
 DEVELOPMENT.md
 
+# Screenshots (debug)
+Assets/Screenshots/
+
 # OS
 .DS_Store
 Thumbs.db
