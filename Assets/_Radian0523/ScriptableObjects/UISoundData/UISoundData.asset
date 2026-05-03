@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84d4bc865aec64bc982984ff7ccd6ed3, type: 3}
   m_Name: UISoundData
   m_EditorClassIdentifier: Assembly-CSharp::Velora.Data.UISoundData
-  _buttonClick: {fileID: 0}
+  _buttonClick: {fileID: 8300000, guid: 12fdc89bd4648534692ead42220e2852, type: 3}
