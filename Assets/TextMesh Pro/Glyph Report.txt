@@ -1,0 +1,13 @@
+Font: Conthrax  Style: Semi Bold
+Point Size: 59   Padding: 5   SP/PD Ratio: 8.5%
+
+Characters included: 98/99
+Missing characters: 1
+Excluded characters: 0
+
+Characters missing from font file:
+----------------------------------------
+ID: 9633	Hex: 25A1	Char [□]
+
+Characters excluded from packing:
+----------------------------------------

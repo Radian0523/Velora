@@ -261,6 +261,7 @@ MonoBehaviour:
   _glowColor: {r: 1, g: 1, b: 1, a: 0.9}
   _glowPulseDuration: 0.8
   _glowMinAlpha: 0.4
+  _framePadding: 4
 --- !u!1 &7937662352260722853
 GameObject:
   m_ObjectHideFlags: 0
@@ -272,6 +273,7 @@ GameObject:
   - component: {fileID: 8483472626517213304}
   - component: {fileID: 2496730212233121487}
   - component: {fileID: 8645623457981333245}
+  - component: {fileID: 1661511465408828178}
   m_Layer: 0
   m_Name: NumberText
   m_TagString: Untagged
@@ -398,3 +400,16 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1661511465408828178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7937662352260722853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7eb45b4e626194f3994a6914636aa4d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.FontThemeApplier
+  _category: 1

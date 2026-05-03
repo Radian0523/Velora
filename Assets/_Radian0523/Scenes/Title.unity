@@ -770,6 +770,7 @@ GameObject:
   - component: {fileID: 1251867016}
   - component: {fileID: 1251867015}
   - component: {fileID: 1251867014}
+  - component: {fileID: 1251867017}
   m_Layer: 0
   m_Name: TitleText
   m_TagString: Untagged
@@ -916,6 +917,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1251867012}
   m_CullTransparentMesh: 1
+--- !u!114 &1251867017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1251867012}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7eb45b4e626194f3994a6914636aa4d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.FontThemeApplier
+  _category: 1
 --- !u!1 &1439200629
 GameObject:
   m_ObjectHideFlags: 0
@@ -1072,6 +1086,7 @@ GameObject:
   - component: {fileID: 1772691725}
   - component: {fileID: 1772691727}
   - component: {fileID: 1772691726}
+  - component: {fileID: 1772691728}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -1198,6 +1213,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1772691724}
   m_CullTransparentMesh: 1
+--- !u!114 &1772691728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772691724}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7eb45b4e626194f3994a6914636aa4d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.FontThemeApplier
+  _category: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

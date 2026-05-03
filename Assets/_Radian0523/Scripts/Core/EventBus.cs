@@ -142,4 +142,14 @@ namespace Velora.Core
             IsHeadshot = isHeadshot;
         }
     }
+
+    public readonly struct FontThemeChangedEvent
+    {
+        public string LanguageKey { get; }
+
+        public FontThemeChangedEvent(string languageKey)
+        {
+            LanguageKey = languageKey;
+        }
+    }
 }

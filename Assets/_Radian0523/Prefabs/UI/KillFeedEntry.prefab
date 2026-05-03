@@ -96,6 +96,7 @@ GameObject:
   - component: {fileID: 4361252976488451725}
   - component: {fileID: 6759506517665509814}
   - component: {fileID: 4911383217709384429}
+  - component: {fileID: 4462570749598100016}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -222,3 +223,16 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &4462570749598100016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6369317729094266645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7eb45b4e626194f3994a6914636aa4d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.FontThemeApplier
+  _category: 1

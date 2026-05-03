@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Velora.Data;
 using Velora.UI;
 
 namespace Velora.Core
@@ -23,9 +24,13 @@ namespace Velora.Core
         [SerializeField] private AudioManagerHost _audioManagerHost;
         [SerializeField] private PausePresenter _pausePresenter;
 
+        [Header("Font")]
+        [SerializeField] private FontThemeData[] _fontThemes;
+
         public FadeView FadeView => _fadeView;
         public SceneLoader SceneLoader { get; private set; }
         public AudioManager AudioManager { get; private set; }
+        public FontThemeService FontThemeService { get; private set; }
         public PausePresenter PausePresenter => _pausePresenter;
 
         private void Awake()
@@ -39,6 +44,7 @@ namespace Velora.Core
             Instance = this;
             SceneLoader = new SceneLoader();
             AudioManager = new AudioManager(_audioManagerHost);
+            FontThemeService = new FontThemeService(_fontThemes);
         }
 
         private void OnDestroy()
