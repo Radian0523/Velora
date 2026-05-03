@@ -3349,6 +3349,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &844829880 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2676714043304461614, guid: dcbb8ec23f974474d8418ea797a2a4f1, type: 3}
+  m_PrefabInstance: {fileID: 695773001}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 993c6cbd23abb4e51aa317f7e7706239, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.WeaponSlotView
 --- !u!1 &884527002
 GameObject:
   m_ObjectHideFlags: 0
@@ -3556,6 +3567,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3d758bfad26f841e09871a4cf978a28a, type: 3}
+--- !u!114 &1002360266 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2676714043304461614, guid: dcbb8ec23f974474d8418ea797a2a4f1, type: 3}
+  m_PrefabInstance: {fileID: 438558899}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 993c6cbd23abb4e51aa317f7e7706239, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.WeaponSlotView
 --- !u!1 &1005004107
 GameObject:
   m_ObjectHideFlags: 0
@@ -3694,8 +3716,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 20, y: 30}
-  m_SizeDelta: {x: 350, y: 24}
+  m_AnchoredPosition: {x: 449, y: 22}
+  m_SizeDelta: {x: 350, y: 15.25}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1049740322
 MonoBehaviour:
@@ -3718,8 +3740,8 @@ MonoBehaviour:
   _warningThreshold: 0.5
   _criticalThreshold: 0.25
   _mainBarDuration: 0.3
-  _trailDelay: 0.5
-  _trailDuration: 0.6
+  _trailDelay: 0.2
+  _trailDuration: 0.2
   _numberCountDuration: 0.4
   _criticalPulseDuration: 0.6
 --- !u!1 &1077698860
@@ -5580,6 +5602,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 252039141785777225, guid: dcbb8ec23f974474d8418ea797a2a4f1, type: 3}
   m_PrefabInstance: {fileID: 1510553236}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1510553238 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2676714043304461614, guid: dcbb8ec23f974474d8418ea797a2a4f1, type: 3}
+  m_PrefabInstance: {fileID: 1510553236}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 993c6cbd23abb4e51aa317f7e7706239, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.WeaponSlotView
 --- !u!1 &1527371344
 GameObject:
   m_ObjectHideFlags: 0
@@ -5613,7 +5646,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20577951ef6674cb4b7bf7153a191d8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.WeaponBarView
-  _slots: []
+  _slots:
+  - {fileID: 1886780259}
+  - {fileID: 1510553238}
+  - {fileID: 1002360266}
+  - {fileID: 844829880}
+  - {fileID: 2102812502}
 --- !u!224 &1527371346
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5635,7 +5673,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 6, y: 39}
+  m_AnchoredPosition: {x: 6, y: 79}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1527371347
@@ -11741,6 +11779,17 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -30}
   m_SizeDelta: {x: 200, y: 36}
   m_Pivot: {x: 0.5, y: 1}
+--- !u!114 &1886780259 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2676714043304461614, guid: dcbb8ec23f974474d8418ea797a2a4f1, type: 3}
+  m_PrefabInstance: {fileID: 1563767154}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 993c6cbd23abb4e51aa317f7e7706239, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.WeaponSlotView
 --- !u!1 &1915532350
 GameObject:
   m_ObjectHideFlags: 0
@@ -12046,6 +12095,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 158770694}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2102812502 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2676714043304461614, guid: dcbb8ec23f974474d8418ea797a2a4f1, type: 3}
+  m_PrefabInstance: {fileID: 503527184}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 993c6cbd23abb4e51aa317f7e7706239, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.WeaponSlotView
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
