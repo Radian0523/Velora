@@ -59,6 +59,9 @@ namespace Velora.Weapon
         private readonly Dictionary<WeaponData, WeaponModelView> _modelRegistry = new();
         private WeaponModelView _activeModelView;
 
+        // 弾薬管理: 武器ごとの現在の弾数を追跡するマップ。
+        private readonly Dictionary<WeaponData, int> _ammoMap = new();
+
         // リコイル: カメラに適用した実際の pitch/yaw オフセットを追跡し、
         // 射撃停止後に逆方向へ復帰させる
         private int _consecutiveShotCount;
@@ -306,7 +309,7 @@ namespace Velora.Weapon
 
             _currentWeaponIndex = index;
             _currentWeaponData = _ownedWeapons[index];
-            _currentAmmo = _currentWeaponData.MaxAmmo;
+            LoadAmmo();
             _lastFireTime = 0f;
             _consecutiveShotCount = 0;
             _recoilCameraOffset = Vector2.zero;
@@ -451,6 +454,7 @@ namespace Velora.Weapon
         {
             _lastFireTime = Time.time;
             _currentAmmo--;
+            SaveAmmo();
 
             // ADS 中は拡散角を縮小し、精密射撃を可能にする
             float spreadAngle = _isAiming
@@ -615,6 +619,7 @@ namespace Velora.Weapon
 
                 PlayReloadEndSound();
                 _currentAmmo = _currentWeaponData.MaxAmmo;
+                SaveAmmo();
                 OnAmmoChanged?.Invoke(_currentAmmo, _currentWeaponData.MaxAmmo);
             }
             catch (OperationCanceledException)
@@ -633,6 +638,27 @@ namespace Velora.Weapon
             _reloadCts?.Cancel();
             _reloadCts?.Dispose();
             _reloadCts = null;
+        }
+
+        // --- 弾数 ---
+
+        private void SaveAmmo()
+        {
+            if (_currentWeaponData == null) return;
+            _ammoMap[_currentWeaponData] = _currentAmmo;
+        }
+
+        private void LoadAmmo()
+        {
+            if (_currentWeaponData == null) return;
+            if (_ammoMap.TryGetValue(_currentWeaponData, out int savedAmmo))
+            {
+                _currentAmmo = savedAmmo;
+            }
+            else
+            {
+                _currentAmmo = _currentWeaponData.MaxAmmo;
+            }
         }
 
         // --- ADS FOV ---
