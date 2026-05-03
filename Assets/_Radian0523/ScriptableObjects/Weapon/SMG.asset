@@ -34,5 +34,5 @@ MonoBehaviour:
   _kickUpAngle: 2
   _kickDuration: 0.08
   _kickVibrato: 1
-  _fireSound: {fileID: 8300000, guid: 09f634dfafc05604580f9f42bc32ce14, type: 3}
-  _reloadSound: {fileID: 8300000, guid: 1226bfba727ac0242b14ae2a82557d86, type: 3}
+  _fireSound: {fileID: 8300000, guid: a80ef7318fd885a499785c2ba788fcbe, type: 3}
+  _reloadSound: {fileID: 8300000, guid: a6493b889174c054db3620030019c782, type: 3}

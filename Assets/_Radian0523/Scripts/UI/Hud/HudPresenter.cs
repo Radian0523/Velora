@@ -96,6 +96,15 @@ namespace Velora.UI
                     _weaponController.CurrentAmmo,
                     _weaponController.CurrentWeaponData.MaxAmmo,
                     isReloading);
+
+                if (isReloading)
+                {
+                    _hudView.ShowReloadRing(_weaponController.CurrentWeaponData.ReloadTime);
+                }
+                else
+                {
+                    _hudView.HideReloadRing();
+                }
             }
         }
 
@@ -104,6 +113,7 @@ namespace Velora.UI
             _isReloading = false;
             _hudView.UpdateAmmoDisplay(_weaponController.CurrentAmmo, weaponData.MaxAmmo, false);
             _hudView.SelectWeaponSlot(_weaponController.CurrentWeaponIndex);
+            _hudView.HideReloadRing();
         }
 
         private void HandleWeaponAdded(WeaponData weaponData)

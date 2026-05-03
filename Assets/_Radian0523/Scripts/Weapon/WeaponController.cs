@@ -509,10 +509,16 @@ namespace Velora.Weapon
             CommonUIDirector.Instance?.AudioManager?.PlaySE(_currentWeaponData.FireSound);
         }
 
-        private void PlayReloadSound()
+        private void PlayReloadStartSound()
         {
-            if (_currentWeaponData?.ReloadSound == null) return;
-            CommonUIDirector.Instance?.AudioManager?.PlaySE(_currentWeaponData.ReloadSound);
+            if (_currentWeaponData?.ReloadStartSound == null) return;
+            CommonUIDirector.Instance?.AudioManager?.PlaySE(_currentWeaponData.ReloadStartSound);
+        }
+
+        private void PlayReloadEndSound()
+        {
+            if (_currentWeaponData?.ReloadEndSound == null) return;
+            CommonUIDirector.Instance?.AudioManager?.PlaySE(_currentWeaponData.ReloadEndSound);
         }
 
         /// <summary>
@@ -599,7 +605,7 @@ namespace Velora.Weapon
 
             _isReloading = true;
             OnReloadStateChanged?.Invoke(true);
-            PlayReloadSound();
+            PlayReloadStartSound();
 
             try
             {
@@ -607,6 +613,7 @@ namespace Velora.Weapon
                     TimeSpan.FromSeconds(_currentWeaponData.ReloadTime),
                     cancellationToken: _reloadCts.Token);
 
+                PlayReloadEndSound();
                 _currentAmmo = _currentWeaponData.MaxAmmo;
                 OnAmmoChanged?.Invoke(_currentAmmo, _currentWeaponData.MaxAmmo);
             }

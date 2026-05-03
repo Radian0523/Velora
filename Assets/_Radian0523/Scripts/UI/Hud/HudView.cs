@@ -22,6 +22,9 @@ namespace Velora.UI
         [Header("武器バー")]
         [SerializeField] private WeaponBarView _weaponBar;
 
+        [Header("リロードリング")]
+        [SerializeField] private ReloadRingView _reloadRing;
+
         public void UpdateHealthBar(float current, float max)
         {
             _healthBar.UpdateHealth(current, max);
@@ -50,6 +53,16 @@ namespace Velora.UI
         public void SelectWeaponSlot(int index)
         {
             _weaponBar.SelectSlot(index);
+        }
+
+        public void ShowReloadRing(float duration)
+        {
+            _reloadRing.StartFill(duration);
+        }
+
+        public void HideReloadRing()
+        {
+            _reloadRing.Cancel();
         }
     }
 }
