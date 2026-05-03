@@ -27,7 +27,7 @@ MonoBehaviour:
   _projectileSpeed: 50
   _projectileMaxLifetime: 5
   _projectilePrefab: {fileID: 0}
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: e10642c0e07e84a33931acb9f5263b11, type: 3}
   _muzzleFlashPrefab: {fileID: 8590451330835685401, guid: e101a4ada3a5d4cd48f3f74b9207dd24, type: 3}
   _impactEffectPrefab: {fileID: 8446651104369974411, guid: 7b480ee653174434cb7cc41fdbbe1d42, type: 3}
   _kickBackDistance: 0.15

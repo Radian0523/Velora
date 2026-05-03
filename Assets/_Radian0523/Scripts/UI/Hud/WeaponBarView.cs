@@ -1,40 +1,33 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Velora.UI
 {
     /// <summary>
     /// 武器バー全体のコンテナ View。
-    /// 固定数の空スロットを初期生成し、武器取得時に左から順にアイコンを割り当てる。
-    /// スロット枠は常に表示されているため、プレイヤーに「まだ武器を拾える」ことを
-    /// 視覚的に伝えられる。
+    /// スロットは Scene 上に事前配置し、Inspector から参照する。
+    /// Editor 上でレイアウトを確認・調整できるため、見た目の調整が容易。
+    /// 武器取得時に左から順にアイコンを割り当てる。
     /// </summary>
     public class WeaponBarView : MonoBehaviour
     {
-        [SerializeField] private WeaponSlotView _slotPrefab;
-        [SerializeField] private Transform _slotContainer;
-        [SerializeField] private int _slotCount = 5;
+        [SerializeField] private WeaponSlotView[] _slots;
 
-        private readonly List<WeaponSlotView> _slots = new();
         private int _currentSelectedIndex = -1;
         private int _assignedCount;
 
         /// <summary>
-        /// 空スロットを _slotCount 個生成する。
-        /// 武器の割り当ては AssignWeapon() で後から行う。
+        /// 全スロットを空状態にリセットする。
+        /// Scene に配置済みのスロットをそのまま使い、Instantiate は行わない。
         /// </summary>
         public void Initialize()
         {
-            ClearSlots();
-
-            for (int i = 0; i < _slotCount; i++)
-            {
-                var slot = Instantiate(_slotPrefab, _slotContainer);
-                slot.SetupEmpty(i + 1);
-                _slots.Add(slot);
-            }
-
             _assignedCount = 0;
+            _currentSelectedIndex = -1;
+
+            for (int i = 0; i < _slots.Length; i++)
+            {
+                _slots[i].SetupEmpty(i + 1);
+            }
         }
 
         /// <summary>
@@ -43,7 +36,7 @@ namespace Velora.UI
         /// </summary>
         public void AssignWeapon(Sprite icon)
         {
-            if (_assignedCount >= _slots.Count) return;
+            if (_assignedCount >= _slots.Length) return;
 
             _slots[_assignedCount].AssignWeapon(icon);
             _assignedCount++;
@@ -53,24 +46,13 @@ namespace Velora.UI
         {
             if (index < 0 || index >= _assignedCount) return;
 
-            if (_currentSelectedIndex >= 0 && _currentSelectedIndex < _slots.Count)
+            if (_currentSelectedIndex >= 0 && _currentSelectedIndex < _slots.Length)
             {
                 _slots[_currentSelectedIndex].SetSelected(false);
             }
 
             _slots[index].SetSelected(true);
             _currentSelectedIndex = index;
-        }
-
-        private void ClearSlots()
-        {
-            foreach (var slot in _slots)
-            {
-                Destroy(slot.gameObject);
-            }
-            _slots.Clear();
-            _currentSelectedIndex = -1;
-            _assignedCount = 0;
         }
     }
 }

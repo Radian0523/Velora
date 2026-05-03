@@ -258,6 +258,9 @@ MonoBehaviour:
   _selectedFrame: {fileID: 3101121967556082556}
   _numberText: {fileID: 8645623457981333245}
   _canvasGroup: {fileID: 8552076853713115024}
+  _glowColor: {r: 1, g: 1, b: 1, a: 0.9}
+  _glowPulseDuration: 0.8
+  _glowMinAlpha: 0.4
 --- !u!1 &7937662352260722853
 GameObject:
   m_ObjectHideFlags: 0
@@ -345,7 +348,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2

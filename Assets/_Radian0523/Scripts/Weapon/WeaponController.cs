@@ -52,6 +52,7 @@ namespace Velora.Weapon
         private bool _isAiming;
         private bool _isFireHeld;
         private bool _isSwitching;
+        private float _lastScrollTime;
 
         // 武器モデル管理: WeaponData → 生成済み WeaponModelView のマッピング。
         // Start 時に全武器分を生成し、切替時は SetActive で表示を切り替える。
@@ -90,23 +91,27 @@ namespace Velora.Weapon
         public bool IsAiming => _isAiming;
         public int CurrentAmmo => _currentAmmo;
 
-        private void Start()
+        /// <summary>
+        /// 初期武器の登録を Awake で行い、他スクリプトの Start() より先に
+        /// _ownedWeapons を確定させる。BattleSceneDirector.Start() → HudPresenter.Initialize()
+        /// が Weapons を参照する時点で武器リストが空にならないことを保証する。
+        /// </summary>
+        private void Awake()
         {
             if (_initialWeapons == null || _initialWeapons.Length == 0) return;
 
-            // マズルフラッシュは武器カメラで描画するため Weapon レイヤーに設定。
-            // メインカメラの Culling Mask から除外されていても正しく表示される。
-            if (_muzzleFlashVfx != null)
-            {
-                SetLayerRecursive(_muzzleFlashVfx.gameObject, LayerMask.NameToLayer("Weapon"));
-            }
-
-            // Inspector で設定された初期武器をランタイムリストに登録し、
-            // モデルを事前生成して非アクティブで待機させる。
             foreach (var weaponData in _initialWeapons)
             {
                 if (weaponData == null) continue;
                 RegisterWeapon(weaponData);
+            }
+        }
+
+        private void Start()
+        {
+            if (_muzzleFlashVfx != null)
+            {
+                SetLayerRecursive(_muzzleFlashVfx.gameObject, LayerMask.NameToLayer("Weapon"));
             }
 
             if (_ownedWeapons.Count > 0)
@@ -195,7 +200,13 @@ namespace Velora.Weapon
             float scroll = value.Get<float>();
             if (scroll == 0f || _ownedWeapons.Count <= 1) return;
 
-            int direction = scroll > 0f ? 1 : -1;
+            // macOS の慣性スクロールやバウンスで符号が反転するイベントが
+            // 連続発生するため、クールダウンで誤切替を防ぐ
+            const float scrollCooldown = 0.2f;
+            if (Time.unscaledTime - _lastScrollTime < scrollCooldown) return;
+            _lastScrollTime = Time.unscaledTime;
+
+            int direction = scroll > 0f ? -1 : 1;
             int nextIndex = (_currentWeaponIndex + direction + _ownedWeapons.Count) % _ownedWeapons.Count;
             EquipWeapon(nextIndex);
         }
