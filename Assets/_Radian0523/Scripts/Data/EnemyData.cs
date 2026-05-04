@@ -50,6 +50,11 @@ namespace Velora.Data
         [Tooltip("T_ColorAtlas の行（0〜31）。色合いを切り替える")]
         [SerializeField, Range(0, 31)] private int _colorRow;
 
+        [Header("サウンド")]
+        [SerializeField] private AudioClip _attackSound;
+        [SerializeField] private AudioClip _hitSound;
+        [SerializeField] private AudioClip _headshotHitSound;
+
         [Header("エフェクト")]
         [SerializeField] private GameObject _deathEffectPrefab;
         [SerializeField] private GameObject _spawnEffectPrefab;
@@ -78,6 +83,9 @@ namespace Velora.Data
         public GameObject ChargeEffectPrefab => _chargeEffectPrefab;
         public int ColorColumn => _colorColumn;
         public int ColorRow => _colorRow;
+        public AudioClip AttackSound => _attackSound;
+        public AudioClip HitSound => _hitSound;
+        public AudioClip HeadshotHitSound => _headshotHitSound;
         public GameObject DeathEffectPrefab => _deathEffectPrefab;
         public GameObject SpawnEffectPrefab => _spawnEffectPrefab;
         public float SpawnWeight => _spawnWeight;

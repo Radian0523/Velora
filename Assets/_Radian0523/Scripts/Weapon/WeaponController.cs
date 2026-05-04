@@ -328,6 +328,7 @@ namespace Velora.Weapon
             _modelRegistry.TryGetValue(_currentWeaponData, out var incomingView);
 
             await PlaySwitchAnimation(previousModelView, incomingView);
+            PlaySwitchSound();
 
             _activeModelView = incomingView;
             _isSwitching = false;
@@ -505,6 +506,12 @@ namespace Velora.Weapon
             var effect = _impactEffectPool.Get();
             effect.Initialize(_impactEffectPool);
             effect.transform.SetPositionAndRotation(result.HitPoint, Quaternion.LookRotation(result.HitNormal));
+        }
+
+        private void PlaySwitchSound()
+        {
+            if (_currentWeaponData?.SwitchSound == null) return;
+            CommonUIDirector.Instance?.AudioManager?.PlaySE(_currentWeaponData.SwitchSound);
         }
 
         private void PlayFireSound()

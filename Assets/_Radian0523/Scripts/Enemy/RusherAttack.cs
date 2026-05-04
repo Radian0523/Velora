@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Velora.Core;
 
 namespace Velora.Enemy
 {
@@ -26,11 +27,18 @@ namespace Velora.Enemy
 
             if (distance <= controller.Data.AttackRange)
             {
+                PlayAttackSound(controller);
                 controller.PlayerDamageable.TakeDamage(
                     controller.Data.AttackDamage,
                     controller.transform.position,
                     false);
             }
+        }
+
+        private static void PlayAttackSound(EnemyController controller)
+        {
+            if (controller.Data.AttackSound == null) return;
+            CommonUIDirector.Instance?.AudioManager?.PlaySE(controller.Data.AttackSound);
         }
     }
 }

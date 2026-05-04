@@ -35,4 +35,6 @@ MonoBehaviour:
   _kickDuration: 0.1
   _kickVibrato: 1
   _fireSound: {fileID: 8300000, guid: 562f7c87ecb6d2b45932aacb5a652204, type: 3}
-  _reloadSound: {fileID: 8300000, guid: 4346d6eaea6d7c042b38148c33f14269, type: 3}
+  _reloadStartSound: {fileID: 8300000, guid: d2b0eb1f437ee7144a20639fc64961a3, type: 3}
+  _reloadEndSound: {fileID: 8300000, guid: 2fd47cfef6580af4db46656a26e8bc01, type: 3}
+  _switchSound: {fileID: 0}

@@ -73,8 +73,9 @@ namespace Velora.Enemy
                 return;
             }
 
-            // 発射の瞬間に攻撃アニメーションを再生する
+            // 発射の瞬間に攻撃アニメーションと攻撃音を再生する
             controller.PlayAnimation(EnemyController.AnimAttack);
+            PlayAttackSound(controller);
 
             // チャージ位置からプレイヤーの目線に向かって放出する
             var targetPoint = controller.PlayerTransform.position
@@ -94,6 +95,12 @@ namespace Velora.Enemy
             await UniTask.Delay(
                 TimeSpan.FromSeconds(AttackAnimationDuration),
                 cancellationToken: controller.destroyCancellationToken);
+        }
+
+        private static void PlayAttackSound(EnemyController controller)
+        {
+            if (controller.Data.AttackSound == null) return;
+            CommonUIDirector.Instance?.AudioManager?.PlaySE(controller.Data.AttackSound);
         }
 
         /// <summary>

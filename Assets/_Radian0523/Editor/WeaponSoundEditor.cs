@@ -7,8 +7,8 @@ using Velora.Data;
 namespace Velora.Editor
 {
     /// <summary>
-    /// 全武器の音声アサインを一覧で管理するエディタウィンドウ。
-    /// 武器ごとに FireSound / ReloadStartSound / ReloadEndSound を横並びで表示し、
+    /// バトル関連の全音声アサインを一覧管理するエディタウィンドウ。
+    /// WeaponData / EnemyData / BattleSoundData の音声フィールドを横並びで表示し、
     /// 試聴ボタンでその場で聴き比べができる。
     /// 変更は SerializedObject 経由で即座に ScriptableObject に反映される。
     /// </summary>
@@ -16,6 +16,8 @@ namespace Velora.Editor
     {
         private Vector2 _scrollPosition;
         private WeaponData[] _weaponDataAssets;
+        private EnemyData[] _enemyDataAssets;
+        private BattleSoundData[] _battleSoundDataAssets;
         private AudioClip _playingClip;
 
         // UnityEditor.AudioUtil は internal クラスのため、リフレクションでアクセスする。
@@ -38,41 +40,34 @@ namespace Velora.Editor
         private const float ButtonWidth = 24f;
         private const float ClipFieldMinWidth = 140f;
 
-        [MenuItem("Velora/Weapon Sound Editor", priority = 100)]
+        [MenuItem("Velora/Battle Sound Editor", priority = 100)]
         private static void Open()
         {
-            var window = GetWindow<WeaponSoundEditor>("Weapon Sounds");
-            window.minSize = new Vector2(600f, 300f);
+            var window = GetWindow<WeaponSoundEditor>("Battle Sounds");
+            window.minSize = new Vector2(700f, 400f);
         }
 
         private void OnEnable()
         {
-            RefreshWeaponDataAssets();
+            RefreshAllAssets();
         }
 
         private void OnFocus()
         {
-            RefreshWeaponDataAssets();
+            RefreshAllAssets();
         }
 
         private void OnGUI()
         {
-            if (_weaponDataAssets == null || _weaponDataAssets.Length == 0)
-            {
-                EditorGUILayout.HelpBox("WeaponData が見つかりません。", MessageType.Info);
-                return;
-            }
-
             DrawToolbar();
-            DrawHeader();
 
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
 
-            foreach (var weaponData in _weaponDataAssets)
-            {
-                if (weaponData == null) continue;
-                DrawWeaponRow(weaponData);
-            }
+            DrawWeaponSection();
+            EditorGUILayout.Space(8f);
+            DrawEnemySection();
+            EditorGUILayout.Space(8f);
+            DrawBattleSoundSection();
 
             EditorGUILayout.EndScrollView();
         }
@@ -82,17 +77,30 @@ namespace Velora.Editor
             StopPreview();
         }
 
-        private void RefreshWeaponDataAssets()
+        // --- データ取得 ---
+
+        private void RefreshAllAssets()
         {
-            var guids = AssetDatabase.FindAssets("t:WeaponData");
-            _weaponDataAssets = new WeaponData[guids.Length];
+            _weaponDataAssets = FindAssets<WeaponData>("t:WeaponData");
+            _enemyDataAssets = FindAssets<EnemyData>("t:EnemyData");
+            _battleSoundDataAssets = FindAssets<BattleSoundData>("t:BattleSoundData");
+        }
+
+        private static T[] FindAssets<T>(string filter) where T : UnityEngine.Object
+        {
+            var guids = AssetDatabase.FindAssets(filter);
+            var assets = new T[guids.Length];
 
             for (int i = 0; i < guids.Length; i++)
             {
                 var path = AssetDatabase.GUIDToAssetPath(guids[i]);
-                _weaponDataAssets[i] = AssetDatabase.LoadAssetAtPath<WeaponData>(path);
+                assets[i] = AssetDatabase.LoadAssetAtPath<T>(path);
             }
+
+            return assets;
         }
+
+        // --- ツールバー ---
 
         private void DrawToolbar()
         {
@@ -100,7 +108,7 @@ namespace Velora.Editor
 
             if (GUILayout.Button("Refresh", EditorStyles.toolbarButton, GUILayout.Width(60f)))
             {
-                RefreshWeaponDataAssets();
+                RefreshAllAssets();
             }
 
             GUILayout.FlexibleSpace();
@@ -113,16 +121,26 @@ namespace Velora.Editor
             EditorGUILayout.EndHorizontal();
         }
 
-        private void DrawHeader()
-        {
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Weapon", EditorStyles.boldLabel, GUILayout.Width(LabelWidth));
-            EditorGUILayout.LabelField("Fire", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Reload Start", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Reload End", EditorStyles.boldLabel);
-            EditorGUILayout.EndHorizontal();
+        // --- Weapon セクション ---
 
+        private void DrawWeaponSection()
+        {
+            EditorGUILayout.LabelField("Weapon", EditorStyles.boldLabel);
             DrawSeparator();
+
+            if (_weaponDataAssets == null || _weaponDataAssets.Length == 0)
+            {
+                EditorGUILayout.HelpBox("WeaponData が見つかりません。", MessageType.Info);
+                return;
+            }
+
+            DrawSectionHeader("Name", "Fire", "Reload Start", "Reload End", "Switch");
+
+            foreach (var weaponData in _weaponDataAssets)
+            {
+                if (weaponData == null) continue;
+                DrawWeaponRow(weaponData);
+            }
         }
 
         private void DrawWeaponRow(WeaponData weaponData)
@@ -132,20 +150,120 @@ namespace Velora.Editor
 
             EditorGUILayout.BeginHorizontal();
 
-            // 武器名ラベル（クリックで SO を選択）
-            if (GUILayout.Button(weaponData.WeaponName, EditorStyles.label, GUILayout.Width(LabelWidth)))
-            {
-                EditorGUIUtility.PingObject(weaponData);
-                Selection.activeObject = weaponData;
-            }
+            DrawAssetLabel(weaponData.WeaponName, weaponData);
 
             DrawClipField(serializedObject, "_fireSound");
             DrawClipField(serializedObject, "_reloadStartSound");
             DrawClipField(serializedObject, "_reloadEndSound");
+            DrawClipField(serializedObject, "_switchSound");
 
             EditorGUILayout.EndHorizontal();
 
             serializedObject.ApplyModifiedProperties();
+        }
+
+        // --- Enemy セクション ---
+
+        private void DrawEnemySection()
+        {
+            EditorGUILayout.LabelField("Enemy", EditorStyles.boldLabel);
+            DrawSeparator();
+
+            if (_enemyDataAssets == null || _enemyDataAssets.Length == 0)
+            {
+                EditorGUILayout.HelpBox("EnemyData が見つかりません。", MessageType.Info);
+                return;
+            }
+
+            DrawSectionHeader("Name", "Attack", "Hit", "Headshot Hit");
+
+            foreach (var enemyData in _enemyDataAssets)
+            {
+                if (enemyData == null) continue;
+                DrawEnemyRow(enemyData);
+            }
+        }
+
+        private void DrawEnemyRow(EnemyData enemyData)
+        {
+            var serializedObject = new SerializedObject(enemyData);
+            serializedObject.Update();
+
+            EditorGUILayout.BeginHorizontal();
+
+            DrawAssetLabel(enemyData.EnemyName, enemyData);
+
+            DrawClipField(serializedObject, "_attackSound");
+            DrawClipField(serializedObject, "_hitSound");
+            DrawClipField(serializedObject, "_headshotHitSound");
+
+            EditorGUILayout.EndHorizontal();
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        // --- BattleSound セクション ---
+
+        private void DrawBattleSoundSection()
+        {
+            EditorGUILayout.LabelField("Battle (Global)", EditorStyles.boldLabel);
+            DrawSeparator();
+
+            if (_battleSoundDataAssets == null || _battleSoundDataAssets.Length == 0)
+            {
+                EditorGUILayout.HelpBox("BattleSoundData が見つかりません。", MessageType.Info);
+                return;
+            }
+
+            DrawSectionHeader("Asset", "Player Damage", "Player Death", "Wave Clear");
+
+            foreach (var battleSoundData in _battleSoundDataAssets)
+            {
+                if (battleSoundData == null) continue;
+                DrawBattleSoundRow(battleSoundData);
+            }
+        }
+
+        private void DrawBattleSoundRow(BattleSoundData battleSoundData)
+        {
+            var serializedObject = new SerializedObject(battleSoundData);
+            serializedObject.Update();
+
+            EditorGUILayout.BeginHorizontal();
+
+            DrawAssetLabel(battleSoundData.name, battleSoundData);
+
+            DrawClipField(serializedObject, "_playerDamageSound");
+            DrawClipField(serializedObject, "_playerDeathSound");
+            DrawClipField(serializedObject, "_waveClearSound");
+
+            EditorGUILayout.EndHorizontal();
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        // --- 共通描画 ---
+
+        private void DrawSectionHeader(string labelTitle, params string[] columns)
+        {
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(labelTitle, EditorStyles.miniLabel, GUILayout.Width(LabelWidth));
+
+            foreach (var column in columns)
+            {
+                EditorGUILayout.LabelField(column, EditorStyles.miniLabel);
+            }
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void DrawAssetLabel(string displayName, UnityEngine.Object asset)
+        {
+            if (GUILayout.Button(displayName, EditorStyles.label, GUILayout.Width(LabelWidth)))
+            {
+                EditorGUIUtility.PingObject(asset);
+                Selection.activeObject = asset;
+            }
         }
 
         private void DrawClipField(SerializedObject serializedObject, string propertyName)

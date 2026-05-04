@@ -38,6 +38,9 @@ namespace Velora.Core
         [Header("UI")]
         [SerializeField] private WaveEffectView _waveEffectView;
 
+        [Header("サウンド")]
+        [SerializeField] private BattleSoundData _battleSoundData;
+
         [Header("UI Presenter")]
         [SerializeField] private HudPresenter _hudPresenter;
         [SerializeField] private UpgradeSelectPresenter _upgradeSelectPresenter;
@@ -140,6 +143,9 @@ namespace Velora.Core
             _playerModel.OnDeath += HandlePlayerDeath;
             _waveDirector.OnWaveCleared += HandleWaveCleared;
             _waveDirector.OnAllWavesComplete += HandleAllWavesComplete;
+
+            EventBus.Subscribe<PlayerDamagedEvent>(HandlePlayerDamaged);
+            EventBus.Subscribe<WaveClearedEvent>(HandleWaveClearSound);
         }
 
         private void UnsubscribeEvents()
@@ -154,6 +160,9 @@ namespace Velora.Core
                 _waveDirector.OnWaveCleared -= HandleWaveCleared;
                 _waveDirector.OnAllWavesComplete -= HandleAllWavesComplete;
             }
+
+            EventBus.Unsubscribe<PlayerDamagedEvent>(HandlePlayerDamaged);
+            EventBus.Unsubscribe<WaveClearedEvent>(HandleWaveClearSound);
         }
 
         /// <summary>
@@ -199,7 +208,26 @@ namespace Velora.Core
 
         private void HandlePlayerDeath()
         {
+            PlayBattleSound(_battleSoundData?.PlayerDeathSound);
             _gameFlowManager.ChangeState(GameState.GameOver).Forget();
+        }
+
+        // --- サウンドイベントハンドラ ---
+
+        private void HandlePlayerDamaged(PlayerDamagedEvent e)
+        {
+            PlayBattleSound(_battleSoundData?.PlayerDamageSound);
+        }
+
+        private void HandleWaveClearSound(WaveClearedEvent e)
+        {
+            PlayBattleSound(_battleSoundData?.WaveClearSound);
+        }
+
+        private void PlayBattleSound(AudioClip clip)
+        {
+            if (clip == null) return;
+            CommonUIDirector.Instance?.AudioManager?.PlaySE(clip);
         }
     }
 }

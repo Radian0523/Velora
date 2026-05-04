@@ -32,6 +32,9 @@ MonoBehaviour:
   _chargeEffectPrefab: {fileID: 7131401307255788800, guid: 4401205a7c0d043c9b3df924f73a8710, type: 3}
   _colorColumn: 1
   _colorRow: 0
+  _attackSound: {fileID: 0}
+  _hitSound: {fileID: 8300000, guid: 3b67912d3ae9c423395a9447772a67ee, type: 3}
+  _headshotHitSound: {fileID: 0}
   _deathEffectPrefab: {fileID: 0}
   _spawnEffectPrefab: {fileID: 0}
   _spawnWeight: 1

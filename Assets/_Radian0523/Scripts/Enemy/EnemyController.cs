@@ -130,7 +130,20 @@ namespace Velora.Enemy
             if (Model == null || Model.IsDead) return;
 
             Model.TakeDamage(damage);
+            PlayHitSound(isHeadshot);
             EventBus.Publish(new EnemyDamagedEvent(damage, hitPoint, isHeadshot));
+        }
+
+        /// <summary>
+        /// ヘッドショット時は専用音で通常ヒット音を置き換える。
+        /// 加算再生ではなく排他にすることで、
+        /// 一撃で「当たった箇所」がサウンドだけで識別できるようにする。
+        /// </summary>
+        private void PlayHitSound(bool isHeadshot)
+        {
+            var clip = isHeadshot ? Data.HeadshotHitSound : Data.HitSound;
+            if (clip == null) return;
+            CommonUIDirector.Instance?.AudioManager?.PlaySE(clip);
         }
 
         // --- 外部 API ---
