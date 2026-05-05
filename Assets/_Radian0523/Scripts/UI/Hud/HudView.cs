@@ -30,9 +30,9 @@ namespace Velora.UI
             _healthBar.UpdateHealth(current, max);
         }
 
-        public void UpdateAmmoDisplay(int current, int max, bool isReloading)
+        public void UpdateAmmoDisplay(int current, int max, int reserve, bool isReloading)
         {
-            _ammoText.text = isReloading ? "RELOADING..." : $"{current} / {max}";
+            _ammoText.text = isReloading ? "RELOADING..." : $"{current} / {reserve}";
         }
 
         public void ShowWaveNumber(int waveNumber)

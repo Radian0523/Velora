@@ -32,6 +32,11 @@ namespace Velora.Weapon
         // 初期装備 + ピックアップで追加された武器を保持する。
         private readonly List<WeaponData> _ownedWeapons = new();
 
+        [Header("リザーブ弾薬（全武器共有）")]
+        [SerializeField] private int _initialReserveAmmo = 120;
+
+        private int _reserveAmmo;
+
         [Header("参照")]
         [SerializeField] private Camera _playerCamera;
         [SerializeField] private Camera _weaponCamera;
@@ -93,6 +98,7 @@ namespace Velora.Weapon
         public int CurrentWeaponIndex => _currentWeaponIndex;
         public bool IsAiming => _isAiming;
         public int CurrentAmmo => _currentAmmo;
+        public int ReserveAmmo => _reserveAmmo;
 
         /// <summary>
         /// 初期武器の登録を Awake で行い、他スクリプトの Start() より先に
@@ -112,6 +118,8 @@ namespace Velora.Weapon
 
         private void Start()
         {
+            _reserveAmmo = _initialReserveAmmo;
+
             if (_muzzleFlashVfx != null)
             {
                 SetLayerRecursive(_muzzleFlashVfx.gameObject, LayerMask.NameToLayer("Weapon"));
@@ -441,7 +449,7 @@ namespace Velora.Weapon
 
             if (_currentAmmo <= 0)
             {
-                StartReload().Forget();
+                if (_reserveAmmo > 0) StartReload().Forget();
                 return;
             }
 
@@ -610,6 +618,7 @@ namespace Velora.Weapon
         {
             if (_isSwitching || _isReloading || _currentWeaponData == null) return;
             if (_currentAmmo >= _currentWeaponData.MaxAmmo) return;
+            if (_reserveAmmo <= 0) return;
 
             CancelReload();
             _reloadCts = new CancellationTokenSource();
@@ -625,7 +634,12 @@ namespace Velora.Weapon
                     cancellationToken: _reloadCts.Token);
 
                 PlayReloadEndSound();
-                _currentAmmo = _currentWeaponData.MaxAmmo;
+
+                // リザーブから必要分だけ補充する（無限回復ではなくリソース消費型）
+                int needed = _currentWeaponData.MaxAmmo - _currentAmmo;
+                int toLoad = Mathf.Min(needed, _reserveAmmo);
+                _currentAmmo += toLoad;
+                _reserveAmmo -= toLoad;
                 SaveAmmo();
                 OnAmmoChanged?.Invoke(_currentAmmo, _currentWeaponData.MaxAmmo);
             }
@@ -666,6 +680,15 @@ namespace Velora.Weapon
             {
                 _currentAmmo = _currentWeaponData.MaxAmmo;
             }
+        }
+
+        /// <summary>
+        /// リザーブ弾薬を補充する。AmmoPickup や WeaponPickup から呼ばれる公開メソッド。
+        /// </summary>
+        public void AddReserveAmmo(int amount)
+        {
+            _reserveAmmo += amount;
+            OnAmmoChanged?.Invoke(_currentAmmo, _currentWeaponData?.MaxAmmo ?? 0);
         }
 
         // --- ADS FOV ---

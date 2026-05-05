@@ -6,6 +6,7 @@ namespace Velora.Weapon
     /// <summary>
     /// 地面に配置する武器ピックアップオブジェクト。
     /// トリガー接触でプレイヤーの WeaponController に武器を追加し、自身を破棄する。
+    /// 既に所持済みの武器を拾った場合はマガジン1本分のリザーブ弾薬を補充する。
     /// 新しい武器を追加する際はこのプレハブを配置し、_weaponData に WeaponData SO を
     /// 設定するだけでよい（コード変更不要、データドリブン）。
     /// </summary>
@@ -35,8 +36,7 @@ namespace Velora.Weapon
 
         /// <summary>
         /// CharacterController はトリガーとの接触で OnTriggerEnter を発火する。
-        /// プレイヤー階層内の WeaponController を検索し、武器追加を試みる。
-        /// 既に所持済みの武器の場合は AddWeapon が false を返すため、ピックアップは残る。
+        /// 未所持の武器 → AddWeapon で追加。所持済み → マガジン分のリザーブ弾薬を補充。
         /// </summary>
         private void OnTriggerEnter(Collider other)
         {
@@ -46,7 +46,12 @@ namespace Velora.Weapon
             if (weaponController.AddWeapon(_weaponData))
             {
                 Destroy(gameObject);
+                return;
             }
+
+            // 所持済みの武器を拾った場合、マガジン1本分の弾薬をリザーブに補充する
+            weaponController.AddReserveAmmo(_weaponData.MaxAmmo);
+            Destroy(gameObject);
         }
     }
 }

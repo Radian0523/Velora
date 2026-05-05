@@ -34,6 +34,7 @@ namespace Velora.UI
                 _hudView.UpdateAmmoDisplay(
                     _weaponController.CurrentAmmo,
                     _weaponController.CurrentWeaponData.MaxAmmo,
+                    _weaponController.ReserveAmmo,
                     false);
             }
 
@@ -83,7 +84,7 @@ namespace Velora.UI
 
         private void HandleAmmoChanged(int current, int max)
         {
-            _hudView.UpdateAmmoDisplay(current, max, _isReloading);
+            _hudView.UpdateAmmoDisplay(current, max, _weaponController.ReserveAmmo, _isReloading);
         }
 
         private void HandleReloadStateChanged(bool isReloading)
@@ -95,6 +96,7 @@ namespace Velora.UI
                 _hudView.UpdateAmmoDisplay(
                     _weaponController.CurrentAmmo,
                     _weaponController.CurrentWeaponData.MaxAmmo,
+                    _weaponController.ReserveAmmo,
                     isReloading);
 
                 if (isReloading)
@@ -111,7 +113,9 @@ namespace Velora.UI
         private void HandleWeaponSwitched(WeaponData weaponData)
         {
             _isReloading = false;
-            _hudView.UpdateAmmoDisplay(_weaponController.CurrentAmmo, weaponData.MaxAmmo, false);
+            _hudView.UpdateAmmoDisplay(
+                _weaponController.CurrentAmmo, weaponData.MaxAmmo,
+                _weaponController.ReserveAmmo, false);
             _hudView.SelectWeaponSlot(_weaponController.CurrentWeaponIndex);
             _hudView.HideReloadRing();
         }
