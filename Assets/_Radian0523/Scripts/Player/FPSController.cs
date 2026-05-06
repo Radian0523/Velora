@@ -92,19 +92,6 @@ namespace Velora.Player
             _isSprinting = value.isPressed;
         }
 
-        /// <summary>
-        /// 外部からカメラ回転にオフセットを加える。
-        /// WeaponController のリコイル適用・復帰で使用する。
-        /// FPSController がカメラ回転の状態を一元管理しているため、
-        /// 外部から直接 Transform を操作すると UpdateLook で上書きされてしまう。
-        /// </summary>
-        public void AddCameraRecoil(float pitchDelta, float yawDelta)
-        {
-            _cameraPitch += pitchDelta;
-            _cameraPitch = Mathf.Clamp(_cameraPitch, -_maxLookAngle, _maxLookAngle);
-            transform.Rotate(Vector3.up * yawDelta);
-        }
-
         private void UpdateGroundCheck()
         {
             IsGrounded = _controller.isGrounded;

@@ -30,10 +30,9 @@ namespace Velora.Data
         [SerializeField] private float _reloadTime = 1.5f;
         [SerializeField] private float _headshotMultiplier = 2f;
 
-        [Header("拡散・反動")]
+        [Header("拡散")]
         [SerializeField] private float _spreadAngle = 1f;
         [SerializeField] private float _adsSpreadAngle = 0.2f;
-        [SerializeField] private RecoilData _recoilPattern;
 
         [Header("ADS")]
         [SerializeField] private float _adsFieldOfView = 45f;
@@ -83,7 +82,6 @@ namespace Velora.Data
         public float HeadshotMultiplier => _headshotMultiplier;
         public float SpreadAngle => _spreadAngle;
         public float AdsSpreadAngle => _adsSpreadAngle;
-        public RecoilData RecoilPattern => _recoilPattern;
         public float AdsFieldOfView => _adsFieldOfView;
         public float ProjectileSpeed => _projectileSpeed;
         public float ProjectileMaxLifetime => _projectileMaxLifetime;
