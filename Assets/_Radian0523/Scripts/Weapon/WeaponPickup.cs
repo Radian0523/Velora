@@ -9,30 +9,13 @@ namespace Velora.Weapon
     /// 既に所持済みの武器を拾った場合はマガジン1本分のリザーブ弾薬を補充する。
     /// 新しい武器を追加する際はこのプレハブを配置し、_weaponData に WeaponData SO を
     /// 設定するだけでよい（コード変更不要、データドリブン）。
+    /// 回転・浮遊演出は PickupBobAnimation コンポーネントが担当する。
     /// </summary>
     [RequireComponent(typeof(Collider))]
+    [RequireComponent(typeof(PickupBobAnimation))]
     public class WeaponPickup : MonoBehaviour
     {
         [SerializeField] private WeaponData _weaponData;
-
-        private const float RotationSpeed = 90f;
-        private const float BobAmplitude = 0.15f;
-        private const float BobFrequency = 1.5f;
-
-        private Vector3 _startPosition;
-
-        private void Start()
-        {
-            _startPosition = transform.position;
-        }
-
-        private void Update()
-        {
-            // ピックアップオブジェクトの回転 + 上下浮遊で視認性を高める
-            transform.Rotate(Vector3.up, RotationSpeed * Time.deltaTime, Space.World);
-            float bobOffset = Mathf.Sin(Time.time * BobFrequency * Mathf.PI * 2f) * BobAmplitude;
-            transform.position = _startPosition + Vector3.up * bobOffset;
-        }
 
         /// <summary>
         /// CharacterController はトリガーとの接触で OnTriggerEnter を発火する。
