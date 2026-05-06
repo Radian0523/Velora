@@ -37,8 +37,7 @@ namespace Velora.Enemy
 
         private static void PlayAttackSound(EnemyController controller)
         {
-            if (controller.Data.AttackSound == null) return;
-            CommonUIDirector.Instance?.AudioManager?.PlaySE(controller.Data.AttackSound);
+            AudioHelper.PlaySE(controller.Data.AttackSound);
         }
     }
 }

@@ -142,8 +142,7 @@ namespace Velora.Enemy
         private void PlayHitSound(bool isHeadshot)
         {
             var clip = isHeadshot ? Data.HeadshotHitSound : Data.HitSound;
-            if (clip == null) return;
-            CommonUIDirector.Instance?.AudioManager?.PlaySE(clip);
+            AudioHelper.PlaySE(clip);
         }
 
         // --- 外部 API ---

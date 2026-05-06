@@ -266,8 +266,7 @@ namespace Velora.Core
 
         private void PlayBattleSound(AudioClip clip)
         {
-            if (clip == null) return;
-            CommonUIDirector.Instance?.AudioManager?.PlaySE(clip);
+            AudioHelper.PlaySE(clip);
         }
     }
 }

@@ -457,26 +457,22 @@ namespace Velora.Weapon
 
         private void PlaySwitchSound()
         {
-            if (_currentWeaponData?.SwitchSound == null) return;
-            CommonUIDirector.Instance?.AudioManager?.PlaySE(_currentWeaponData.SwitchSound);
+            AudioHelper.PlaySE(_currentWeaponData?.SwitchSound);
         }
 
         private void PlayFireSound()
         {
-            if (_currentWeaponData?.FireSound == null) return;
-            CommonUIDirector.Instance?.AudioManager?.PlaySE(_currentWeaponData.FireSound);
+            AudioHelper.PlaySE(_currentWeaponData?.FireSound);
         }
 
         private void PlayReloadStartSound()
         {
-            if (_currentWeaponData?.ReloadStartSound == null) return;
-            CommonUIDirector.Instance?.AudioManager?.PlaySE(_currentWeaponData.ReloadStartSound);
+            AudioHelper.PlaySE(_currentWeaponData?.ReloadStartSound);
         }
 
         private void PlayReloadEndSound()
         {
-            if (_currentWeaponData?.ReloadEndSound == null) return;
-            CommonUIDirector.Instance?.AudioManager?.PlaySE(_currentWeaponData.ReloadEndSound);
+            AudioHelper.PlaySE(_currentWeaponData?.ReloadEndSound);
         }
 
         /// <summary>
