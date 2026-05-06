@@ -33,7 +33,7 @@ namespace Velora.Player
             if (_playerModel == null || _playerModel.IsDead) return;
 
             _playerModel.TakeDamage(damage);
-            EventBus.Publish(new PlayerDamagedEvent(damage));
+            EventBus.Publish(new PlayerDamagedEvent(damage, hitPoint));
         }
 
         private void HandleHealthChanged(float current, float max)

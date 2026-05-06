@@ -70,10 +70,12 @@ namespace Velora.Core
     public readonly struct PlayerDamagedEvent
     {
         public float Damage { get; }
+        public Vector3 HitPoint { get; }
 
-        public PlayerDamagedEvent(float damage)
+        public PlayerDamagedEvent(float damage, Vector3 hitPoint)
         {
             Damage = damage;
+            HitPoint = hitPoint;
         }
     }
 
