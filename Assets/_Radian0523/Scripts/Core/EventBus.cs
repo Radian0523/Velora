@@ -143,6 +143,8 @@ namespace Velora.Core
         }
     }
 
+    public readonly struct AmmoPickedUpEvent { }
+
     public readonly struct FontThemeChangedEvent
     {
         public string LanguageKey { get; }

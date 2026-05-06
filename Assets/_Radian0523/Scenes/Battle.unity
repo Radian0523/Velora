@@ -3257,7 +3257,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 813d88629452444f3858535a0c2a8e92, type: 2}
   - {fileID: 11400000, guid: c17920149c8674e59929fa808c219bfb, type: 2}
   _waveEffectView: {fileID: 322610767}
-  _battleSoundData: {fileID: 0}
+  _battleSoundData: {fileID: 11400000, guid: 4ac1ac89dd0d3422694ac459781f5264, type: 2}
   _hudPresenter: {fileID: 1308589435}
   _upgradeSelectPresenter: {fileID: 1364938951}
   _resultPresenter: {fileID: 1380629890}

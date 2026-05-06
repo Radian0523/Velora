@@ -15,3 +15,4 @@ MonoBehaviour:
   _playerDamageSound: {fileID: 0}
   _playerDeathSound: {fileID: 0}
   _waveClearSound: {fileID: 0}
+  _ammoPickupSound: {fileID: 8300000, guid: ce8ecaaf48f0647d194ad4d6ddf66aaa, type: 3}

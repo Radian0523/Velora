@@ -1,4 +1,5 @@
 using UnityEngine;
+using Velora.Core;
 
 namespace Velora.Weapon
 {
@@ -36,6 +37,7 @@ namespace Velora.Weapon
             if (weaponController == null) return;
 
             weaponController.AddReserveAmmo(_ammoAmount);
+            EventBus.Publish(new AmmoPickedUpEvent());
             Destroy(gameObject);
         }
     }

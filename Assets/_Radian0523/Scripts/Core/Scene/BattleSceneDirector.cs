@@ -148,6 +148,7 @@ namespace Velora.Core
 
             EventBus.Subscribe<PlayerDamagedEvent>(HandlePlayerDamaged);
             EventBus.Subscribe<WaveClearedEvent>(HandleWaveClearSound);
+            EventBus.Subscribe<AmmoPickedUpEvent>(HandleAmmoPickup);
         }
 
         private void UnsubscribeEvents()
@@ -166,6 +167,7 @@ namespace Velora.Core
 
             EventBus.Unsubscribe<PlayerDamagedEvent>(HandlePlayerDamaged);
             EventBus.Unsubscribe<WaveClearedEvent>(HandleWaveClearSound);
+            EventBus.Unsubscribe<AmmoPickedUpEvent>(HandleAmmoPickup);
         }
 
         /// <summary>
@@ -237,6 +239,11 @@ namespace Velora.Core
         private void HandleWaveClearSound(WaveClearedEvent e)
         {
             PlayBattleSound(_battleSoundData?.WaveClearSound);
+        }
+
+        private void HandleAmmoPickup(AmmoPickedUpEvent e)
+        {
+            PlayBattleSound(_battleSoundData?.AmmoPickupSound);
         }
 
         private void PlayBattleSound(AudioClip clip)

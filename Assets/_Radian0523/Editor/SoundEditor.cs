@@ -219,7 +219,7 @@ namespace Velora.Editor
                 return;
             }
 
-            DrawSectionHeader("Asset", "Player Damage", "Player Death", "Wave Clear");
+            DrawSectionHeader("Asset", "Player Damage", "Player Death", "Ammo Pickup", "Wave Clear");
 
             foreach (var battleSoundData in _battleSoundDataAssets)
             {
@@ -239,6 +239,7 @@ namespace Velora.Editor
 
             DrawClipField(serializedObject, "_playerDamageSound");
             DrawClipField(serializedObject, "_playerDeathSound");
+            DrawClipField(serializedObject, "_ammoPickupSound");
             DrawClipField(serializedObject, "_waveClearSound");
 
             EditorGUILayout.EndHorizontal();
