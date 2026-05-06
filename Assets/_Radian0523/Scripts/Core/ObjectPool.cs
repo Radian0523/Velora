@@ -34,31 +34,39 @@ namespace Velora.Core
 
         /// <summary>
         /// プールから取得する。空の場合は新規生成。
-        /// maxSize に達している場合は最も古いオブジェクトを強制回収して再利用する。
+        /// シーン遷移等で外部から破棄されたインスタンスは自動的にスキップする。
         /// </summary>
         public T Get()
         {
-            T instance;
-
-            if (_pool.Count > 0)
+            while (_pool.Count > 0)
             {
-                instance = _pool.Dequeue();
-            }
-            else
-            {
-                instance = CreateInstance();
+                var instance = _pool.Dequeue();
+                if (instance != null)
+                {
+                    instance.gameObject.SetActive(true);
+                    return instance;
+                }
             }
 
-            instance.gameObject.SetActive(true);
-            return instance;
+            var newInstance = CreateInstance();
+            newInstance.gameObject.SetActive(true);
+            return newInstance;
         }
 
         /// <summary>
         /// プールに返却する。maxSize を超える場合は破棄する。
+        /// シーン遷移中にプール親が破棄済みの場合はインスタンスも破棄する。
         /// </summary>
         public void Return(T instance)
         {
-            // 使用中に別の親へ移されたオブジェクトをプール階層に戻す
+            if (instance == null) return;
+
+            if (_parent == null)
+            {
+                Object.Destroy(instance.gameObject);
+                return;
+            }
+
             instance.transform.SetParent(_parent);
             instance.gameObject.SetActive(false);
 

@@ -13,7 +13,7 @@ using Velora.Player;
 namespace Velora.Weapon
 {
     /// <summary>
-    /// 射撃・リロード・ADS・武器切替・リコイル・視覚フィードバックを統合管理する MonoBehaviour。
+    /// 射撃・リロード・ADS・武器切替・視覚フィードバックを統合管理する MonoBehaviour。
     /// 各武器の射撃方式は IFireStrategy で差し替え可能（ストラテジーパターン）。
     /// エフェクト生成は Strategy から分離し、WeaponController が一元管理する。
     /// これにより射撃ロジック（Strategy）と視覚演出（Controller）の責務が分離される。
@@ -35,8 +35,6 @@ namespace Velora.Weapon
         [Header("リザーブ弾薬（全武器共有）")]
         [SerializeField] private int _initialReserveAmmo = 120;
 
-        private int _reserveAmmo;
-
         [Header("参照")]
         [SerializeField] private Camera _playerCamera;
         [SerializeField] private Camera _weaponCamera;
@@ -51,13 +49,13 @@ namespace Velora.Weapon
         private WeaponData _currentWeaponData;
         private IFireStrategy _fireStrategy;
         private int _currentWeaponIndex;
-        private int _currentAmmo;
         private float _lastFireTime;
         private bool _isReloading;
         private bool _isAiming;
         private bool _isFireHeld;
         private bool _isSwitching;
         private float _lastScrollTime;
+        private bool _isDestroying;
 
         // PlayerModel への参照は、firerateアップなどで必要になるため保持する。
         private PlayerModel _playerModel;
@@ -67,23 +65,8 @@ namespace Velora.Weapon
         private readonly Dictionary<WeaponData, WeaponModelView> _modelRegistry = new();
         private WeaponModelView _activeModelView;
 
-        // 弾薬管理: 武器ごとの現在の弾数を追跡するマップ。
-        private readonly Dictionary<WeaponData, int> _ammoMap = new();
-
-        // リコイル: カメラに適用した実際の pitch/yaw オフセットを追跡し、
-        // 射撃停止後に逆方向へ復帰させる
-        private int _consecutiveShotCount;
-        private Vector2 _recoilCameraOffset;
-
-        // エフェクトプール: プレハブ単位でキャッシュし、同じエフェクトなら武器間で共有する。
-        // 武器切替時に Destroy しないため、飛行中のプロジェクタイルが参照するプールが
-        // 破棄される問題を回避する。
-        private ObjectPool<PooledEffect> _impactEffectPool;
-        private ObjectPool<PooledEffect> _explosionEffectPool;
-        private readonly Dictionary<GameObject, ObjectPool<PooledEffect>> _effectPoolCache = new();
-
-        private const int EffectPoolInitialSize = 3;
-        private const int EffectPoolMaxSize = 10;
+        private WeaponAmmoManager _ammoManager;
+        private WeaponEffectPoolManager _effectPoolManager;
 
         // 武器切替演出パラメータ
         private const float SwitchSlideOffset = -0.4f;
@@ -108,8 +91,8 @@ namespace Velora.Weapon
         public IReadOnlyList<WeaponData> Weapons => _ownedWeapons;
         public int CurrentWeaponIndex => _currentWeaponIndex;
         public bool IsAiming => _isAiming;
-        public int CurrentAmmo => _currentAmmo;
-        public int ReserveAmmo => _reserveAmmo;
+        public int CurrentAmmo => _ammoManager.CurrentAmmo;
+        public int ReserveAmmo => _ammoManager.ReserveAmmo;
 
         /// <summary>
         /// 初期武器の登録を Awake で行い、他スクリプトの Start() より先に
@@ -118,6 +101,9 @@ namespace Velora.Weapon
         /// </summary>
         private void Awake()
         {
+            _ammoManager = new WeaponAmmoManager(_initialReserveAmmo);
+            _effectPoolManager = new WeaponEffectPoolManager();
+
             if (_initialWeapons == null || _initialWeapons.Length == 0) return;
 
             foreach (var weaponData in _initialWeapons)
@@ -129,8 +115,6 @@ namespace Velora.Weapon
 
         private void Start()
         {
-            _reserveAmmo = _initialReserveAmmo;
-
             if (_muzzleFlashVfx != null)
             {
                 SetLayerRecursive(_muzzleFlashVfx.gameObject, LayerMask.NameToLayer("Weapon"));
@@ -162,14 +146,14 @@ namespace Velora.Weapon
 
             SetWeaponCameraEnabled(true);
             TryAutoFire();
-            UpdateRecoilRecovery();
             UpdateAdsFieldOfView();
         }
 
         private void OnDestroy()
         {
+            _isDestroying = true;
             CancelReload();
-            CleanupEffectPools();
+            _effectPoolManager.Cleanup();
 
             foreach (var kvp in _modelRegistry)
             {
@@ -192,10 +176,6 @@ namespace Velora.Weapon
             if (_isFireHeld)
             {
                 TryFire();
-            }
-            else
-            {
-                _consecutiveShotCount = 0;
             }
         }
 
@@ -327,12 +307,10 @@ namespace Velora.Weapon
 
             _currentWeaponIndex = index;
             _currentWeaponData = _ownedWeapons[index];
-            LoadAmmo();
+            _ammoManager.LoadAmmo(_currentWeaponData);
             _lastFireTime = 0f;
-            _consecutiveShotCount = 0;
-            _recoilCameraOffset = Vector2.zero;
 
-            InitializeEffectPools();
+            _effectPoolManager.InitializeForWeapon(_currentWeaponData);
 
             // WeaponType に応じて射撃方式を自動選択（ストラテジーパターン）。
             // 新しい WeaponType を追加した場合のみ、ここに分岐を追加する。
@@ -340,7 +318,7 @@ namespace Velora.Weapon
             {
                 WeaponType.Hitscan => new HitscanStrategy(),
                 WeaponType.Projectile => new ProjectileStrategy(
-                    _impactEffectPool, _explosionEffectPool,
+                    _effectPoolManager.ImpactEffectPool, _effectPoolManager.ExplosionEffectPool,
                     _playerCamera.GetComponentInParent<Collider>()),
                 _ => new HitscanStrategy()
             };
@@ -351,11 +329,11 @@ namespace Velora.Weapon
             PlaySwitchSound();
 
             _activeModelView = incomingView;
-            _activeModelView?.SetLoadedAmmoVisible(_currentAmmo > 0);
+            _activeModelView?.SetLoadedAmmoVisible(_ammoManager.CurrentAmmo > 0);
             _isSwitching = false;
 
             OnWeaponSwitched?.Invoke(_currentWeaponData);
-            OnAmmoChanged?.Invoke(_currentAmmo, _currentWeaponData.MaxAmmo);
+            OnAmmoChanged?.Invoke(_ammoManager.CurrentAmmo, _currentWeaponData.MaxAmmo);
         }
 
         /// <summary>
@@ -394,55 +372,6 @@ namespace Velora.Weapon
             }
         }
 
-        // --- エフェクトプール ---
-
-        /// <summary>
-        /// 現在の武器に必要なエフェクトプールを取得する。
-        /// 同じプレハブのプールは武器間で共有し、生成済みなら使い回す。
-        /// </summary>
-        private void InitializeEffectPools()
-        {
-            _impactEffectPool = GetOrCreateEffectPool(_currentWeaponData.ImpactEffectPrefab);
-            _explosionEffectPool = GetOrCreateEffectPool(_currentWeaponData.ExplosionEffectPrefab);
-        }
-
-        private ObjectPool<PooledEffect> GetOrCreateEffectPool(GameObject prefab)
-        {
-            if (prefab == null) return null;
-
-            if (_effectPoolCache.TryGetValue(prefab, out var cached))
-            {
-                return cached;
-            }
-
-            var pooledEffect = prefab.GetComponent<PooledEffect>();
-            if (pooledEffect == null) return null;
-
-            var poolParent = new GameObject($"Pool_{prefab.name}").transform;
-            var pool = new ObjectPool<PooledEffect>(pooledEffect, poolParent, EffectPoolInitialSize, EffectPoolMaxSize);
-
-            for (int i = 0; i < EffectPoolInitialSize; i++)
-            {
-                var instance = pool.Get();
-                instance.Initialize(pool);
-                pool.Return(instance);
-            }
-
-            _effectPoolCache[prefab] = pool;
-            return pool;
-        }
-
-        private void CleanupEffectPools()
-        {
-            foreach (var pool in _effectPoolCache.Values)
-            {
-                pool.Clear();
-            }
-            _effectPoolCache.Clear();
-            _impactEffectPool = null;
-            _explosionEffectPool = null;
-        }
-
         // --- 射撃 ---
 
         private void TryAutoFire()
@@ -456,7 +385,6 @@ namespace Velora.Weapon
             if (mouse != null && !mouse.leftButton.isPressed)
             {
                 _isFireHeld = false;
-                _consecutiveShotCount = 0;
                 return;
             }
 
@@ -467,9 +395,9 @@ namespace Velora.Weapon
         {
             if (_isSwitching || _isReloading || _currentWeaponData == null) return;
 
-            if (_currentAmmo <= 0)
+            if (_ammoManager.CurrentAmmo <= 0)
             {
-                if (_reserveAmmo > 0) StartReload().Forget();
+                if (_ammoManager.ReserveAmmo > 0) StartReload().Forget();
                 return;
             }
 
@@ -482,8 +410,7 @@ namespace Velora.Weapon
         private async UniTaskVoid ExecuteFire()
         {
             _lastFireTime = Time.time;
-            _currentAmmo--;
-            SaveAmmo();
+            _ammoManager.ConsumeAmmo();
 
             // ADS 中は拡散角を縮小し、精密射撃を可能にする
             float spreadAngle = _isAiming
@@ -502,12 +429,12 @@ namespace Velora.Weapon
 
             if (result.DidHit)
             {
-                SpawnImpactEffect(result);
+                _effectPoolManager.SpawnImpactEffect(result.HitPoint, result.HitNormal);
             }
 
             ApplyWeaponKick();
 
-            OnAmmoChanged?.Invoke(_currentAmmo, _currentWeaponData.MaxAmmo);
+            OnAmmoChanged?.Invoke(_ammoManager.CurrentAmmo, _currentWeaponData.MaxAmmo);
             OnFired?.Invoke();
             EventBus.Publish(new WeaponFiredEvent());
         }
@@ -528,15 +455,6 @@ namespace Velora.Weapon
             }
 
             _muzzleFlashVfx.Play();
-        }
-
-        private void SpawnImpactEffect(FireResult result)
-        {
-            if (_impactEffectPool == null) return;
-
-            var effect = _impactEffectPool.Get();
-            effect.Initialize(_impactEffectPool);
-            effect.transform.SetPositionAndRotation(result.HitPoint, Quaternion.LookRotation(result.HitNormal));
         }
 
         private void PlaySwitchSound()
@@ -586,51 +504,6 @@ namespace Velora.Weapon
                 _currentWeaponData.KickVibrato);
         }
 
-        // --- リコイル ---
-
-        private void ApplyRecoil()
-        {
-            if (_currentWeaponData.RecoilPattern == null || _fpsController == null) return;
-
-            var recoil = _currentWeaponData.RecoilPattern;
-
-            // 連射の進行度に応じて反動の強さが変化する（AnimationCurve で定義）
-            float t = Mathf.Clamp01((float)_consecutiveShotCount / _currentWeaponData.MaxAmmo);
-            float vertical = recoil.VerticalRecoil.Evaluate(t);
-            float horizontal = recoil.HorizontalRecoil.Evaluate(t);
-
-            // pitch は負方向が上向きなので、反動で上を向かせるには負の値を渡す
-            float pitchDelta = -vertical;
-            float yawDelta = horizontal;
-
-            _fpsController.AddCameraRecoil(pitchDelta, yawDelta);
-            _recoilCameraOffset += new Vector2(pitchDelta, yawDelta);
-            _consecutiveShotCount++;
-        }
-
-        /// <summary>
-        /// 射撃停止後にリコイルの蓄積分を徐々にゼロへ戻す。
-        /// カメラに適用した pitch/yaw オフセットを逆方向に補間して復帰させる。
-        /// </summary>
-        private void UpdateRecoilRecovery()
-        {
-            if (_recoilCameraOffset.sqrMagnitude < 0.001f)
-            {
-                _recoilCameraOffset = Vector2.zero;
-                return;
-            }
-
-            if (_isFireHeld) return;
-            if (_currentWeaponData?.RecoilPattern == null || _fpsController == null) return;
-
-            float recoverySpeed = _currentWeaponData.RecoilPattern.RecoverySpeed * Time.deltaTime;
-            var newOffset = Vector2.MoveTowards(_recoilCameraOffset, Vector2.zero, recoverySpeed);
-            var recoveryDelta = newOffset - _recoilCameraOffset;
-
-            _fpsController.AddCameraRecoil(recoveryDelta.x, recoveryDelta.y);
-            _recoilCameraOffset = newOffset;
-        }
-
         // --- リロード ---
 
         /// <summary>
@@ -640,8 +513,8 @@ namespace Velora.Weapon
         private async UniTask StartReload()
         {
             if (_isSwitching || _isReloading || _currentWeaponData == null) return;
-            if (_currentAmmo >= _currentWeaponData.MaxAmmo) return;
-            if (_reserveAmmo <= 0) return;
+            if (_ammoManager.IsFull(_currentWeaponData.MaxAmmo)) return;
+            if (_ammoManager.ReserveAmmo <= 0) return;
 
             CancelReload();
             _reloadCts = new CancellationTokenSource();
@@ -660,13 +533,8 @@ namespace Velora.Weapon
                 PlayReloadEndSound();
                 _activeModelView?.SetLoadedAmmoVisible(true);
 
-                // リザーブから必要分だけ補充する（無限回復ではなくリソース消費型）
-                int needed = _currentWeaponData.MaxAmmo - _currentAmmo;
-                int toLoad = Mathf.Min(needed, _reserveAmmo);
-                _currentAmmo += toLoad;
-                _reserveAmmo -= toLoad;
-                SaveAmmo();
-                OnAmmoChanged?.Invoke(_currentAmmo, _currentWeaponData.MaxAmmo);
+                _ammoManager.Reload(_currentWeaponData.MaxAmmo);
+                OnAmmoChanged?.Invoke(_ammoManager.CurrentAmmo, _currentWeaponData.MaxAmmo);
             }
             catch (OperationCanceledException)
             {
@@ -675,7 +543,12 @@ namespace Velora.Weapon
             finally
             {
                 _isReloading = false;
-                OnReloadStateChanged?.Invoke(false);
+                // OnDestroy 経由のキャンセル時は購読側が既に破棄されている可能性があるため
+                // イベントを発火しない
+                if (!_isDestroying)
+                {
+                    OnReloadStateChanged?.Invoke(false);
+                }
             }
         }
 
@@ -686,34 +559,13 @@ namespace Velora.Weapon
             _reloadCts = null;
         }
 
-        // --- 弾数 ---
-
-        private void SaveAmmo()
-        {
-            if (_currentWeaponData == null) return;
-            _ammoMap[_currentWeaponData] = _currentAmmo;
-        }
-
-        private void LoadAmmo()
-        {
-            if (_currentWeaponData == null) return;
-            if (_ammoMap.TryGetValue(_currentWeaponData, out int savedAmmo))
-            {
-                _currentAmmo = savedAmmo;
-            }
-            else
-            {
-                _currentAmmo = _currentWeaponData.MaxAmmo;
-            }
-        }
-
         /// <summary>
         /// リザーブ弾薬を補充する。AmmoPickup や WeaponPickup から呼ばれる公開メソッド。
         /// </summary>
         public void AddReserveAmmo(int amount)
         {
-            _reserveAmmo += amount;
-            OnAmmoChanged?.Invoke(_currentAmmo, _currentWeaponData?.MaxAmmo ?? 0);
+            _ammoManager.AddReserve(amount);
+            OnAmmoChanged?.Invoke(_ammoManager.CurrentAmmo, _currentWeaponData?.MaxAmmo ?? 0);
         }
 
         // --- ADS FOV ---
