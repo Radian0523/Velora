@@ -37,4 +37,4 @@ MonoBehaviour:
   _fireSound: {fileID: 8300000, guid: 4cd3c67cc89b58c4f8185458331aebfc, type: 3}
   _reloadStartSound: {fileID: 8300000, guid: dc7af827bad1937478e758682971fa4f, type: 3}
   _reloadEndSound: {fileID: 8300000, guid: c6bbd31aca20af443be3f37f8db3b8f1, type: 3}
-  _switchSound: {fileID: 0}
+  _switchSound: {fileID: 8300000, guid: 10f58d426060d45808ab848762bfb95b, type: 3}
