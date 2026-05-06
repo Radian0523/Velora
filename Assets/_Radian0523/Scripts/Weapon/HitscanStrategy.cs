@@ -15,7 +15,7 @@ namespace Velora.Weapon
     {
         private const float MaxRayDistance = 200f;
 
-        public UniTask<FireResult> Fire(WeaponData data, Transform origin, LayerMask hitMask, float spreadAngle)
+        public UniTask<FireResult> Fire(WeaponData data, Transform origin, LayerMask hitMask, float spreadAngle, float damageMultiplier)
         {
             var direction = ApplySpread(origin.forward, spreadAngle);
 
@@ -26,7 +26,7 @@ namespace Velora.Weapon
                 if (hit.collider.GetComponentInParent<IDamageable>() is IDamageable damageable)
                 {
                     bool isHeadshot = hit.collider.CompareTag("Headshot");
-                    float damage = data.Damage * (isHeadshot ? data.HeadshotMultiplier : 1f);
+                    float damage = data.Damage * damageMultiplier * (isHeadshot ? data.HeadshotMultiplier : 1f);
                     damageable.TakeDamage(damage, hit.point, isHeadshot);
                 }
 

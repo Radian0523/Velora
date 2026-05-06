@@ -25,13 +25,13 @@ namespace Velora.Weapon
             _impactEffectPool = impactEffectPool;
         }
 
-        public UniTask<FireResult> Fire(WeaponData data, Transform origin, LayerMask hitMask, float spreadAngle)
+        public UniTask<FireResult> Fire(WeaponData data, Transform origin, LayerMask hitMask, float spreadAngle, float damageMultiplier)
         {
             EnsurePool(data);
 
             var projectile = _pool.Get();
             projectile.transform.SetPositionAndRotation(origin.position, origin.rotation);
-            projectile.Launch(data.ProjectileSpeed, hitMask, data, _pool, _impactEffectPool);
+            projectile.Launch(data.ProjectileSpeed, hitMask, data, damageMultiplier, _pool, _impactEffectPool);
 
             return UniTask.FromResult(FireResult.None);
         }

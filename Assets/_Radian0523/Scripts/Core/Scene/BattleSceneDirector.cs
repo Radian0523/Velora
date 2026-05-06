@@ -84,6 +84,7 @@ namespace Velora.Core
         {
             _playerModel = new PlayerModel(_playerMaxHealth);
             _playerDamageReceiver.Initialize(_playerModel);
+            _weaponController.Initialize(_playerModel);
         }
 
         private void InitializeScore()
@@ -141,6 +142,7 @@ namespace Velora.Core
         private void SubscribeEvents()
         {
             _playerModel.OnDeath += HandlePlayerDeath;
+            _playerModel.OnUpgradeApplied += HandleUpgradeApplied;
             _waveDirector.OnWaveCleared += HandleWaveCleared;
             _waveDirector.OnAllWavesComplete += HandleAllWavesComplete;
 
@@ -153,6 +155,7 @@ namespace Velora.Core
             if (_playerModel != null)
             {
                 _playerModel.OnDeath -= HandlePlayerDeath;
+                _playerModel.OnUpgradeApplied -= HandleUpgradeApplied;
             }
 
             if (_waveDirector != null)
@@ -204,6 +207,18 @@ namespace Velora.Core
         {
             await _gameFlowManager.ChangeState(GameState.WaveCleared);
             await _gameFlowManager.ChangeState(GameState.Result);
+        }
+
+        /// <summary>
+        /// PlayerModel(ロジック層) → WeaponController(MonoBehaviour) の橋渡し。
+        /// NewWeapon アップグレード適用時に武器を追加する。
+        /// </summary>
+        private void HandleUpgradeApplied(UpgradeData upgrade)
+        {
+            if (upgrade.UpgradeType == UpgradeType.NewWeapon && upgrade.WeaponData != null)
+            {
+                _weaponController.AddWeapon(upgrade.WeaponData);
+            }
         }
 
         private void HandlePlayerDeath()

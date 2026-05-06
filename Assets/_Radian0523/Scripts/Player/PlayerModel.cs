@@ -85,6 +85,10 @@ namespace Velora.Player
                 case UpgradeType.HealNow:
                     Heal(upgrade.EffectValue);
                     break;
+                case UpgradeType.NewWeapon:
+                    // 武器追加は MonoBehaviour 側の処理が必要なため、
+                    // OnUpgradeApplied イベント経由で BattleSceneDirector が担う
+                    break;
             }
 
             OnUpgradeApplied?.Invoke(upgrade);

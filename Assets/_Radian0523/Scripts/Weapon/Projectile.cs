@@ -19,6 +19,7 @@ namespace Velora.Weapon
         private float _maxLifetime;
         private LayerMask _hitMask;
         private WeaponData _weaponData;
+        private float _damageMultiplier;
         private ObjectPool<Projectile> _pool;
         private ObjectPool<PooledEffect> _impactEffectPool;
         private bool _isActive;
@@ -34,11 +35,13 @@ namespace Velora.Weapon
             float speed,
             LayerMask hitMask,
             WeaponData weaponData,
+            float damageMultiplier,
             ObjectPool<Projectile> pool,
             ObjectPool<PooledEffect> impactEffectPool)
         {
             _hitMask = hitMask;
             _weaponData = weaponData;
+            _damageMultiplier = damageMultiplier;
             _maxLifetime = weaponData.ProjectileMaxLifetime;
             _pool = pool;
             _impactEffectPool = impactEffectPool;
@@ -68,7 +71,7 @@ namespace Velora.Weapon
             if (collision.gameObject.GetComponentInParent<IDamageable>() is IDamageable damageable)
             {
                 var contact = collision.GetContact(0);
-                damageable.TakeDamage(_weaponData.Damage, contact.point, false);
+                damageable.TakeDamage(_weaponData.Damage * _damageMultiplier, contact.point, false);
             }
 
             SpawnImpactEffect(collision);

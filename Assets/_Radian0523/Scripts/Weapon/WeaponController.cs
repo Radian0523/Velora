@@ -59,6 +59,9 @@ namespace Velora.Weapon
         private bool _isSwitching;
         private float _lastScrollTime;
 
+        // PlayerModel への参照は、firerateアップなどで必要になるため保持する。
+        private PlayerModel _playerModel;
+
         // 武器モデル管理: WeaponData → 生成済み WeaponModelView のマッピング。
         // Start 時に全武器分を生成し、切替時は SetActive で表示を切り替える。
         private readonly Dictionary<WeaponData, WeaponModelView> _modelRegistry = new();
@@ -93,6 +96,10 @@ namespace Velora.Weapon
         public event Action<bool> OnAimStateChanged;
         public event Action OnFired;
 
+        public void Initialize(PlayerModel playerModel)
+        {
+            _playerModel = playerModel;
+        }
         public WeaponData CurrentWeaponData => _currentWeaponData;
         public IReadOnlyList<WeaponData> Weapons => _ownedWeapons;
         public int CurrentWeaponIndex => _currentWeaponIndex;
@@ -453,7 +460,7 @@ namespace Velora.Weapon
                 return;
             }
 
-            float fireInterval = 1f / _currentWeaponData.FireRate;
+            float fireInterval = 1f / (_currentWeaponData.FireRate * _playerModel.FireRateMultiplier);
             if (Time.time - _lastFireTime < fireInterval) return;
 
             ExecuteFire().Forget();
@@ -472,7 +479,9 @@ namespace Velora.Weapon
 
             // 弾道はカメラ中心から発射し、クロスヘアが指す方向に飛ぶ。
             // マズルフラッシュは銃口(WeaponModelView.MuzzlePoint)に表示する。
-            var result = await _fireStrategy.Fire(_currentWeaponData, _playerCamera.transform, _hitMask, spreadAngle);
+            var result = await _fireStrategy.Fire(
+                _currentWeaponData, _playerCamera.transform, _hitMask,
+                spreadAngle, _playerModel.DamageMultiplier);
 
             SpawnMuzzleFlash();
             PlayFireSound();
@@ -629,8 +638,9 @@ namespace Velora.Weapon
 
             try
             {
+                float adjustedReloadTime = _currentWeaponData.ReloadTime / _playerModel.ReloadSpeedMultiplier;
                 await UniTask.Delay(
-                    TimeSpan.FromSeconds(_currentWeaponData.ReloadTime),
+                    TimeSpan.FromSeconds(adjustedReloadTime),
                     cancellationToken: _reloadCts.Token);
 
                 PlayReloadEndSound();

@@ -34,11 +34,15 @@ namespace Velora.Data
         [SerializeField] private float _effectValue;
         [SerializeField] private UpgradeRarity _rarity;
 
+        [Header("NewWeapon 専用")]
+        [SerializeField] private WeaponData _weaponData;
+
         public string UpgradeName => _upgradeName;
         public string Description => _description;
         public Sprite Icon => _icon;
         public UpgradeType UpgradeType => _upgradeType;
         public float EffectValue => _effectValue;
         public UpgradeRarity Rarity => _rarity;
+        public WeaponData WeaponData => _weaponData;
     }
 }
