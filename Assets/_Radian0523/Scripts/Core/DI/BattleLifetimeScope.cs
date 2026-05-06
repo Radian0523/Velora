@@ -50,6 +50,7 @@ namespace Velora.Core
         [SerializeField] private HudPresenter _hudPresenter;
         [SerializeField] private UpgradeSelectPresenter _upgradeSelectPresenter;
         [SerializeField] private ResultPresenter _resultPresenter;
+        [SerializeField] private DamageDirectionView _damageDirectionView;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -83,6 +84,7 @@ namespace Velora.Core
             builder.RegisterComponent(_hudPresenter);
             builder.RegisterComponent(_upgradeSelectPresenter);
             builder.RegisterComponent(_resultPresenter);
+            builder.RegisterComponent(_damageDirectionView);
 
             // --- エントリーポイント ---
             // IStartable.Start() で初期化、ITickable.Tick() で毎フレーム更新、

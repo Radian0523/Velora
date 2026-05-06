@@ -36,6 +36,19 @@ namespace Velora.UI
 
         private Transform _playerTransform;
         private Transform _cameraTransform;
+        private bool _isInitialized;
+
+        /// <summary>
+        /// プレイヤーとカメラの参照を外部から受け取る。
+        /// BattleFlowEntryPoint が戦闘開始時に呼び出す。
+        /// FindWithTag を使わず、依存の受け渡しで参照を解決する。
+        /// </summary>
+        public void Initialize(Transform playerTransform, Camera mainCamera)
+        {
+            _playerTransform = playerTransform;
+            _cameraTransform = mainCamera != null ? mainCamera.transform : null;
+            _isInitialized = true;
+        }
 
         private void Awake()
         {
@@ -65,17 +78,6 @@ namespace Velora.UI
                 arcImage.color = color;
                 _arcImages[i] = arcImage;
             }
-        }
-
-        private void Start()
-        {
-            var playerObj = GameObject.FindWithTag("Player");
-            if (playerObj != null)
-            {
-                _playerTransform = playerObj.transform;
-            }
-
-            _cameraTransform = Camera.main?.transform;
 
             EventBus.Subscribe<PlayerDamagedEvent>(HandlePlayerDamaged);
         }
@@ -92,7 +94,7 @@ namespace Velora.UI
 
         private void HandlePlayerDamaged(PlayerDamagedEvent e)
         {
-            if (_playerTransform == null || _cameraTransform == null) return;
+            if (!_isInitialized || _playerTransform == null || _cameraTransform == null) return;
 
             float angle = CalculateDirectionAngle(e.HitPoint);
             ShowIndicator(angle);

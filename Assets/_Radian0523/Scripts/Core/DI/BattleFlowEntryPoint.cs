@@ -43,6 +43,7 @@ namespace Velora.Core
         private readonly HudPresenter _hudPresenter;
         private readonly UpgradeSelectPresenter _upgradeSelectPresenter;
         private readonly ResultPresenter _resultPresenter;
+        private readonly DamageDirectionView _damageDirectionView;
 
         private WaveDirector _waveDirector;
 
@@ -59,7 +60,8 @@ namespace Velora.Core
             WaveEffectView waveEffectView,
             HudPresenter hudPresenter,
             UpgradeSelectPresenter upgradeSelectPresenter,
-            ResultPresenter resultPresenter)
+            ResultPresenter resultPresenter,
+            DamageDirectionView damageDirectionView)
         {
             _playerModel = playerModel;
             _scoreManager = scoreManager;
@@ -74,6 +76,7 @@ namespace Velora.Core
             _hudPresenter = hudPresenter;
             _upgradeSelectPresenter = upgradeSelectPresenter;
             _resultPresenter = resultPresenter;
+            _damageDirectionView = damageDirectionView;
         }
 
         public void Start()
@@ -128,6 +131,8 @@ namespace Velora.Core
             _hudPresenter.Initialize(_playerModel, _weaponController);
             _upgradeSelectPresenter.Initialize(_upgradeManager, _playerModel);
             _resultPresenter.Initialize(_scoreManager);
+
+            _damageDirectionView.Initialize(_playerDamageReceiver.transform, Camera.main);
         }
 
         /// <summary>
