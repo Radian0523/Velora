@@ -75,8 +75,9 @@ namespace Velora.Weapon
         private int _consecutiveShotCount;
         private Vector2 _recoilCameraOffset;
 
-        // 着弾エフェクトプール: 武器ごとにプールを生成し、武器切替時に入れ替える
+        // エフェクトプール: 武器ごとにプールを生成し、武器切替時に入れ替える
         private ObjectPool<PooledEffect> _impactEffectPool;
+        private ObjectPool<PooledEffect> _explosionEffectPool;
 
         private const int EffectPoolInitialSize = 3;
         private const int EffectPoolMaxSize = 10;
@@ -336,7 +337,9 @@ namespace Velora.Weapon
             _fireStrategy = _currentWeaponData.WeaponType switch
             {
                 WeaponType.Hitscan => new HitscanStrategy(),
-                WeaponType.Projectile => new ProjectileStrategy(_impactEffectPool),
+                WeaponType.Projectile => new ProjectileStrategy(
+                    _impactEffectPool, _explosionEffectPool,
+                    _playerCamera.GetComponentInParent<Collider>()),
                 _ => new HitscanStrategy()
             };
 
@@ -346,6 +349,7 @@ namespace Velora.Weapon
             PlaySwitchSound();
 
             _activeModelView = incomingView;
+            _activeModelView?.SetLoadedAmmoVisible(_currentAmmo > 0);
             _isSwitching = false;
 
             OnWeaponSwitched?.Invoke(_currentWeaponData);
@@ -393,12 +397,17 @@ namespace Velora.Weapon
         /// <summary>
         /// 武器装備時にエフェクトプールを生成する。
         /// プレハブに PooledEffect がアタッチされていない場合はプールを作らない（エフェクトなし武器に対応）。
+        /// スプラッシュダメージ対応武器は爆発エフェクトプールも生成する。
         /// </summary>
         private void InitializeEffectPools()
         {
             _impactEffectPool = CreateEffectPool(
                 _currentWeaponData.ImpactEffectPrefab,
                 $"Pool_{_currentWeaponData.WeaponName}_ImpactEffect");
+
+            _explosionEffectPool = CreateEffectPool(
+                _currentWeaponData.ExplosionEffectPrefab,
+                $"Pool_{_currentWeaponData.WeaponName}_ExplosionEffect");
         }
 
         private ObjectPool<PooledEffect> CreateEffectPool(GameObject prefab, string poolName)
@@ -428,6 +437,8 @@ namespace Velora.Weapon
         {
             _impactEffectPool?.Clear();
             _impactEffectPool = null;
+            _explosionEffectPool?.Clear();
+            _explosionEffectPool = null;
         }
 
         // --- 射撃 ---
@@ -485,6 +496,7 @@ namespace Velora.Weapon
 
             SpawnMuzzleFlash();
             PlayFireSound();
+            _activeModelView?.SetLoadedAmmoVisible(false);
 
             if (result.DidHit)
             {
@@ -644,6 +656,7 @@ namespace Velora.Weapon
                     cancellationToken: _reloadCts.Token);
 
                 PlayReloadEndSound();
+                _activeModelView?.SetLoadedAmmoVisible(true);
 
                 // リザーブから必要分だけ補充する（無限回復ではなくリソース消費型）
                 int needed = _currentWeaponData.MaxAmmo - _currentAmmo;

@@ -12,9 +12,13 @@ namespace Velora.Weapon
     {
         [SerializeField] private Transform _muzzlePoint;
 
+        [Header("装填弾ビジュアル（任意）")]
+        [SerializeField] private GameObject _loadedAmmoVisual;
+
         private Vector3 _restLocalPosition;
 
         public Transform MuzzlePoint => _muzzlePoint;
+        public bool HasLoadedAmmoVisual => _loadedAmmoVisual != null;
 
         /// <summary>
         /// Instantiate 直後の localPosition を記録し、
@@ -25,6 +29,18 @@ namespace Velora.Weapon
         private void Awake()
         {
             _restLocalPosition = transform.localPosition;
+        }
+
+        /// <summary>
+        /// 装填弾の表示/非表示を切り替える。
+        /// ロケットランチャーなど、発射時に弾が見えなくなり
+        /// リロード完了で再表示される武器で使用する。
+        /// _loadedAmmoVisual 未設定の武器では何もしない。
+        /// </summary>
+        public void SetLoadedAmmoVisible(bool visible)
+        {
+            if (_loadedAmmoVisual == null) return;
+            _loadedAmmoVisual.SetActive(visible);
         }
     }
 }

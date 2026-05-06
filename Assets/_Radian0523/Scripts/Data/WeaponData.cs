@@ -42,6 +42,17 @@ namespace Velora.Data
         [SerializeField] private float _projectileSpeed = 50f;
         [SerializeField] private float _projectileMaxLifetime = 5f;
         [SerializeField] private GameObject _projectilePrefab;
+        [SerializeField] private bool _projectileUseGravity;
+
+        [Header("スプラッシュダメージ（Projectile 専用）")]
+        [SerializeField] private bool _hasSplashDamage;
+        [SerializeField] private float _splashRadius = 5f;
+        [SerializeField] private float _splashDamageMultiplier = 0.5f;
+        [SerializeField] private AnimationCurve _splashFalloff = AnimationCurve.Linear(0f, 1f, 1f, 0f);
+        [SerializeField] private bool _canSelfDamage;
+
+        [Header("爆発エフェクト（Projectile 専用）")]
+        [SerializeField] private GameObject _explosionEffectPrefab;
 
         [Header("UI")]
         [SerializeField] private Sprite _icon;
@@ -77,6 +88,13 @@ namespace Velora.Data
         public float ProjectileSpeed => _projectileSpeed;
         public float ProjectileMaxLifetime => _projectileMaxLifetime;
         public GameObject ProjectilePrefab => _projectilePrefab;
+        public bool ProjectileUseGravity => _projectileUseGravity;
+        public bool HasSplashDamage => _hasSplashDamage;
+        public float SplashRadius => _splashRadius;
+        public float SplashDamageMultiplier => _splashDamageMultiplier;
+        public AnimationCurve SplashFalloff => _splashFalloff;
+        public bool CanSelfDamage => _canSelfDamage;
+        public GameObject ExplosionEffectPrefab => _explosionEffectPrefab;
         public GameObject MuzzleFlashPrefab => _muzzleFlashPrefab;
         public GameObject ImpactEffectPrefab => _impactEffectPrefab;
         public float KickBackDistance => _kickBackDistance;

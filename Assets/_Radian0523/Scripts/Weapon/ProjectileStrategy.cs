@@ -15,14 +15,21 @@ namespace Velora.Weapon
     {
         private ObjectPool<Projectile> _pool;
         private ObjectPool<PooledEffect> _impactEffectPool;
+        private ObjectPool<PooledEffect> _explosionEffectPool;
+        private Collider _ownerCollider;
         private WeaponData _cachedData;
 
         private const int PoolInitialSize = 5;
         private const int PoolMaxSize = 20;
 
-        public ProjectileStrategy(ObjectPool<PooledEffect> impactEffectPool)
+        public ProjectileStrategy(
+            ObjectPool<PooledEffect> impactEffectPool,
+            ObjectPool<PooledEffect> explosionEffectPool,
+            Collider ownerCollider)
         {
             _impactEffectPool = impactEffectPool;
+            _explosionEffectPool = explosionEffectPool;
+            _ownerCollider = ownerCollider;
         }
 
         public UniTask<FireResult> Fire(WeaponData data, Transform origin, LayerMask hitMask, float spreadAngle, float damageMultiplier)
@@ -31,7 +38,9 @@ namespace Velora.Weapon
 
             var projectile = _pool.Get();
             projectile.transform.SetPositionAndRotation(origin.position, origin.rotation);
-            projectile.Launch(data.ProjectileSpeed, hitMask, data, damageMultiplier, _pool, _impactEffectPool);
+            projectile.Launch(
+                data.ProjectileSpeed, hitMask, data, damageMultiplier,
+                _pool, _impactEffectPool, _explosionEffectPool, _ownerCollider);
 
             return UniTask.FromResult(FireResult.None);
         }

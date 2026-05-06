@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 751b3278cfc104efc83129411a59b497, type: 3}
+  m_Name: RocketLauncher
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.Data.WeaponData
+  _weaponName: Rocket Launcher
+  _weaponType: 1
+  _modelPrefab: {fileID: 1233992181619504068, guid: 036fc064914674179923267e7c261fcc, type: 3}
+  _damage: 80
+  _fireRate: 1
+  _maxAmmo: 1
+  _reloadTime: 2.5
+  _headshotMultiplier: 1.5
+  _spreadAngle: 0.5
+  _adsSpreadAngle: 0.1
+  _recoilPattern: {fileID: 11400000, guid: 73692d7bb6e1347a2bf196cf24e24d58, type: 2}
+  _adsFieldOfView: 50
+  _projectileSpeed: 30
+  _projectileMaxLifetime: 5
+  _projectilePrefab: {fileID: 4092872357349286730, guid: 68f219a4065aa440f90ba41b51621bd2, type: 3}
+  _projectileUseGravity: 0
+  _hasSplashDamage: 1
+  _splashRadius: 6
+  _splashDamageMultiplier: 0.5
+  _splashFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _canSelfDamage: 0
+  _explosionEffectPrefab: {fileID: 1764654978243476, guid: 59071adcf8e374f9cbdca63c7c3c7ec9, type: 3}
+  _icon: {fileID: 21300000, guid: bb767532c13bd4f728b519812f0acba3, type: 3}
+  _muzzleFlashPrefab: {fileID: 450044020708499364, guid: 055ef7a726bcf4a9aae6e30912d56f59, type: 3}
+  _impactEffectPrefab: {fileID: 0}
+  _kickBackDistance: 0.12
+  _kickUpAngle: 6
+  _kickDuration: 0.15
+  _kickVibrato: 1
+  _fireSound: {fileID: 8300000, guid: 40e71b0f7bd610849b40f150553f4702, type: 3}
+  _reloadStartSound: {fileID: 8300000, guid: c3430338b7987524d96ce1f63db280cd, type: 3}
+  _reloadEndSound: {fileID: 0}
+  _switchSound: {fileID: 8300000, guid: 10f58d426060d45808ab848762bfb95b, type: 3}
