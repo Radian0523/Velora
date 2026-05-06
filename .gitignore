@@ -44,8 +44,8 @@ DEVELOPMENT.md
 # Screenshots (debug)
 Assets/Screenshots/
 
-# uloop (Unity CLI tool outputs)
-.uloop/outputs/
+# uloop (Unity CLI tool outputs and local settings)
+.uloop/
 
 # OS
 .DS_Store
