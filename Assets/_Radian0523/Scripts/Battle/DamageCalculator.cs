@@ -1,6 +1,5 @@
 using UnityEngine;
 using Velora.Data;
-using Velora.Player;
 
 namespace Velora.Battle
 {
@@ -41,20 +40,32 @@ namespace Velora.Battle
 
     /// <summary>
     /// ダメージ計算を Battle 層に集約する static クラス。
-    /// 武器の基礎ダメージ × ヘッドショット倍率 × プレイヤーのバフ倍率で最終ダメージを算出。
+    /// 武器の基礎ダメージ × ヘッドショット倍率 × バフ倍率で最終ダメージを算出。
     /// 計算ロジックを一箇所に集めることで、バランス調整時の変更箇所を限定する。
+    /// HitscanStrategy・Projectile の両方がこのクラスを経由してダメージを計算する。
     /// </summary>
     public static class DamageCalculator
     {
-        public static DamageResult Calculate(WeaponData weaponData, HitInfo hitInfo, PlayerModel playerModel)
+        /// <summary>
+        /// 直撃ダメージを算出する。ヘッドショット時は追加倍率を適用。
+        /// </summary>
+        public static DamageResult Calculate(WeaponData weaponData, float damageMultiplier, bool isHeadshot)
         {
-            float baseDamage = weaponData.Damage * playerModel.DamageMultiplier;
+            float baseDamage = weaponData.Damage * damageMultiplier;
 
-            float finalDamage = hitInfo.IsHeadshot
+            float finalDamage = isHeadshot
                 ? baseDamage * weaponData.HeadshotMultiplier
                 : baseDamage;
 
-            return new DamageResult(finalDamage, hitInfo.IsHeadshot);
+            return new DamageResult(finalDamage, isHeadshot);
+        }
+
+        /// <summary>
+        /// スプラッシュダメージを算出する。距離減衰(falloff)を適用。
+        /// </summary>
+        public static float CalculateSplash(WeaponData weaponData, float damageMultiplier, float falloff)
+        {
+            return weaponData.Damage * damageMultiplier * weaponData.SplashDamageMultiplier * falloff;
         }
     }
 }

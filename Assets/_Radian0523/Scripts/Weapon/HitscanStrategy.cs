@@ -26,8 +26,8 @@ namespace Velora.Weapon
                 if (hit.collider.GetComponentInParent<IDamageable>() is IDamageable damageable)
                 {
                     bool isHeadshot = hit.collider.CompareTag("Headshot");
-                    float damage = data.Damage * damageMultiplier * (isHeadshot ? data.HeadshotMultiplier : 1f);
-                    damageable.TakeDamage(damage, hit.point, isHeadshot);
+                    var result = DamageCalculator.Calculate(data, damageMultiplier, isHeadshot);
+                    damageable.TakeDamage(result.FinalDamage, hit.point, result.IsHeadshot);
                 }
 
                 return UniTask.FromResult(new FireResult(true, hit.point, hit.normal));

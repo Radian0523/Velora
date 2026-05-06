@@ -117,7 +117,8 @@ namespace Velora.Weapon
 
             if (collision.gameObject.GetComponentInParent<IDamageable>() is IDamageable damageable)
             {
-                damageable.TakeDamage(_weaponData.Damage * _damageMultiplier, contact.point, false);
+                var damageResult = DamageCalculator.Calculate(_weaponData, _damageMultiplier, false);
+                damageable.TakeDamage(damageResult.FinalDamage, contact.point, false);
                 directHitTarget = damageable;
             }
 
@@ -152,8 +153,6 @@ namespace Velora.Weapon
             int hitCount = Physics.OverlapSphereNonAlloc(
                 center, _weaponData.SplashRadius, SplashBuffer, _hitMask);
 
-            float baseDamage = _weaponData.Damage * _damageMultiplier * _weaponData.SplashDamageMultiplier;
-
             for (int i = 0; i < hitCount; i++)
             {
                 var col = SplashBuffer[i];
@@ -173,7 +172,8 @@ namespace Velora.Weapon
                 float normalizedDistance = Mathf.Clamp01(distance / _weaponData.SplashRadius);
                 float falloff = _weaponData.SplashFalloff.Evaluate(normalizedDistance);
 
-                float splashDamage = baseDamage * falloff;
+                float splashDamage = DamageCalculator.CalculateSplash(
+                    _weaponData, _damageMultiplier, falloff);
                 if (splashDamage > 0f)
                 {
                     target.TakeDamage(splashDamage, closestPoint, false);

@@ -101,7 +101,9 @@ namespace Velora.UI
 
                 if (isReloading)
                 {
-                    _hudView.ShowReloadRing(_weaponController.CurrentWeaponData.ReloadTime);
+                    float adjustedReloadTime = _weaponController.CurrentWeaponData.ReloadTime
+                                             / _playerModel.ReloadSpeedMultiplier;
+                    _hudView.ShowReloadRing(adjustedReloadTime);
                 }
                 else
                 {

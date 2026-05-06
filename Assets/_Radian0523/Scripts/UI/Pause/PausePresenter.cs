@@ -135,7 +135,7 @@ namespace Velora.UI
         {
             if (CommonUIDirector.Instance != null)
             {
-                await CommonUIDirector.Instance.TransitionToScene("TitleScene", "BattleScene");
+                await CommonUIDirector.Instance.TransitionToScene("Title", "Battle");
             }
         }
     }

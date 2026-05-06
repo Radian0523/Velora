@@ -25,8 +25,11 @@ namespace Velora.Enemy
         // 全 RangedAttack インスタンスで1つのプールを共有する。
         // シーン遷移で _poolParent が Destroy されると Unity の null 判定が true になり、
         // 次回 EnsurePool で新しいプールが自動生成される。
+        // _cachedPrefab でプレハブの一致を検証し、異なるプレハブの敵が混在しても
+        // 正しいプールが使われることを保証する。
         private static ObjectPool<EnemyProjectile> _pool;
         private static Transform _poolParent;
+        private static GameObject _cachedPrefab;
 
         public async UniTask Attack(EnemyController controller)
         {
@@ -104,13 +107,21 @@ namespace Velora.Enemy
         }
 
         /// <summary>
-        /// プールが未作成またはシーン遷移で親オブジェクトが破棄された場合に再生成する。
+        /// プールが未作成、シーン遷移で親オブジェクトが破棄された場合、
+        /// または異なるプレハブの敵が使用する場合にプールを再生成する。
         /// static フィールドのため、同シーン内の全 RangedAttack インスタンスが共有する。
         /// </summary>
         private static void EnsurePool(EnemyData data)
         {
-            if (_poolParent != null) return;
+            if (_poolParent != null && _cachedPrefab == data.ProjectilePrefab) return;
 
+            _pool?.Clear();
+            if (_poolParent != null)
+            {
+                UnityEngine.Object.Destroy(_poolParent.gameObject);
+            }
+
+            _cachedPrefab = data.ProjectilePrefab;
             _poolParent = new GameObject("EnemyProjectilePool").transform;
             var prefabComponent = data.ProjectilePrefab.GetComponent<EnemyProjectile>();
             _pool = new ObjectPool<EnemyProjectile>(

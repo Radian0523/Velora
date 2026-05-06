@@ -222,22 +222,26 @@ namespace Velora.Enemy
         /// EnemyData のカラー設定に基づき、全 SkinnedMeshRenderer の M_AtlasOffset マテリアルに
         /// UV オフセットを適用する。アセット付属の T_ColorAtlas テクスチャアトラスの
         /// 列(色系統)と行(色合い)を指定することで敵タイプごとの外見を差別化する。
+        /// MaterialPropertyBlock を使用し、マテリアルインスタンスの生成を回避する。
         /// </summary>
         private void ApplyColorOffset(EnemyData data)
         {
             float x = ColorColumnOffsets[Mathf.Clamp(data.ColorColumn, 0, 2)];
             float y = data.ColorRow * ColorRowStep;
-            var offset = new Vector2(x, y);
+            var offset = new Vector4(x, y, 0f, 0f);
 
+            var block = new MaterialPropertyBlock();
             var renderers = GetComponentsInChildren<SkinnedMeshRenderer>();
             foreach (var renderer in renderers)
             {
-                var materials = renderer.materials;
-                for (int i = 0; i < materials.Length; i++)
+                var sharedMaterials = renderer.sharedMaterials;
+                for (int i = 0; i < sharedMaterials.Length; i++)
                 {
-                    if (materials[i].name.Contains(OffsetMaterialName))
+                    if (sharedMaterials[i] != null && sharedMaterials[i].name.Contains(OffsetMaterialName))
                     {
-                        materials[i].SetVector(UVOffsetProperty, offset);
+                        renderer.GetPropertyBlock(block, i);
+                        block.SetVector(UVOffsetProperty, offset);
+                        renderer.SetPropertyBlock(block, i);
                     }
                 }
             }
