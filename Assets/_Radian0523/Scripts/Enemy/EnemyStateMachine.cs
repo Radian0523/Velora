@@ -1,6 +1,4 @@
-using System;
-using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
+using Velora.Core;
 
 namespace Velora.Enemy
 {
@@ -16,64 +14,22 @@ namespace Velora.Enemy
     }
 
     /// <summary>
-    /// 敵AI のステートマシン。GameFlowManager と同一パターン。
-    /// 各ステートの Enter/Update/Exit を管理し、非同期遷移をガードする。
+    /// 敵AI のステートマシン。
+    /// 汎用 StateMachine の遷移ロジックを継承し、
+    /// ステート登録時の EnemyController 参照設定のみをオーバーライドで差し込む。
     /// </summary>
-    public class EnemyStateMachine
+    public class EnemyStateMachine : StateMachine<EnemyState, EnemyStateBase>
     {
-        private readonly EnemyController _controller;
-        private readonly Dictionary<EnemyState, EnemyStateBase> _states = new();
-        private EnemyStateBase _currentState;
-        private bool _isTransitioning;
-
-        public EnemyController Controller => _controller;
-        public EnemyState CurrentState { get; private set; }
+        public EnemyController Controller { get; }
 
         public EnemyStateMachine(EnemyController controller)
         {
-            _controller = controller;
+            Controller = controller;
         }
 
-        public void RegisterState(EnemyState state, EnemyStateBase stateInstance)
+        protected override void InitializeState(EnemyStateBase stateInstance)
         {
             stateInstance.SetStateMachine(this);
-            _states[state] = stateInstance;
-        }
-
-        /// <summary>
-        /// ステートを遷移する。前ステートの Exit → 新ステートの Enter を
-        /// 非同期で順番に実行し、演出の完了を待ってから次に進む。
-        /// </summary>
-        public async UniTask ChangeState(EnemyState newState)
-        {
-            if (_isTransitioning) return;
-            if (!_states.ContainsKey(newState))
-            {
-                throw new InvalidOperationException(
-                    $"EnemyState {newState} is not registered. Call RegisterState first.");
-            }
-
-            _isTransitioning = true;
-
-            if (_currentState != null)
-            {
-                await _currentState.Exit();
-            }
-
-            CurrentState = newState;
-            _currentState = _states[newState];
-
-            await _currentState.Enter();
-
-            _isTransitioning = false;
-        }
-
-        public void Update()
-        {
-            if (!_isTransitioning)
-            {
-                _currentState?.Update();
-            }
         }
     }
 }

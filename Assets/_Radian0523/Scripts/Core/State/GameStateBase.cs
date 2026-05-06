@@ -9,7 +9,7 @@ namespace Velora.Core
     /// Enter/Exit を UniTask にすることで、演出の非同期シーケンスを
     /// async/await で直感的に記述できる。
     /// </summary>
-    public abstract class GameStateBase
+    public abstract class GameStateBase : IState
     {
         protected GameFlowManager Owner { get; private set; }
 

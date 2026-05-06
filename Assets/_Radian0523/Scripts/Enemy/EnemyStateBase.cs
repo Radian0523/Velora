@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Velora.Core;
 
 namespace Velora.Enemy
 {
@@ -7,7 +8,7 @@ namespace Velora.Enemy
     /// GameStateBase と同一パターンで、Enter/Update/Exit のライフサイクルを提供する。
     /// 各ステートはこのクラスを継承し、自身の責務を完結させる。
     /// </summary>
-    public abstract class EnemyStateBase
+    public abstract class EnemyStateBase : IState
     {
         protected EnemyStateMachine StateMachine { get; private set; }
         protected EnemyController Controller => StateMachine.Controller;
