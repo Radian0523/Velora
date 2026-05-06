@@ -13,14 +13,17 @@ namespace Velora.UI
     {
         [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField] private Button _resumeButton;
+        [SerializeField] private Button _settingsButton;
         [SerializeField] private Button _titleButton;
 
         public event Action OnResumeClicked;
+        public event Action OnSettingsClicked;
         public event Action OnTitleClicked;
 
         private void Awake()
         {
             _resumeButton.onClick.AddListener(() => OnResumeClicked?.Invoke());
+            _settingsButton.onClick.AddListener(() => OnSettingsClicked?.Invoke());
             _titleButton.onClick.AddListener(() => OnTitleClicked?.Invoke());
             Hide();
         }

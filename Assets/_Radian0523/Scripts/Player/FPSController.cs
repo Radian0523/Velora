@@ -26,7 +26,6 @@ namespace Velora.Player
         [Header("Look")]
         [SerializeField] private float _mouseSensitivity = 0.15f;
         [SerializeField] private float _maxLookAngle = 89f;
-        [SerializeField] private float _lookDeadZone = 2f;
 
         private CharacterController _controller;
         private Transform _cameraTransform;
@@ -36,17 +35,28 @@ namespace Velora.Player
         private float _verticalVelocity;
         private float _cameraPitch;
 
+        private const string MouseSensitivityKey = "MouseSensitivity";
+
         public bool IsGrounded { get; private set; }
         public bool IsSprinting => _isSprinting && _moveInput.sqrMagnitude > 0f;
         public Vector3 Velocity => _controller.velocity;
+        public float MouseSensitivity => _mouseSensitivity;
 
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
             _cameraTransform = GetComponentInChildren<Camera>().transform;
 
+            _mouseSensitivity = PlayerPrefs.GetFloat(MouseSensitivityKey, _mouseSensitivity);
+
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+        }
+
+        public void SetMouseSensitivity(float sensitivity)
+        {
+            _mouseSensitivity = sensitivity;
+            PlayerPrefs.SetFloat(MouseSensitivityKey, sensitivity);
         }
 
         private void Update()

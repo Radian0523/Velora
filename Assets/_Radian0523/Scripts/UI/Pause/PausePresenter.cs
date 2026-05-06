@@ -9,15 +9,19 @@ namespace Velora.UI
     /// PauseManager と PauseMenuView の橋渡し。
     /// InputAction（Pause / Cancel）のイベントを受け取り、
     /// ポーズ状態に応じて View の表示切替・カーソル制御を行う。
+    /// 設定画面の開閉も管理し、PauseMenu ↔ Settings の遷移を制御する。
     /// </summary>
     public class PausePresenter : MonoBehaviour
     {
         [SerializeField] private PauseMenuView _view;
         [SerializeField] private InputActionReference _pauseAction;
+        [SerializeField] private SettingsPresenter _settingsPresenter;
 
         private PauseManager _pauseManager;
+        private bool _isSettingsOpen;
 
         public PauseManager PauseManager => _pauseManager;
+        public SettingsPresenter SettingsPresenter => _settingsPresenter;
 
         private void Awake()
         {
@@ -34,7 +38,14 @@ namespace Velora.UI
 
             _pauseManager.OnPauseStateChanged += HandlePauseStateChanged;
             _view.OnResumeClicked += HandleResumeClicked;
+            _view.OnSettingsClicked += HandleSettingsClicked;
             _view.OnTitleClicked += HandleTitleClicked;
+
+            if (_settingsPresenter != null)
+            {
+                _settingsPresenter.GetComponent<SettingsView>()
+                    .OnBackClicked += HandleSettingsBackClicked;
+            }
         }
 
         private void OnDisable()
@@ -46,11 +57,25 @@ namespace Velora.UI
 
             _pauseManager.OnPauseStateChanged -= HandlePauseStateChanged;
             _view.OnResumeClicked -= HandleResumeClicked;
+            _view.OnSettingsClicked -= HandleSettingsClicked;
             _view.OnTitleClicked -= HandleTitleClicked;
+
+            if (_settingsPresenter != null)
+            {
+                _settingsPresenter.GetComponent<SettingsView>()
+                    .OnBackClicked -= HandleSettingsBackClicked;
+            }
         }
 
         private void HandlePauseInput(InputAction.CallbackContext context)
         {
+            // 設定画面が開いている場合は ESC でポーズメニューに戻る
+            if (_isSettingsOpen)
+            {
+                CloseSettings();
+                return;
+            }
+
             _pauseManager.TogglePause();
         }
 
@@ -64,7 +89,13 @@ namespace Velora.UI
             }
             else
             {
+                // Unpause 時はポーズメニューと設定画面の両方を閉じる
                 _view.Hide();
+                if (_isSettingsOpen)
+                {
+                    _settingsPresenter?.Hide();
+                    _isSettingsOpen = false;
+                }
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
             }
@@ -73,6 +104,25 @@ namespace Velora.UI
         private void HandleResumeClicked()
         {
             _pauseManager.SetPaused(false);
+        }
+
+        private void HandleSettingsClicked()
+        {
+            _view.Hide();
+            _settingsPresenter?.Show();
+            _isSettingsOpen = true;
+        }
+
+        private void HandleSettingsBackClicked()
+        {
+            CloseSettings();
+        }
+
+        private void CloseSettings()
+        {
+            _settingsPresenter?.Hide();
+            _isSettingsOpen = false;
+            _view.Show();
         }
 
         private void HandleTitleClicked()
