@@ -11579,7 +11579,6 @@ MonoBehaviour:
   _hitMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  _muzzleFlashVfx: {fileID: 1581697458}
   _defaultFieldOfView: 60
   _adsFovLerpSpeed: 10
 --- !u!1 &1676136120
@@ -11627,7 +11626,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Velora.Core.BattleLifetimeScope
   parentReference:
-    TypeName: 
+    TypeName: Velora.Core.RootLifetimeScope
   autoRun: 1
   autoInjectGameObjects: []
   _playerDamageReceiver: {fileID: 1510134888}

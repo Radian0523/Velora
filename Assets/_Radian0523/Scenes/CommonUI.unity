@@ -3743,6 +3743,8 @@ MonoBehaviour:
   _commonUIDirector: {fileID: 1626390047}
   _fadeView: {fileID: 2010384416}
   _pausePresenter: {fileID: 818533237}
+  _settingsPresenter: {fileID: 1478124594}
+  _languageSwitchPresenter: {fileID: 1333209634}
   _uiSoundData: {fileID: 11400000, guid: d23d26ff291654762bc6ebe5641a902d, type: 2}
 --- !u!1 &1634255808
 GameObject:

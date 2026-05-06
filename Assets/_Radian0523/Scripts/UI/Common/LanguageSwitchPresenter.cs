@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using VContainer;
 using Velora.Core;
 
 namespace Velora.UI
@@ -8,6 +9,7 @@ namespace Velora.UI
     /// LanguageSwitchView と FontThemeService を橋渡しする Presenter。
     /// ボタンクリックで言語をトグル切替し、EventBus 経由で
     /// 他シーンの LanguageSwitchPresenter とも状態を同期する。
+    /// FontThemeService は VContainer から注入されるため CommonUIDirector への依存がない。
     /// </summary>
     public class LanguageSwitchPresenter : MonoBehaviour
     {
@@ -15,26 +17,29 @@ namespace Velora.UI
 
         private FontThemeService _fontThemeService;
 
+        [Inject]
+        public void Construct(FontThemeService fontThemeService)
+        {
+            _fontThemeService = fontThemeService;
+        }
+
         private void OnEnable()
         {
             _view.OnSwitchClicked += HandleSwitch;
             EventBus.Subscribe<FontThemeChangedEvent>(OnThemeChanged);
 
-            // 再有効化時（Start 完了後）にラベルを最新の言語に同期する
+            // 再有効化時（Construct 完了後）にラベルを最新の言語に同期する。
+            // 初回有効化時は Construct が未呼び出しのため null チェックで保護する。
             if (_fontThemeService != null)
             {
                 UpdateLabel();
             }
         }
 
-        /// <summary>
-        /// CommonUIDirector と同一シーン（CommonUI）に配置されるため、
-        /// OnEnable 時点では Instance が未初期化の場合がある。
-        /// Start は全 Awake 完了後に呼ばれるため、安全に参照を取得できる。
-        /// </summary>
         private void Start()
         {
-            _fontThemeService = CommonUIDirector.Instance.FontThemeService;
+            // Construct（[Inject]）は Awake 後・Start 前に完了するため、
+            // Start では確実に _fontThemeService が設定済みになっている。
             UpdateLabel();
         }
 

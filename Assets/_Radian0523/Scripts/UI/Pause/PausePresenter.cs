@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using VContainer;
 using Velora.Core;
 
 namespace Velora.UI
@@ -19,6 +20,13 @@ namespace Velora.UI
 
         private PauseManager _pauseManager;
         private bool _isSettingsOpen;
+        private SceneNavigator _sceneNavigator;
+
+        [Inject]
+        public void Construct(SceneNavigator sceneNavigator)
+        {
+            _sceneNavigator = sceneNavigator;
+        }
 
         public PauseManager PauseManager => _pauseManager;
         public SettingsPresenter SettingsPresenter => _settingsPresenter;
@@ -133,10 +141,7 @@ namespace Velora.UI
 
         private async UniTaskVoid TransitionToTitle()
         {
-            if (CommonUIDirector.Instance != null)
-            {
-                await CommonUIDirector.Instance.TransitionToScene("Title", "Battle");
-            }
+            await _sceneNavigator.TransitionTo("Title", "Battle");
         }
     }
 }

@@ -24,6 +24,8 @@ namespace Velora.Core
         [SerializeField] private CommonUIDirector _commonUIDirector;
         [SerializeField] private FadeView _fadeView;
         [SerializeField] private PausePresenter _pausePresenter;
+        [SerializeField] private SettingsPresenter _settingsPresenter;
+        [SerializeField] private LanguageSwitchPresenter _languageSwitchPresenter;
 
         [Header("UI Sound")]
         [SerializeField] private UISoundData _uiSoundData;
@@ -39,12 +41,19 @@ namespace Velora.Core
             builder.Register<FontThemeService>(Lifetime.Singleton)
                 .WithParameter(_fontThemes);
 
+            // フェード付きシーン遷移を SceneNavigator に集約する。
+            // Presenter は CommonUIDirector.Instance ではなく SceneNavigator を
+            // 注入してもらうことで、シングルトン参照を排除できる。
+            builder.Register<SceneNavigator>(Lifetime.Singleton);
+
             // MonoBehaviour コンポーネント: シーン上の既存インスタンスを登録
             // CommonUIDirector を登録することで [Inject] Construct() が呼ばれ、
             // AudioManager / SceneLoader / FontThemeService が注入される。
             builder.RegisterComponent(_commonUIDirector);
             builder.RegisterComponent(_fadeView);
             builder.RegisterComponent(_pausePresenter);
+            builder.RegisterComponent(_settingsPresenter);
+            builder.RegisterComponent(_languageSwitchPresenter);
 
             // ScriptableObject データ: 読み取り専用のためインスタンス登録
             builder.RegisterInstance(_uiSoundData);

@@ -1,4 +1,5 @@
 using UnityEngine;
+using VContainer;
 using Velora.Core;
 using Velora.Player;
 
@@ -7,8 +8,8 @@ namespace Velora.UI
     /// <summary>
     /// 設定画面の Presenter 層。
     /// SettingsView のスライダーイベントを AudioManager / FPSController に橋渡しする。
-    /// FPSController は Battle シーンのみに存在するため、Initialize で遅延注入を行う。
-    /// AudioManager は CommonUIDirector 経由で取得する（シーン横断サービス）。
+    /// AudioManager は VContainer から注入されるため CommonUIDirector への依存がない。
+    /// FPSController は Battle シーンにのみ存在するため、Initialize で遅延注入を行う。
     /// </summary>
     public class SettingsPresenter : MonoBehaviour
     {
@@ -16,6 +17,12 @@ namespace Velora.UI
 
         private AudioManager _audioManager;
         private FPSController _fpsController;
+
+        [Inject]
+        public void Construct(AudioManager audioManager)
+        {
+            _audioManager = audioManager;
+        }
 
         private void OnEnable()
         {
@@ -36,7 +43,7 @@ namespace Velora.UI
         /// <summary>
         /// Battle シーンから FPSController 参照を受け取る。
         /// FPSController は Battle シーンにのみ存在するため、
-        /// BattleSceneDirector の初期化完了後に呼ばれる。
+        /// BattleFlowEntryPoint の初期化完了後に呼ばれる。
         /// </summary>
         public void Initialize(FPSController fpsController)
         {
@@ -48,8 +55,6 @@ namespace Velora.UI
         /// </summary>
         public void Show()
         {
-            _audioManager = CommonUIDirector.Instance?.AudioManager;
-
             float bgm = _audioManager?.BgmVolume ?? 1f;
             float se = _audioManager?.SeVolume ?? 1f;
             float sensitivity = _fpsController != null ? _fpsController.MouseSensitivity : 0.15f;

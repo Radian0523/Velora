@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using VContainer;
 using Velora.Core;
 
 namespace Velora.UI
@@ -15,6 +16,13 @@ namespace Velora.UI
         [SerializeField] private ResultView _resultView;
 
         private ScoreManager _scoreManager;
+        private SceneNavigator _sceneNavigator;
+
+        [Inject]
+        public void Construct(SceneNavigator sceneNavigator)
+        {
+            _sceneNavigator = sceneNavigator;
+        }
 
         public void Initialize(ScoreManager scoreManager)
         {
@@ -60,18 +68,12 @@ namespace Velora.UI
 
         private async UniTaskVoid TransitionToRetry()
         {
-            if (CommonUIDirector.Instance != null)
-            {
-                await CommonUIDirector.Instance.TransitionToScene("Battle", "Battle");
-            }
+            await _sceneNavigator.TransitionTo("Battle", "Battle");
         }
 
         private async UniTaskVoid TransitionToTitle()
         {
-            if (CommonUIDirector.Instance != null)
-            {
-                await CommonUIDirector.Instance.TransitionToScene("Title", "Battle");
-            }
+            await _sceneNavigator.TransitionTo("Title", "Battle");
         }
     }
 }

@@ -1,28 +1,35 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using VContainer;
 using Velora.Core;
 
 namespace Velora.UI
 {
     /// <summary>
     /// TitleView のイベントを受け取り、シーン遷移を発火する Presenter。
-    /// 連打防止のためボタン無効化→遷移→の順で処理する。
+    /// SceneNavigator を VContainer で注入することで CommonUIDirector.Instance への依存を排除。
+    /// 連打防止のためボタン無効化 → 遷移 の順で処理する。
     /// </summary>
     public class TitlePresenter : MonoBehaviour
     {
         [SerializeField] private TitleView _view;
 
-        public void Initialize()
+        private SceneNavigator _sceneNavigator;
+
+        [Inject]
+        public void Construct(SceneNavigator sceneNavigator)
+        {
+            _sceneNavigator = sceneNavigator;
+        }
+
+        private void OnEnable()
         {
             _view.OnStartClicked += HandleStart;
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
-            if (_view != null)
-            {
-                _view.OnStartClicked -= HandleStart;
-            }
+            _view.OnStartClicked -= HandleStart;
         }
 
         private void HandleStart()
@@ -33,10 +40,7 @@ namespace Velora.UI
 
         private async UniTaskVoid TransitionToBattle()
         {
-            if (CommonUIDirector.Instance != null)
-            {
-                await CommonUIDirector.Instance.TransitionToScene("Battle", "Title");
-            }
+            await _sceneNavigator.TransitionTo("Battle", "Title");
         }
     }
 }
