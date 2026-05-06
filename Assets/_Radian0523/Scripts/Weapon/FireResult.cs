@@ -9,9 +9,9 @@ namespace Velora.Weapon
     /// </summary>
     public readonly struct FireResult
     {
-        public readonly bool DidHit;
-        public readonly Vector3 HitPoint;
-        public readonly Vector3 HitNormal;
+        public bool DidHit { get; }
+        public Vector3 HitPoint { get; }
+        public Vector3 HitNormal { get; }
 
         public FireResult(bool didHit, Vector3 hitPoint, Vector3 hitNormal)
         {
