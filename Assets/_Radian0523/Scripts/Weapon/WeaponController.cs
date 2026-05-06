@@ -5,7 +5,6 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 using Velora.Core;
 using Velora.Data;
 using Velora.Player;
@@ -25,7 +24,6 @@ namespace Velora.Weapon
     public class WeaponController : MonoBehaviour
     {
         [Header("武器データ（初期装備）")]
-        [FormerlySerializedAs("_weapons")]
         [SerializeField] private WeaponData[] _initialWeapons;
 
         // ランタイムで管理する所持武器リスト。
