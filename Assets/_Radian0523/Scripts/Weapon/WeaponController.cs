@@ -12,10 +12,10 @@ using Velora.Player;
 namespace Velora.Weapon
 {
     /// <summary>
-    /// 射撃・リロード・ADS・武器切替・視覚フィードバックを統合管理する MonoBehaviour。
+    /// 射撃・リロード・ADS・武器切替を統合管理する MonoBehaviour。
     /// 各武器の射撃方式は IFireStrategy で差し替え可能（ストラテジーパターン）。
-    /// エフェクト生成は Strategy から分離し、WeaponController が一元管理する。
-    /// これにより射撃ロジック（Strategy）と視覚演出（Controller）の責務が分離される。
+    /// マズルフラッシュ・発射キックなどの視覚演出は WeaponModelView に委譲することで、
+    /// Controller は入力とゲームロジックのみを担当する（単一責務の原則）。
     ///
     /// 武器モデルは WeaponData.ModelPrefab から生成し、_modelRegistry で管理する。
     /// 初期武器は _initialWeapons（Inspector 設定）から Start 時に登録。
@@ -38,7 +38,6 @@ namespace Velora.Weapon
         [SerializeField] private Camera _weaponCamera;
         [SerializeField] private FPSController _fpsController;
         [SerializeField] private LayerMask _hitMask;
-        [SerializeField] private ParticleSystem _muzzleFlashVfx;
 
         [Header("ADS")]
         [SerializeField] private float _defaultFieldOfView = 60f;
@@ -113,11 +112,6 @@ namespace Velora.Weapon
 
         private void Start()
         {
-            if (_muzzleFlashVfx != null)
-            {
-                SetLayerRecursive(_muzzleFlashVfx.gameObject, LayerMask.NameToLayer("Weapon"));
-            }
-
             if (_ownedWeapons.Count > 0)
             {
                 EquipWeapon(0);
@@ -421,7 +415,7 @@ namespace Velora.Weapon
                 _currentWeaponData, _playerCamera.transform, _hitMask,
                 spreadAngle, _playerModel.DamageMultiplier);
 
-            SpawnMuzzleFlash();
+            _activeModelView?.PlayMuzzleFlash();
             PlayFireSound();
             _activeModelView?.SetLoadedAmmoVisible(false);
 
@@ -430,30 +424,14 @@ namespace Velora.Weapon
                 _effectPoolManager.SpawnImpactEffect(result.HitPoint, result.HitNormal);
             }
 
-            ApplyWeaponKick();
+            _activeModelView?.PlayKick(_currentWeaponData);
 
             OnAmmoChanged?.Invoke(_ammoManager.CurrentAmmo, _currentWeaponData.MaxAmmo);
             OnFired?.Invoke();
             EventBus.Publish(new WeaponFiredEvent());
         }
 
-        // --- 視覚フィードバック ---
-
-        /// <summary>
-        /// マズルフラッシュを現在の武器モデルの銃口位置にスナップしてから再生する。
-        /// 共有 VFX を使い回すことでプール不要にしつつ、武器ごとに正しい位置で表示する。
-        /// </summary>
-        private void SpawnMuzzleFlash()
-        {
-            if (_muzzleFlashVfx == null) return;
-
-            if (_activeModelView != null && _activeModelView.MuzzlePoint != null)
-            {
-                _muzzleFlashVfx.transform.position = _activeModelView.MuzzlePoint.position;
-            }
-
-            _muzzleFlashVfx.Play();
-        }
+        // --- サウンド ---
 
         private void PlaySwitchSound()
         {
@@ -473,29 +451,6 @@ namespace Velora.Weapon
         private void PlayReloadEndSound()
         {
             AudioHelper.PlaySE(_currentWeaponData?.ReloadEndSound);
-        }
-
-        /// <summary>
-        /// 発射時の武器モデルキック演出。
-        /// DOTween の Punch で後退 + 上方向回転を同時適用し、自然な反動を再現する。
-        /// パラメータは WeaponData で武器ごとに調整可能（データドリブン）。
-        /// </summary>
-        private void ApplyWeaponKick()
-        {
-            if (_activeModelView == null || _currentWeaponData == null) return;
-
-            var modelTransform = _activeModelView.transform;
-            modelTransform.DOComplete();
-
-            modelTransform.DOPunchPosition(
-                Vector3.back * _currentWeaponData.KickBackDistance,
-                _currentWeaponData.KickDuration,
-                _currentWeaponData.KickVibrato);
-
-            modelTransform.DOPunchRotation(
-                Vector3.right * -_currentWeaponData.KickUpAngle,
-                _currentWeaponData.KickDuration,
-                _currentWeaponData.KickVibrato);
         }
 
         // --- リロード ---
