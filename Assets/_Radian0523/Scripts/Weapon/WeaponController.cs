@@ -75,9 +75,12 @@ namespace Velora.Weapon
         private int _consecutiveShotCount;
         private Vector2 _recoilCameraOffset;
 
-        // エフェクトプール: 武器ごとにプールを生成し、武器切替時に入れ替える
+        // エフェクトプール: プレハブ単位でキャッシュし、同じエフェクトなら武器間で共有する。
+        // 武器切替時に Destroy しないため、飛行中のプロジェクタイルが参照するプールが
+        // 破棄される問題を回避する。
         private ObjectPool<PooledEffect> _impactEffectPool;
         private ObjectPool<PooledEffect> _explosionEffectPool;
+        private readonly Dictionary<GameObject, ObjectPool<PooledEffect>> _effectPoolCache = new();
 
         private const int EffectPoolInitialSize = 3;
         private const int EffectPoolMaxSize = 10;
@@ -319,7 +322,6 @@ namespace Velora.Weapon
             }
 
             CancelReload();
-            CleanupEffectPools();
 
             var previousModelView = _activeModelView;
 
@@ -395,34 +397,30 @@ namespace Velora.Weapon
         // --- エフェクトプール ---
 
         /// <summary>
-        /// 武器装備時にエフェクトプールを生成する。
-        /// プレハブに PooledEffect がアタッチされていない場合はプールを作らない（エフェクトなし武器に対応）。
-        /// スプラッシュダメージ対応武器は爆発エフェクトプールも生成する。
+        /// 現在の武器に必要なエフェクトプールを取得する。
+        /// 同じプレハブのプールは武器間で共有し、生成済みなら使い回す。
         /// </summary>
         private void InitializeEffectPools()
         {
-            _impactEffectPool = CreateEffectPool(
-                _currentWeaponData.ImpactEffectPrefab,
-                $"Pool_{_currentWeaponData.WeaponName}_ImpactEffect");
-
-            _explosionEffectPool = CreateEffectPool(
-                _currentWeaponData.ExplosionEffectPrefab,
-                $"Pool_{_currentWeaponData.WeaponName}_ExplosionEffect");
+            _impactEffectPool = GetOrCreateEffectPool(_currentWeaponData.ImpactEffectPrefab);
+            _explosionEffectPool = GetOrCreateEffectPool(_currentWeaponData.ExplosionEffectPrefab);
         }
 
-        private ObjectPool<PooledEffect> CreateEffectPool(GameObject prefab, string poolName)
+        private ObjectPool<PooledEffect> GetOrCreateEffectPool(GameObject prefab)
         {
             if (prefab == null) return null;
+
+            if (_effectPoolCache.TryGetValue(prefab, out var cached))
+            {
+                return cached;
+            }
 
             var pooledEffect = prefab.GetComponent<PooledEffect>();
             if (pooledEffect == null) return null;
 
-            var poolParent = new GameObject(poolName).transform;
+            var poolParent = new GameObject($"Pool_{prefab.name}").transform;
             var pool = new ObjectPool<PooledEffect>(pooledEffect, poolParent, EffectPoolInitialSize, EffectPoolMaxSize);
 
-            // プール内の全インスタンスに自身のプール参照を設定
-            // Get() 時に取得されるインスタンスにも Initialize が必要なため、
-            // ObjectPool の Get → Initialize → Return のサイクルで設定する
             for (int i = 0; i < EffectPoolInitialSize; i++)
             {
                 var instance = pool.Get();
@@ -430,14 +428,18 @@ namespace Velora.Weapon
                 pool.Return(instance);
             }
 
+            _effectPoolCache[prefab] = pool;
             return pool;
         }
 
         private void CleanupEffectPools()
         {
-            _impactEffectPool?.Clear();
+            foreach (var pool in _effectPoolCache.Values)
+            {
+                pool.Clear();
+            }
+            _effectPoolCache.Clear();
             _impactEffectPool = null;
-            _explosionEffectPool?.Clear();
             _explosionEffectPool = null;
         }
 
