@@ -2924,6 +2924,60 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fe12fda7251b344b785604d0692baed7, type: 3}
+--- !u!1 &733134373
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 733134374}
+  - component: {fileID: 733134375}
+  m_Layer: 0
+  m_Name: DamageDirectionIndicators
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &733134374
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 733134373}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1308589434}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 400, y: 400}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &733134375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 733134373}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2cd6396e728849cd982c40ca3b0d09c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.DamageDirectionView
+  _indicatorParent: {fileID: 733134374}
+  _displayRadius: 120
+  _arcWidth: 60
+  _arcThickness: 6
+  _arcColor: {r: 0.8, g: 0, b: 0, a: 0.9}
+  _fadeDuration: 0.8
 --- !u!1 &747728534
 GameObject:
   m_ObjectHideFlags: 0
@@ -3205,7 +3259,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 815247416}
-  - component: {fileID: 815247417}
   m_Layer: 0
   m_Name: BattleSceneDirector
   m_TagString: Untagged
@@ -3228,39 +3281,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1086929068}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &815247417
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 815247415}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2eab79b9f49a74d74899654ad92b2d47, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Velora.Core.BattleSceneDirector
-  _playerDamageReceiver: {fileID: 1510134888}
-  _playerMaxHealth: 100
-  _weaponController: {fileID: 1662499285}
-  _enemyPrefab: {fileID: 9125785520455508347, guid: e4e84698e3ed34ae5be3c0f66caa03c5, type: 3}
-  _waveDataList:
-  - {fileID: 11400000, guid: 58109ed602a9842899d02f3702afddd7, type: 2}
-  - {fileID: 11400000, guid: d7db07354e04043f3a89482998505de9, type: 2}
-  - {fileID: 11400000, guid: fa787bd9da05340afbb502b46302b374, type: 2}
-  _spawnPointManager: {fileID: 1766242631}
-  _poolParent: {fileID: 820250130}
-  _upgradeDataList:
-  - {fileID: 11400000, guid: a9295b434005a4f08a3afbb0f33ebaf3, type: 2}
-  - {fileID: 11400000, guid: 725be642ff33c4d238e8ea6235e4fd46, type: 2}
-  - {fileID: 11400000, guid: 9346e54e0906e4fcb98e2192f7b35cec, type: 2}
-  - {fileID: 11400000, guid: 813d88629452444f3858535a0c2a8e92, type: 2}
-  - {fileID: 11400000, guid: c17920149c8674e59929fa808c219bfb, type: 2}
-  _waveEffectView: {fileID: 322610767}
-  _battleSoundData: {fileID: 11400000, guid: 4ac1ac89dd0d3422694ac459781f5264, type: 2}
-  _hudPresenter: {fileID: 1308589435}
-  _upgradeSelectPresenter: {fileID: 1364938951}
-  _resultPresenter: {fileID: 1380629890}
 --- !u!1 &820250129
 GameObject:
   m_ObjectHideFlags: 0
@@ -4198,6 +4218,7 @@ Transform:
   m_Children:
   - {fileID: 815247416}
   - {fileID: 820250130}
+  - {fileID: 1676136121}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1112384996
@@ -4867,6 +4888,7 @@ RectTransform:
   - {fileID: 1884210959}
   - {fileID: 1189268616}
   - {fileID: 1527371346}
+  - {fileID: 733134374}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -5716,6 +5738,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.FontThemeApplier
   _category: 1
+--- !u!1 &1486142637
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1486142638}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1486142638
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1486142637}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.21196, y: 0.5, z: 0.58727}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1510134886
 GameObject:
   m_ObjectHideFlags: 0
@@ -5782,7 +5835,6 @@ MonoBehaviour:
   _jumpForce: 7
   _mouseSensitivity: 0.3
   _maxLookAngle: 89
-  _lookDeadZone: 2
 --- !u!143 &1510134890
 CharacterController:
   m_ObjectHideFlags: 0
@@ -11502,6 +11554,76 @@ MonoBehaviour:
   _muzzleFlashVfx: {fileID: 1581697458}
   _defaultFieldOfView: 60
   _adsFovLerpSpeed: 10
+--- !u!1 &1676136120
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1676136121}
+  - component: {fileID: 1676136122}
+  m_Layer: 0
+  m_Name: BattleLifetimeScope
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1676136121
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1676136120}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1086929068}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1676136122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1676136120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9342ec2693bf64eaea183ece74e69a5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.Core.BattleLifetimeScope
+  parentReference:
+    TypeName: 
+  autoRun: 1
+  autoInjectGameObjects: []
+  _playerDamageReceiver: {fileID: 1510134888}
+  _fpsController: {fileID: 1510134889}
+  _playerMaxHealth: 100
+  _weaponController: {fileID: 1662499285}
+  _enemyPrefab: {fileID: 9125785520455508347, guid: e4e84698e3ed34ae5be3c0f66caa03c5, type: 3}
+  _waveDataList:
+  - {fileID: 11400000, guid: 58109ed602a9842899d02f3702afddd7, type: 2}
+  - {fileID: 11400000, guid: d7db07354e04043f3a89482998505de9, type: 2}
+  - {fileID: 11400000, guid: fa787bd9da05340afbb502b46302b374, type: 2}
+  _spawnPointManager: {fileID: 1766242631}
+  _poolParent: {fileID: 820250130}
+  _upgradeDataList:
+  - {fileID: 11400000, guid: a9295b434005a4f08a3afbb0f33ebaf3, type: 2}
+  - {fileID: 11400000, guid: 725be642ff33c4d238e8ea6235e4fd46, type: 2}
+  - {fileID: 11400000, guid: c17920149c8674e59929fa808c219bfb, type: 2}
+  - {fileID: 11400000, guid: 9346e54e0906e4fcb98e2192f7b35cec, type: 2}
+  - {fileID: 11400000, guid: 813d88629452444f3858535a0c2a8e92, type: 2}
+  _waveEffectView: {fileID: 322610767}
+  _battleSoundData: {fileID: 11400000, guid: 4ac1ac89dd0d3422694ac459781f5264, type: 2}
+  _hudPresenter: {fileID: 1308589435}
+  _upgradeSelectPresenter: {fileID: 1364938951}
+  _resultPresenter: {fileID: 1380629890}
 --- !u!1 &1750832214
 GameObject:
   m_ObjectHideFlags: 0
@@ -12614,6 +12736,63 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.FontThemeApplier
   _category: 1
+--- !u!1001 &1934105036
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1233992181619504068, guid: d327bad1b351b419f8d0e06abbac709a, type: 3}
+      propertyPath: m_Name
+      value: Weapon_RocketLauncher_Pickup
+      objectReference: {fileID: 0}
+    - target: {fileID: 5023779554772662207, guid: d327bad1b351b419f8d0e06abbac709a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 5023779554772662207, guid: d327bad1b351b419f8d0e06abbac709a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.13
+      objectReference: {fileID: 0}
+    - target: {fileID: 5023779554772662207, guid: d327bad1b351b419f8d0e06abbac709a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 4.3989
+      objectReference: {fileID: 0}
+    - target: {fileID: 5023779554772662207, guid: d327bad1b351b419f8d0e06abbac709a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5023779554772662207, guid: d327bad1b351b419f8d0e06abbac709a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5023779554772662207, guid: d327bad1b351b419f8d0e06abbac709a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5023779554772662207, guid: d327bad1b351b419f8d0e06abbac709a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5023779554772662207, guid: d327bad1b351b419f8d0e06abbac709a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5023779554772662207, guid: d327bad1b351b419f8d0e06abbac709a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5023779554772662207, guid: d327bad1b351b419f8d0e06abbac709a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d327bad1b351b419f8d0e06abbac709a, type: 3}
 --- !u!1 &2057620750
 GameObject:
   m_ObjectHideFlags: 0
@@ -12676,3 +12855,5 @@ SceneRoots:
   - {fileID: 591742741}
   - {fileID: 1151743406}
   - {fileID: 1572658631}
+  - {fileID: 1934105036}
+  - {fileID: 1486142638}

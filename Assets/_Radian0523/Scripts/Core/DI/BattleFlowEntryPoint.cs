@@ -1,7 +1,8 @@
-using UnityEngine;
+using System;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
+using VContainer.Unity;
 using Velora.Data;
-using Velora.Enemy;
 using Velora.Player;
 using Velora.UI;
 using Velora.Upgrade;
@@ -11,69 +12,92 @@ using Velora.Weapon;
 namespace Velora.Core
 {
     /// <summary>
-    /// Battle シーンのオーケストレーター。
-    /// PlayerModel・WaveDirector・GameFlowManager・各 Presenter を生成・接続し、
-    /// 「BattleReady → BattleInProgress → WaveCleared → UpgradeSelect → 次Wave」
-    /// のゲームループを駆動する。各システム間の依存を一箇所で管理し、
-    /// 個々のクラスの疎結合を維持する。
+    /// Battle シーンのエントリーポイント（pure C# クラス）。
+    /// BattleSceneDirector が担っていた全責務を吸収する。
+    ///
+    /// VContainer の IStartable / ITickable / IDisposable を実装し、
+    /// コンポーネント初期化・ステート登録・イベント購読・ゲームループ駆動を行う。
+    /// MonoBehaviour ではないため Update や OnDestroy を使わず、
+    /// VContainer のライフサイクルに従って管理される。
+    ///
+    /// 設計意図:
+    /// - 全依存をコンストラクタで受け取ることで、依存関係が明示的になる
+    /// - WaveDirector や GameFlowManager のステート登録など、
+    ///   構築後の初期化が必要な処理は Start() で実行する
+    /// - Tick() で毎フレームの更新処理を駆動する
     /// </summary>
-    public class BattleSceneDirector : MonoBehaviour
+    public class BattleFlowEntryPoint : IStartable, ITickable, IDisposable
     {
-        [Header("プレイヤー")]
-        [SerializeField] private PlayerDamageReceiver _playerDamageReceiver;
-        [SerializeField] private float _playerMaxHealth = 100f;
+        private readonly PlayerModel _playerModel;
+        private readonly ScoreManager _scoreManager;
+        private readonly UpgradeManager _upgradeManager;
+        private readonly GameFlowManager _gameFlowManager;
+        private readonly BattleConfig _config;
 
-        [Header("武器")]
-        [SerializeField] private WeaponController _weaponController;
+        private readonly PlayerDamageReceiver _playerDamageReceiver;
+        private readonly FPSController _fpsController;
+        private readonly WeaponController _weaponController;
+        private readonly SpawnPointManager _spawnPointManager;
+        private readonly WaveEffectView _waveEffectView;
 
-        [Header("ウェーブ")]
-        [SerializeField] private EnemyController _enemyPrefab;
-        [SerializeField] private WaveData[] _waveDataList;
-        [SerializeField] private SpawnPointManager _spawnPointManager;
-        [SerializeField] private Transform _poolParent;
+        private readonly HudPresenter _hudPresenter;
+        private readonly UpgradeSelectPresenter _upgradeSelectPresenter;
+        private readonly ResultPresenter _resultPresenter;
 
-        [Header("アップグレード")]
-        [SerializeField] private UpgradeData[] _upgradeDataList;
-
-        [Header("UI")]
-        [SerializeField] private WaveEffectView _waveEffectView;
-
-        [Header("サウンド")]
-        [SerializeField] private BattleSoundData _battleSoundData;
-
-        [Header("UI Presenter")]
-        [SerializeField] private HudPresenter _hudPresenter;
-        [SerializeField] private UpgradeSelectPresenter _upgradeSelectPresenter;
-        [SerializeField] private ResultPresenter _resultPresenter;
-
-        private PlayerModel _playerModel;
         private WaveDirector _waveDirector;
-        private GameFlowManager _gameFlowManager;
-        private ScoreManager _scoreManager;
-        private UpgradeManager _upgradeManager;
 
-        private void Start()
+        public BattleFlowEntryPoint(
+            PlayerModel playerModel,
+            ScoreManager scoreManager,
+            UpgradeManager upgradeManager,
+            GameFlowManager gameFlowManager,
+            BattleConfig config,
+            PlayerDamageReceiver playerDamageReceiver,
+            FPSController fpsController,
+            WeaponController weaponController,
+            SpawnPointManager spawnPointManager,
+            WaveEffectView waveEffectView,
+            HudPresenter hudPresenter,
+            UpgradeSelectPresenter upgradeSelectPresenter,
+            ResultPresenter resultPresenter)
         {
-            // Battle シーンではカーソルをロック（Title シーンやリザルトでは解除されている）
+            _playerModel = playerModel;
+            _scoreManager = scoreManager;
+            _upgradeManager = upgradeManager;
+            _gameFlowManager = gameFlowManager;
+            _config = config;
+            _playerDamageReceiver = playerDamageReceiver;
+            _fpsController = fpsController;
+            _weaponController = weaponController;
+            _spawnPointManager = spawnPointManager;
+            _waveEffectView = waveEffectView;
+            _hudPresenter = hudPresenter;
+            _upgradeSelectPresenter = upgradeSelectPresenter;
+            _resultPresenter = resultPresenter;
+        }
+
+        public void Start()
+        {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
             InitializePlayer();
-            InitializeScore();
             InitializeWaveDirector();
-            InitializeGameFlowManager();
+            InitializePresenters();
+            InitializeGameFlowStates();
+            InitializeSettings();
             SubscribeEvents();
 
             RunBattleFlow().Forget();
         }
 
-        private void Update()
+        public void Tick()
         {
-            _gameFlowManager?.Update();
-            _scoreManager?.UpdateSurvivalTime(Time.deltaTime);
+            _gameFlowManager.Update();
+            _scoreManager.UpdateSurvivalTime(Time.deltaTime);
         }
 
-        private void OnDestroy()
+        public void Dispose()
         {
             UnsubscribeEvents();
             _waveDirector?.Dispose();
@@ -82,38 +106,37 @@ namespace Velora.Core
 
         private void InitializePlayer()
         {
-            _playerModel = new PlayerModel(_playerMaxHealth);
             _playerDamageReceiver.Initialize(_playerModel);
             _weaponController.Initialize(_playerModel);
         }
 
-        private void InitializeScore()
+        private void InitializeWaveDirector()
         {
-            _scoreManager = new ScoreManager();
-            _upgradeManager = new UpgradeManager(_upgradeDataList);
+            // WaveDirector はプレイヤーの Transform や IDamageable など
+            // ランタイム固有の参照が必要なため、DI コンテナではなくここで手動生成する。
+            _waveDirector = new WaveDirector(
+                _config.WaveDataList,
+                _spawnPointManager,
+                _playerDamageReceiver.transform,
+                _playerDamageReceiver,
+                _config.EnemyPrefab,
+                _config.PoolParent);
+        }
 
-            // Presenter の配線は全システム初期化後に行う。
-            // _playerModel は InitializePlayer() で生成済みであることが前提。
+        private void InitializePresenters()
+        {
             _hudPresenter.Initialize(_playerModel, _weaponController);
             _upgradeSelectPresenter.Initialize(_upgradeManager, _playerModel);
             _resultPresenter.Initialize(_scoreManager);
         }
 
-        private void InitializeWaveDirector()
+        /// <summary>
+        /// GameFlowManager にゲームステートを登録する。
+        /// ステートクラスは View や Manager への参照を必要とするため、
+        /// 全コンポーネントの初期化完了後にここで生成・登録する。
+        /// </summary>
+        private void InitializeGameFlowStates()
         {
-            _waveDirector = new WaveDirector(
-                _waveDataList,
-                _spawnPointManager,
-                _playerDamageReceiver.transform,
-                _playerDamageReceiver,
-                _enemyPrefab,
-                _poolParent);
-        }
-
-        private void InitializeGameFlowManager()
-        {
-            _gameFlowManager = new GameFlowManager();
-
             _gameFlowManager.RegisterState(
                 GameState.BattleReady,
                 new BattleReadyState(_waveEffectView, _waveDirector));
@@ -137,6 +160,12 @@ namespace Velora.Core
             _gameFlowManager.RegisterState(
                 GameState.Result,
                 new ResultState(_resultPresenter));
+        }
+
+        private void InitializeSettings()
+        {
+            CommonUIDirector.Instance?.PausePresenter?.SettingsPresenter
+                ?.Initialize(_fpsController);
         }
 
         private void SubscribeEvents()
@@ -170,24 +199,17 @@ namespace Velora.Core
             EventBus.Unsubscribe<AmmoPickedUpEvent>(HandleAmmoPickup);
         }
 
-        /// <summary>
-        /// 最初のウェーブの開始演出→戦闘開始までを駆動する。
-        /// 以降のウェーブ進行は HandleWaveCleared から駆動される。
-        /// </summary>
+        // --- ゲームフロー ---
+
         private async UniTaskVoid RunBattleFlow()
         {
             await _gameFlowManager.ChangeState(GameState.BattleReady);
             await _gameFlowManager.ChangeState(GameState.BattleInProgress);
         }
 
-        /// <summary>
-        /// ウェーブクリア時のフロー: クリア演出 → アップグレード選択 → 次ウェーブ準備 → 戦闘開始。
-        /// OnAllWavesComplete が先に発火した場合はこのフローは実行されない。
-        /// </summary>
         private void HandleWaveCleared(int waveNumber)
         {
             if (!_waveDirector.HasNextWave) return;
-
             RunWaveTransition().Forget();
         }
 
@@ -211,10 +233,6 @@ namespace Velora.Core
             await _gameFlowManager.ChangeState(GameState.Result);
         }
 
-        /// <summary>
-        /// PlayerModel(ロジック層) → WeaponController(MonoBehaviour) の橋渡し。
-        /// NewWeapon アップグレード適用時に武器を追加する。
-        /// </summary>
         private void HandleUpgradeApplied(UpgradeData upgrade)
         {
             if (upgrade.UpgradeType == UpgradeType.NewWeapon && upgrade.WeaponData != null)
@@ -225,7 +243,7 @@ namespace Velora.Core
 
         private void HandlePlayerDeath()
         {
-            PlayBattleSound(_battleSoundData?.PlayerDeathSound);
+            PlayBattleSound(_config.BattleSoundData?.PlayerDeathSound);
             _gameFlowManager.ChangeState(GameState.GameOver).Forget();
         }
 
@@ -233,17 +251,17 @@ namespace Velora.Core
 
         private void HandlePlayerDamaged(PlayerDamagedEvent e)
         {
-            PlayBattleSound(_battleSoundData?.PlayerDamageSound);
+            PlayBattleSound(_config.BattleSoundData?.PlayerDamageSound);
         }
 
         private void HandleWaveClearSound(WaveClearedEvent e)
         {
-            PlayBattleSound(_battleSoundData?.WaveClearSound);
+            PlayBattleSound(_config.BattleSoundData?.WaveClearSound);
         }
 
         private void HandleAmmoPickup(AmmoPickedUpEvent e)
         {
-            PlayBattleSound(_battleSoundData?.AmmoPickupSound);
+            PlayBattleSound(_config.BattleSoundData?.AmmoPickupSound);
         }
 
         private void PlayBattleSound(AudioClip clip)

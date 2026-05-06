@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using VContainer;
 using Velora.Data;
 using Velora.UI;
 
@@ -10,31 +11,23 @@ namespace Velora.Core
     /// FadeView・SceneLoader など、シーンをまたいで利用するサービスへの
     /// アクセスを一元管理する。
     ///
-    /// シングルトンを採用した理由:
-    /// CommonUI はアプリ起動時にロードされゲーム終了まで存続するため、
-    /// インスタンスの寿命がアプリケーション全体と一致する。
-    /// シーン設計でインスタンスが1つであることが保証されるため、
-    /// シングルトンのデメリット（寿命管理の曖昧さ）が発生しない。
+    /// VContainer 移行後は RootLifetimeScope が各サービスを生成し、
+    /// [Inject] で受け取る互換シムとして機能する。
+    /// Instance プロパティは既存の参照箇所（Title/Result シーン等）の
+    /// 段階的移行のために維持する。
     /// </summary>
     public class CommonUIDirector : MonoBehaviour
     {
         public static CommonUIDirector Instance { get; private set; }
 
         [SerializeField] private FadeView _fadeView;
-        [SerializeField] private AudioManagerHost _audioManagerHost;
         [SerializeField] private PausePresenter _pausePresenter;
-
-        [Header("Font")]
-        [SerializeField] private FontThemeData[] _fontThemes;
-
-        [Header("UI Sound")]
-        [SerializeField] private UISoundData _uiSoundData;
 
         public FadeView FadeView => _fadeView;
         public SceneLoader SceneLoader { get; private set; }
         public AudioManager AudioManager { get; private set; }
         public FontThemeService FontThemeService { get; private set; }
-        public UISoundData UISoundData => _uiSoundData;
+        public UISoundData UISoundData { get; private set; }
         public PausePresenter PausePresenter => _pausePresenter;
 
         private void Awake()
@@ -46,9 +39,24 @@ namespace Velora.Core
             }
 
             Instance = this;
-            SceneLoader = new SceneLoader();
-            AudioManager = new AudioManager(_audioManagerHost);
-            FontThemeService = new FontThemeService(_fontThemes);
+        }
+
+        /// <summary>
+        /// RootLifetimeScope が生成したサービスを受け取る。
+        /// Awake で手動 new していた生成処理を DI に移譲することで、
+        /// サービスのライフサイクル管理が VContainer に統一される。
+        /// </summary>
+        [Inject]
+        public void Construct(
+            AudioManager audioManager,
+            SceneLoader sceneLoader,
+            FontThemeService fontThemeService,
+            UISoundData uiSoundData)
+        {
+            AudioManager = audioManager;
+            SceneLoader = sceneLoader;
+            FontThemeService = fontThemeService;
+            UISoundData = uiSoundData;
         }
 
         private void OnDestroy()
