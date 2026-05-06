@@ -7,17 +7,18 @@ using Velora.Data;
 namespace Velora.Editor
 {
     /// <summary>
-    /// バトル関連の全音声アサインを一覧管理するエディタウィンドウ。
-    /// WeaponData / EnemyData / BattleSoundData の音声フィールドを横並びで表示し、
-    /// 試聴ボタンでその場で聴き比べができる。
+    /// ゲーム内の全音声アサインを一覧管理するエディタウィンドウ。
+    /// WeaponData / EnemyData / BattleSoundData / UISoundData の音声フィールドを
+    /// 横並びで表示し、試聴ボタンでその場で聴き比べができる。
     /// 変更は SerializedObject 経由で即座に ScriptableObject に反映される。
     /// </summary>
-    public class WeaponSoundEditor : EditorWindow
+    public class SoundEditor : EditorWindow
     {
         private Vector2 _scrollPosition;
         private WeaponData[] _weaponDataAssets;
         private EnemyData[] _enemyDataAssets;
         private BattleSoundData[] _battleSoundDataAssets;
+        private UISoundData[] _uiSoundDataAssets;
         private AudioClip _playingClip;
 
         // UnityEditor.AudioUtil は internal クラスのため、リフレクションでアクセスする。
@@ -40,10 +41,10 @@ namespace Velora.Editor
         private const float ButtonWidth = 24f;
         private const float ClipFieldMinWidth = 140f;
 
-        [MenuItem("Velora/Battle Sound Editor", priority = 100)]
+        [MenuItem("Velora/Sound Editor", priority = 100)]
         private static void Open()
         {
-            var window = GetWindow<WeaponSoundEditor>("Battle Sounds");
+            var window = GetWindow<SoundEditor>("Sound Editor");
             window.minSize = new Vector2(700f, 400f);
         }
 
@@ -68,6 +69,8 @@ namespace Velora.Editor
             DrawEnemySection();
             EditorGUILayout.Space(8f);
             DrawBattleSoundSection();
+            EditorGUILayout.Space(8f);
+            DrawUISoundSection();
 
             EditorGUILayout.EndScrollView();
         }
@@ -84,6 +87,7 @@ namespace Velora.Editor
             _weaponDataAssets = FindAssets<WeaponData>("t:WeaponData");
             _enemyDataAssets = FindAssets<EnemyData>("t:EnemyData");
             _battleSoundDataAssets = FindAssets<BattleSoundData>("t:BattleSoundData");
+            _uiSoundDataAssets = FindAssets<UISoundData>("t:UISoundData");
         }
 
         private static T[] FindAssets<T>(string filter) where T : UnityEngine.Object
@@ -236,6 +240,44 @@ namespace Velora.Editor
             DrawClipField(serializedObject, "_playerDamageSound");
             DrawClipField(serializedObject, "_playerDeathSound");
             DrawClipField(serializedObject, "_waveClearSound");
+
+            EditorGUILayout.EndHorizontal();
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        // --- UI Sound セクション ---
+
+        private void DrawUISoundSection()
+        {
+            EditorGUILayout.LabelField("UI", EditorStyles.boldLabel);
+            DrawSeparator();
+
+            if (_uiSoundDataAssets == null || _uiSoundDataAssets.Length == 0)
+            {
+                EditorGUILayout.HelpBox("UISoundData が見つかりません。", MessageType.Info);
+                return;
+            }
+
+            DrawSectionHeader("Asset", "Button Click");
+
+            foreach (var uiSoundData in _uiSoundDataAssets)
+            {
+                if (uiSoundData == null) continue;
+                DrawUISoundRow(uiSoundData);
+            }
+        }
+
+        private void DrawUISoundRow(UISoundData uiSoundData)
+        {
+            var serializedObject = new SerializedObject(uiSoundData);
+            serializedObject.Update();
+
+            EditorGUILayout.BeginHorizontal();
+
+            DrawAssetLabel(uiSoundData.name, uiSoundData);
+
+            DrawClipField(serializedObject, "_buttonClick");
 
             EditorGUILayout.EndHorizontal();
 
