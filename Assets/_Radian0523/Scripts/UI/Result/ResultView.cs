@@ -1,7 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -64,7 +63,7 @@ namespace Velora.UI
             // ローカル float 変数を DOTween の getter にすることで、
             // 外部状態を汚染せずにアニメーション値を管理できる。
             // 各 DOTween.To は呼び出し時点で即座に開始するため、
-            // Task.WhenAll で全ての完了を待機できる。
+            // UniTask.WhenAll で全ての完了を待機できる。
             float v1 = 0f, v2 = 0f, v3 = 0f, v4 = 0f;
 
             var t1 = DOTween.To(() => v1, v => { v1 = v; _waveText.text         = $"WAVE: {Mathf.RoundToInt(v)}";  }, (float)data.WavesReached, _countUpDuration);
@@ -72,11 +71,11 @@ namespace Velora.UI
             var t3 = DOTween.To(() => v3, v => { v3 = v; _killText.text         = $"KILLS: {Mathf.RoundToInt(v)}"; }, (float)data.TotalKills,    _countUpDuration);
             var t4 = DOTween.To(() => v4, v => { v4 = v; _survivalTimeText.text = $"TIME: {Mathf.FloorToInt(v)}s"; }, data.SurvivalTime,         _countUpDuration);
 
-            await Task.WhenAll(
-                t1.AsyncWaitForCompletion(),
-                t2.AsyncWaitForCompletion(),
-                t3.AsyncWaitForCompletion(),
-                t4.AsyncWaitForCompletion());
+            await UniTask.WhenAll(
+                t1.AsyncWaitForCompletion().AsUniTask(),
+                t2.AsyncWaitForCompletion().AsUniTask(),
+                t3.AsyncWaitForCompletion().AsUniTask(),
+                t4.AsyncWaitForCompletion().AsUniTask());
 
             _retryButton.interactable = true;
             _titleButton.interactable = true;

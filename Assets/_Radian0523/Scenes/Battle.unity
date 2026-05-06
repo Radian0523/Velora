@@ -11652,6 +11652,7 @@ MonoBehaviour:
   _hudPresenter: {fileID: 1308589435}
   _upgradeSelectPresenter: {fileID: 1364938951}
   _resultPresenter: {fileID: 1380629890}
+  _damageDirectionView: {fileID: 733134375}
 --- !u!1 &1750832214
 GameObject:
   m_ObjectHideFlags: 0

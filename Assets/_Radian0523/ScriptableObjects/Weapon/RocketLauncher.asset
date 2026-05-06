@@ -15,14 +15,13 @@ MonoBehaviour:
   _weaponName: Rocket Launcher
   _weaponType: 1
   _modelPrefab: {fileID: 1233992181619504068, guid: 036fc064914674179923267e7c261fcc, type: 3}
-  _damage: 80
+  _damage: 200
   _fireRate: 1
   _maxAmmo: 1
   _reloadTime: 2.5
   _headshotMultiplier: 1.5
   _spreadAngle: 0.5
   _adsSpreadAngle: 0.1
-  _recoilPattern: {fileID: 11400000, guid: 73692d7bb6e1347a2bf196cf24e24d58, type: 2}
   _adsFieldOfView: 50
   _projectileSpeed: 30
   _projectileMaxLifetime: 5
@@ -66,5 +65,5 @@ MonoBehaviour:
   _kickVibrato: 1
   _fireSound: {fileID: 8300000, guid: 40e71b0f7bd610849b40f150553f4702, type: 3}
   _reloadStartSound: {fileID: 8300000, guid: c3430338b7987524d96ce1f63db280cd, type: 3}
-  _reloadEndSound: {fileID: 0}
+  _reloadEndSound: {fileID: 8300000, guid: c3430338b7987524d96ce1f63db280cd, type: 3}
   _switchSound: {fileID: 8300000, guid: 10f58d426060d45808ab848762bfb95b, type: 3}
