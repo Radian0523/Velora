@@ -13,18 +13,18 @@ namespace Velora.Core
 {
     /// <summary>
     /// Battle シーンのエントリーポイント（pure C# クラス）。
-    /// BattleSceneDirector が担っていた全責務を吸収する。
     ///
     /// VContainer の IStartable / ITickable / IDisposable を実装し、
     /// コンポーネント初期化・ステート登録・イベント購読・ゲームループ駆動を行う。
     /// MonoBehaviour ではないため Update や OnDestroy を使わず、
     /// VContainer のライフサイクルに従って管理される。
     ///
-    /// 設計意図:
-    /// - 全依存をコンストラクタで受け取ることで、依存関係が明示的になる
-    /// - WaveDirector や GameFlowManager のステート登録など、
-    ///   構築後の初期化が必要な処理は Start() で実行する
-    /// - Tick() で毎フレームの更新処理を駆動する
+    /// AI Director 統合:
+    /// Wave 1 は既存の WaveData でそのまま開始する（パフォーマンスデータがないため）。
+    /// Wave 2 以降は AI Director がプレイヤーのパフォーマンスに基づいて
+    /// RuntimeWaveConfig を生成し、WaveDirector に渡す。
+    /// Wave 4 以降はエンドレスモードとして AI Director がウェーブを自動生成し続け、
+    /// ゲーム終了はプレイヤー死亡のみとなる。
     /// </summary>
     public class BattleFlowEntryPoint : IStartable, ITickable, IDisposable
     {
@@ -33,6 +33,7 @@ namespace Velora.Core
         private readonly UpgradeManager _upgradeManager;
         private readonly GameFlowManager _gameFlowManager;
         private readonly BattleConfig _config;
+        private readonly AIDirector _aiDirector;
 
         private readonly PlayerDamageReceiver _playerDamageReceiver;
         private readonly FPSController _fpsController;
@@ -46,6 +47,7 @@ namespace Velora.Core
         private readonly DamageDirectionView _damageDirectionView;
 
         private WaveDirector _waveDirector;
+        private int _currentWaveIndex;
 
         public BattleFlowEntryPoint(
             PlayerModel playerModel,
@@ -53,6 +55,7 @@ namespace Velora.Core
             UpgradeManager upgradeManager,
             GameFlowManager gameFlowManager,
             BattleConfig config,
+            AIDirector aiDirector,
             PlayerDamageReceiver playerDamageReceiver,
             FPSController fpsController,
             WeaponController weaponController,
@@ -68,6 +71,7 @@ namespace Velora.Core
             _upgradeManager = upgradeManager;
             _gameFlowManager = gameFlowManager;
             _config = config;
+            _aiDirector = aiDirector;
             _playerDamageReceiver = playerDamageReceiver;
             _fpsController = fpsController;
             _weaponController = weaponController;
@@ -104,6 +108,7 @@ namespace Velora.Core
         {
             UnsubscribeEvents();
             _waveDirector?.Dispose();
+            _aiDirector?.Dispose();
             _scoreManager?.Dispose();
         }
 
@@ -178,7 +183,6 @@ namespace Velora.Core
             _playerModel.OnDeath += HandlePlayerDeath;
             _playerModel.OnUpgradeApplied += HandleUpgradeApplied;
             _waveDirector.OnWaveCleared += HandleWaveCleared;
-            _waveDirector.OnAllWavesComplete += HandleAllWavesComplete;
 
             EventBus.Subscribe<PlayerDamagedEvent>(HandlePlayerDamaged);
             EventBus.Subscribe<WaveClearedEvent>(HandleWaveClearSound);
@@ -196,7 +200,6 @@ namespace Velora.Core
             if (_waveDirector != null)
             {
                 _waveDirector.OnWaveCleared -= HandleWaveCleared;
-                _waveDirector.OnAllWavesComplete -= HandleAllWavesComplete;
             }
 
             EventBus.Unsubscribe<PlayerDamagedEvent>(HandlePlayerDamaged);
@@ -206,36 +209,45 @@ namespace Velora.Core
 
         // --- ゲームフロー ---
 
+        /// <summary>
+        /// Wave 1 は既存の WaveData でそのまま開始する。
+        /// AI Director のパフォーマンスデータがまだないため、調整なしで実行する。
+        /// </summary>
         private async UniTaskVoid RunBattleFlow()
         {
             await _gameFlowManager.ChangeState(GameState.BattleReady);
             await _gameFlowManager.ChangeState(GameState.BattleInProgress);
         }
 
+        /// <summary>
+        /// エンドレスモード: ウェーブクリア後は常に次のウェーブへ進む。
+        /// AI Director が前ウェーブのパフォーマンスを評価し、次ウェーブの構成を決定する。
+        /// </summary>
         private void HandleWaveCleared(int waveNumber)
         {
-            if (!_waveDirector.HasNextWave) return;
+            _currentWaveIndex++;
             RunWaveTransition().Forget();
         }
 
+        /// <summary>
+        /// ウェーブ遷移シーケンス。
+        /// 1. クリア演出を再生
+        /// 2. AI Director が次ウェーブの RuntimeWaveConfig を生成（前ウェーブのメトリクス使用）
+        /// 3. メトリクスをリセット（次ウェーブの計測に備える）
+        /// 4. WaveDirector に pending config を設定（BattleReadyState が正しい番号を参照できる）
+        /// 5. アップグレード選択 → 開始演出 → 戦闘開始
+        /// </summary>
         private async UniTaskVoid RunWaveTransition()
         {
             await _gameFlowManager.ChangeState(GameState.WaveCleared);
-            _waveDirector.AdvanceToNextWave();
+
+            var nextConfig = _aiDirector.BuildNextWaveConfig(_currentWaveIndex);
+            _aiDirector.ResetWaveMetrics();
+            _waveDirector.SetPendingWaveConfig(nextConfig);
+
             await _gameFlowManager.ChangeState(GameState.UpgradeSelect);
             await _gameFlowManager.ChangeState(GameState.BattleReady);
             await _gameFlowManager.ChangeState(GameState.BattleInProgress);
-        }
-
-        private void HandleAllWavesComplete()
-        {
-            RunAllWavesClearSequence().Forget();
-        }
-
-        private async UniTaskVoid RunAllWavesClearSequence()
-        {
-            await _gameFlowManager.ChangeState(GameState.WaveCleared);
-            await _gameFlowManager.ChangeState(GameState.Result);
         }
 
         private void HandleUpgradeApplied(UpgradeData upgrade)

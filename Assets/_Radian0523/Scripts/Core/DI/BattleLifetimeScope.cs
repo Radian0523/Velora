@@ -43,6 +43,9 @@ namespace Velora.Core
         [Header("UI")]
         [SerializeField] private WaveEffectView _waveEffectView;
 
+        [Header("AI Director")]
+        [SerializeField] private AIDirectorConfig _aiDirectorConfig;
+
         [Header("サウンド")]
         [SerializeField] private BattleSoundData _battleSoundData;
 
@@ -67,6 +70,13 @@ namespace Velora.Core
                 .WithParameter<IReadOnlyList<UpgradeData>>(_upgradeDataList);
 
             builder.Register<GameFlowManager>(Lifetime.Scoped);
+
+            // AIDirector: パフォーマンス評価と難易度調整の中核。
+            // AIDirectorConfig と base wave リストをパラメータで渡し、
+            // PlayerModel はコンテナから自動解決する。
+            builder.Register<AIDirector>(Lifetime.Scoped)
+                .WithParameter<AIDirectorConfig>(_aiDirectorConfig)
+                .WithParameter<IReadOnlyList<WaveData>>(_waveDataList);
 
             // --- Battle 設定値 ---
             // WaveDirector が必要とするプレハブ・親 Transform 等は型が重複するため、

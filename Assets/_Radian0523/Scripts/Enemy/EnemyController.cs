@@ -67,8 +67,9 @@ namespace Velora.Enemy
         /// 敵を初期化する。WaveDirector やスポナーから呼び出す想定。
         /// EnemyData のパラメータから Model を構築し、BehaviorType で攻撃方式を自動選択する。
         /// DeathState が Agent 停止・Collider 無効化を行うため、再利用時にここでリセットする。
+        /// healthMultiplier は AI Director が難易度調整に使用する。デフォルト 1f で後方互換。
         /// </summary>
-        public void Initialize(EnemyData data, Transform playerTransform, IDamageable playerDamageable)
+        public void Initialize(EnemyData data, Transform playerTransform, IDamageable playerDamageable, float healthMultiplier = 1f)
         {
             Data = data;
             PlayerTransform = playerTransform;
@@ -89,8 +90,9 @@ namespace Velora.Enemy
             SetColliderEnabled(true);
             _lookAtWeight = 0f;
 
-            // EnemyModel は readonly _maxHealth を持つため、データが変わる場合は毎回 new する
-            Model = new EnemyModel(data.MaxHealth, data.StaggerThreshold);
+            // EnemyModel は readonly _maxHealth を持つため、データが変わる場合は毎回 new する。
+            // AI Director による HP スケーリングは healthMultiplier で適用する。
+            Model = new EnemyModel(data.MaxHealth * healthMultiplier, data.StaggerThreshold);
             AttackBehavior = SelectBehavior(data.BehaviorType);
             ApplyColorOffset(data);
 

@@ -11647,6 +11647,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9346e54e0906e4fcb98e2192f7b35cec, type: 2}
   - {fileID: 11400000, guid: 813d88629452444f3858535a0c2a8e92, type: 2}
   _waveEffectView: {fileID: 322610767}
+  _aiDirectorConfig: {fileID: 11400000, guid: b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7, type: 2}
   _battleSoundData: {fileID: 11400000, guid: 4ac1ac89dd0d3422694ac459781f5264, type: 2}
   _hudPresenter: {fileID: 1308589435}
   _upgradeSelectPresenter: {fileID: 1364938951}

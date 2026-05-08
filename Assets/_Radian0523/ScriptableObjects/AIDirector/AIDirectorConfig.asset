@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0256fd53382154b21bc3bb7919fe55d1, type: 3}
+  m_Name: AIDirectorConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.Data.AIDirectorConfig
+  _smoothingFactor: 0.4
+  _accuracyWeight: 0.3
+  _clearSpeedWeight: 0.3
+  _healthWeight: 0.25
+  _headshotWeight: 0.15
+  _expectedClearTimePerEnemy: 3
+  _enemyCountScaleRange: {x: 0.7, y: 1.5}
+  _spawnDelayScaleRange: {x: 0.6, y: 1.4}
+  _healthScaleRange: {x: 0.8, y: 1.3}
+  _baseGrowthPerWave: 1
+  _maxRangedRatio: 0.5
+  _rangedEnemyData: {fileID: 11400000, guid: 9cec40a306233470082415dd652e1478, type: 2}
+  _rusherEnemyData: {fileID: 11400000, guid: 1920ea0662f074dc4b284a9d48c09eaf, type: 2}

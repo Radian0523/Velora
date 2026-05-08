@@ -156,4 +156,28 @@ namespace Velora.Core
             LanguageKey = languageKey;
         }
     }
+
+    /// <summary>
+    /// AI Director がウェーブ構成を決定した際に発行される。
+    /// デバッグ HUD やログ出力でパフォーマンス評価と難易度調整の結果を確認できる。
+    /// </summary>
+    public readonly struct DifficultyAdjustedEvent
+    {
+        public float PerformanceScore { get; }
+        public float EnemyCountScale { get; }
+        public float HealthScale { get; }
+        public int WaveNumber { get; }
+
+        public DifficultyAdjustedEvent(
+            float performanceScore,
+            float enemyCountScale,
+            float healthScale,
+            int waveNumber)
+        {
+            PerformanceScore = performanceScore;
+            EnemyCountScale = enemyCountScale;
+            HealthScale = healthScale;
+            WaveNumber = waveNumber;
+        }
+    }
 }
