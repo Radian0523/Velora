@@ -30,8 +30,10 @@ namespace Velora.Weapon
         // 初期装備 + ピックアップで追加された武器を保持する。
         private readonly List<WeaponData> _ownedWeapons = new();
 
-        [Header("リザーブ弾薬（全武器共有）")]
-        [SerializeField] private int _initialReserveAmmo = 120;
+        [Header("リザーブ弾薬（タイプ別初期値）")]
+        [SerializeField] private int _initialLightReserve = 120;
+        [SerializeField] private int _initialEnergyReserve = 24;
+        [SerializeField] private int _initialExplosiveReserve = 5;
 
         [Header("参照")]
         [SerializeField] private Camera _playerCamera;
@@ -98,7 +100,13 @@ namespace Velora.Weapon
         /// </summary>
         private void Awake()
         {
-            _ammoManager = new WeaponAmmoManager(_initialReserveAmmo);
+            var initialReserves = new Dictionary<AmmoType, int>
+            {
+                { AmmoType.Light, _initialLightReserve },
+                { AmmoType.Energy, _initialEnergyReserve },
+                { AmmoType.Explosive, _initialExplosiveReserve }
+            };
+            _ammoManager = new WeaponAmmoManager(initialReserves);
             _effectPoolManager = new WeaponEffectPoolManager();
 
             if (_initialWeapons == null || _initialWeapons.Length == 0) return;
@@ -509,11 +517,11 @@ namespace Velora.Weapon
         }
 
         /// <summary>
-        /// リザーブ弾薬を補充する。AmmoPickup や WeaponPickup から呼ばれる公開メソッド。
+        /// 指定した弾薬タイプのリザーブを補充する。AmmoPickup や WeaponPickup から呼ばれる公開メソッド。
         /// </summary>
-        public void AddReserveAmmo(int amount)
+        public void AddReserveAmmo(AmmoType type, int amount)
         {
-            _ammoManager.AddReserve(amount);
+            _ammoManager.AddReserve(type, amount);
             OnAmmoChanged?.Invoke(_ammoManager.CurrentAmmo, _currentWeaponData?.MaxAmmo ?? 0);
         }
 

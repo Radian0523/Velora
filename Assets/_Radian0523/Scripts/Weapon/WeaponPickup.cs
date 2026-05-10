@@ -32,8 +32,8 @@ namespace Velora.Weapon
                 return;
             }
 
-            // 所持済みの武器を拾った場合、マガジン1本分の弾薬をリザーブに補充する
-            weaponController.AddReserveAmmo(_weaponData.MaxAmmo);
+            // 所持済みの武器を拾った場合、対応する弾薬タイプのリザーブにマガジン1本分を補充する
+            weaponController.AddReserveAmmo(_weaponData.AmmoType, _weaponData.MaxAmmo);
             Destroy(gameObject);
         }
     }

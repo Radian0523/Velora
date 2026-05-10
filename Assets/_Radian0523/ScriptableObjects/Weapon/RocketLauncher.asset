@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Velora.Data.WeaponData
   _weaponName: Rocket Launcher
   _weaponType: 1
+  _ammoType: 2
   _modelPrefab: {fileID: 1233992181619504068, guid: 036fc064914674179923267e7c261fcc, type: 3}
   _damage: 200
   _fireRate: 1

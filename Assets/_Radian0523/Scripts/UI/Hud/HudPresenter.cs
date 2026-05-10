@@ -16,6 +16,11 @@ namespace Velora.UI
     {
         [SerializeField] private HudView _hudView;
 
+        [Header("弾薬タイプ別テキスト色")]
+        [SerializeField] private Color _lightAmmoColor = new Color(1f, 0.843f, 0f);
+        [SerializeField] private Color _energyAmmoColor = new Color(0f, 0.898f, 1f);
+        [SerializeField] private Color _explosiveAmmoColor = new Color(1f, 0.188f, 0.188f);
+
         private PlayerModel _playerModel;
         private WeaponController _weaponController;
         private bool _isReloading;
@@ -35,7 +40,8 @@ namespace Velora.UI
                     _weaponController.CurrentAmmo,
                     _weaponController.CurrentWeaponData.MaxAmmo,
                     _weaponController.ReserveAmmo,
-                    false);
+                    false,
+                    GetAmmoTypeColor(_weaponController.CurrentWeaponData.AmmoType));
             }
 
             _playerModel.OnHealthChanged += HandleHealthChanged;
@@ -84,7 +90,9 @@ namespace Velora.UI
 
         private void HandleAmmoChanged(int current, int max)
         {
-            _hudView.UpdateAmmoDisplay(current, max, _weaponController.ReserveAmmo, _isReloading);
+            _hudView.UpdateAmmoDisplay(
+                current, max, _weaponController.ReserveAmmo, _isReloading,
+                GetAmmoTypeColor(_weaponController.CurrentWeaponData.AmmoType));
         }
 
         private void HandleReloadStateChanged(bool isReloading)
@@ -97,7 +105,8 @@ namespace Velora.UI
                     _weaponController.CurrentAmmo,
                     _weaponController.CurrentWeaponData.MaxAmmo,
                     _weaponController.ReserveAmmo,
-                    isReloading);
+                    isReloading,
+                    GetAmmoTypeColor(_weaponController.CurrentWeaponData.AmmoType));
 
                 if (isReloading)
                 {
@@ -117,7 +126,8 @@ namespace Velora.UI
             _isReloading = false;
             _hudView.UpdateAmmoDisplay(
                 _weaponController.CurrentAmmo, weaponData.MaxAmmo,
-                _weaponController.ReserveAmmo, false);
+                _weaponController.ReserveAmmo, false,
+                GetAmmoTypeColor(weaponData.AmmoType));
             _hudView.SelectWeaponSlot(_weaponController.CurrentWeaponIndex);
             _hudView.HideReloadRing();
         }
@@ -130,6 +140,17 @@ namespace Velora.UI
         private void HandleWaveStarted(WaveStartedEvent e)
         {
             _hudView.ShowWaveNumber(e.WaveNumber);
+        }
+
+        private Color GetAmmoTypeColor(AmmoType ammoType)
+        {
+            return ammoType switch
+            {
+                AmmoType.Light => _lightAmmoColor,
+                AmmoType.Energy => _energyAmmoColor,
+                AmmoType.Explosive => _explosiveAmmoColor,
+                _ => Color.white
+            };
         }
     }
 }

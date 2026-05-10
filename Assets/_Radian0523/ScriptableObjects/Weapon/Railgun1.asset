@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Velora.Data.WeaponData
   _weaponName: Railgun
   _weaponType: 0
+  _ammoType: 1
   _modelPrefab: {fileID: 4703980405010025828, guid: d1b6292544b7a46798c98efcbc59c3cf, type: 3}
   _damage: 50
   _fireRate: 0.8

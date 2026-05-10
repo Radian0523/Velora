@@ -4934,6 +4934,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.HudPresenter
   _hudView: {fileID: 1308589436}
+  _lightAmmoColor: {r: 0, g: 0.91849303, b: 1, a: 1}
+  _energyAmmoColor: {r: 0.99765015, g: 1, b: 0, a: 1}
+  _explosiveAmmoColor: {r: 1, g: 0.188, b: 0.188, a: 1}
 --- !u!114 &1308589436
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11572,7 +11575,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Velora.Weapon.WeaponController
   _initialWeapons:
   - {fileID: 11400000, guid: 12a999c0f38ce4acfadb81577f76c6a6, type: 2}
-  _initialReserveAmmo: 120
+  _initialLightReserve: 120
+  _initialEnergyReserve: 24
+  _initialExplosiveReserve: 5
   _playerCamera: {fileID: 330585545}
   _weaponCamera: {fileID: 1077698863}
   _fpsController: {fileID: 1510134889}

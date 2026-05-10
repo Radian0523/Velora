@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Velora.Data
@@ -6,6 +7,32 @@ namespace Velora.Data
     {
         Hitscan,
         Projectile
+    }
+
+    /// <summary>
+    /// 弾薬タイプの分類。武器間で弾薬消費が干渉しないよう、
+    /// タイプごとに独立したリザーブプールを持つ。
+    /// 新しい武器を追加する際は Inspector で AmmoType を選択するだけでよい。
+    /// </summary>
+    public enum AmmoType
+    {
+        Light,      // Pistol, SMG — 汎用・大量消費
+        Energy,     // Railgun1, Railgun2 — 精密・中量
+        Explosive   // RocketLauncher — 高火力・少量
+    }
+
+    /// <summary>
+    /// 弾薬タイプと補充量のペア。AmmoPickup の Inspector で
+    /// 1つのピックアップに複数タイプの弾薬を設定できるようにする。
+    /// </summary>
+    [Serializable]
+    public struct AmmoEntry
+    {
+        [SerializeField] private AmmoType _type;
+        [SerializeField] private int _amount;
+
+        public AmmoType Type => _type;
+        public int Amount => _amount;
     }
 
     /// <summary>
@@ -19,6 +46,9 @@ namespace Velora.Data
         [Header("基本情報")]
         [SerializeField] private string _weaponName;
         [SerializeField] private WeaponType _weaponType;
+
+        [Header("弾薬タイプ")]
+        [SerializeField] private AmmoType _ammoType;
 
         [Header("モデル")]
         [SerializeField] private GameObject _modelPrefab;
@@ -74,6 +104,7 @@ namespace Velora.Data
 
         public string WeaponName => _weaponName;
         public WeaponType WeaponType => _weaponType;
+        public AmmoType AmmoType => _ammoType;
         public GameObject ModelPrefab => _modelPrefab;
         public float Damage => _damage;
         public float FireRate => _fireRate;
