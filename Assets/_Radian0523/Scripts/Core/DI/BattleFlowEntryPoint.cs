@@ -48,6 +48,7 @@ namespace Velora.Core
 
         private WaveDirector _waveDirector;
         private int _currentWaveIndex;
+        private int _lastBgmIndex = -1;
 
         public BattleFlowEntryPoint(
             PlayerModel playerModel,
@@ -218,6 +219,7 @@ namespace Velora.Core
         private async UniTaskVoid RunBattleFlow()
         {
             await _gameFlowManager.ChangeState(GameState.BattleReady);
+            PlayNextBGM();
             await _gameFlowManager.ChangeState(GameState.BattleInProgress);
         }
 
@@ -249,6 +251,7 @@ namespace Velora.Core
 
             await _gameFlowManager.ChangeState(GameState.UpgradeSelect);
             await _gameFlowManager.ChangeState(GameState.BattleReady);
+            PlayNextBGM();
             await _gameFlowManager.ChangeState(GameState.BattleInProgress);
         }
 
@@ -262,6 +265,7 @@ namespace Velora.Core
 
         private void HandlePlayerDeath()
         {
+            AudioHelper.StopBGM();
             PlayBattleSound(_config.BattleSoundData?.PlayerDeathSound);
             _gameFlowManager.ChangeState(GameState.GameOver).Forget();
         }
@@ -286,6 +290,33 @@ namespace Velora.Core
         private void HandleHealthPickup(HealthPickedUpEvent e)
         {
             PlayBattleSound(_config.BattleSoundData?.HealthPickupSound);
+        }
+
+        /// <summary>
+        /// BGM 配列からランダムに選曲する。前回と同じ曲は避ける。
+        /// </summary>
+        private void PlayNextBGM()
+        {
+            var clips = _config.BattleSoundData?.BgmClips;
+            if (clips == null || clips.Count == 0) return;
+
+            int index = PickRandomIndex(clips.Count, _lastBgmIndex);
+            _lastBgmIndex = index;
+            AudioHelper.PlayBGM(clips[index]);
+        }
+
+        private static int PickRandomIndex(int count, int excludeIndex)
+        {
+            if (count == 1) return 0;
+
+            int index;
+            do
+            {
+                index = UnityEngine.Random.Range(0, count);
+            }
+            while (index == excludeIndex);
+
+            return index;
         }
 
         private void PlayBattleSound(AudioClip clip)

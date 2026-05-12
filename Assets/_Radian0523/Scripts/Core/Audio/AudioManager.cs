@@ -1,6 +1,6 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using UnityEngine;
 
 namespace Velora.Core
@@ -10,6 +10,10 @@ namespace Velora.Core
     /// BGM は A/B 2つの AudioSource を切り替えてクロスフェードする。
     /// SE は事前生成した AudioSource 配列から空いているものを使い回す。
     /// ボリューム設定は PlayerPrefs に永続化する。
+    ///
+    /// クロスフェードは UniTask の手動補間ループで実装している。
+    /// DOTween の DOFade + AsyncWaitForCompletion はヒープアロケーションが多く、
+    /// BGM 切り替え時に GC スパイクでフレーム落ちを起こすため採用しなかった。
     /// </summary>
     public class AudioManager : IDisposable
     {
@@ -24,6 +28,7 @@ namespace Velora.Core
         private readonly AudioSource[] _seSources;
 
         private AudioSource _currentBgmSource;
+        private CancellationTokenSource _bgmCts;
         private float _bgmVolume;
         private float _seVolume;
         private bool _isDisposed;
@@ -55,29 +60,66 @@ namespace Velora.Core
         {
             if (clip == null) return;
 
-            var nextSource = (_currentBgmSource == _bgmSourceA) ? _bgmSourceB : _bgmSourceA;
+            CancelBgmFade();
+            _bgmCts = new CancellationTokenSource();
+            var ct = _bgmCts.Token;
+
+            // オーディオデータの非同期プリロード。
+            // Play() 時の同期デコードによるフレーム落ちを防ぐ。
+            if (clip.loadState != AudioDataLoadState.Loaded)
+            {
+                clip.LoadAudioData();
+                await UniTask.WaitUntil(
+                    () => clip.loadState == AudioDataLoadState.Loaded,
+                    cancellationToken: ct);
+            }
+
+            var prevSource = _currentBgmSource;
+            var nextSource = (prevSource == _bgmSourceA) ? _bgmSourceB : _bgmSourceA;
+            float prevStartVolume = prevSource.volume;
+
             nextSource.clip = clip;
             nextSource.volume = 0f;
             nextSource.loop = true;
             nextSource.Play();
-
-            // 現在の BGM フェードアウトと新 BGM フェードインを同時実行
-            var fadeOutTween = _currentBgmSource.DOFade(0f, fadeDuration).SetUpdate(true);
-            var fadeInTween = nextSource.DOFade(_bgmVolume, fadeDuration).SetUpdate(true);
-
-            await UniTask.WhenAll(
-                fadeOutTween.AsyncWaitForCompletion().AsUniTask(),
-                fadeInTween.AsyncWaitForCompletion().AsUniTask());
-
-            _currentBgmSource.Stop();
             _currentBgmSource = nextSource;
+
+            // Play() 直後はオーディオスレッドがバッファを充填するため負荷が高い。
+            // 1フレーム空けることでそのスパイクとフェード処理が同一フレームに重なるのを防ぐ。
+            await UniTask.Yield(PlayerLoopTiming.PreLateUpdate, ct);
+
+            float elapsed = 0f;
+            while (elapsed < fadeDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / fadeDuration);
+                prevSource.volume = Mathf.Lerp(prevStartVolume, 0f, t);
+                nextSource.volume = Mathf.Lerp(0f, _bgmVolume, t);
+                await UniTask.Yield(PlayerLoopTiming.PreLateUpdate, ct);
+            }
+
+            prevSource.volume = 0f;
+            prevSource.Stop();
+            nextSource.volume = _bgmVolume;
         }
 
         public async UniTask StopBGM(float fadeDuration = DefaultFadeDuration)
         {
-            await _currentBgmSource.DOFade(0f, fadeDuration)
-                .SetUpdate(true)
-                .AsyncWaitForCompletion();
+            CancelBgmFade();
+            _bgmCts = new CancellationTokenSource();
+            var ct = _bgmCts.Token;
+
+            float startVolume = _currentBgmSource.volume;
+            float elapsed = 0f;
+            while (elapsed < fadeDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / fadeDuration);
+                _currentBgmSource.volume = Mathf.Lerp(startVolume, 0f, t);
+                await UniTask.Yield(PlayerLoopTiming.PreLateUpdate, ct);
+            }
+
+            _currentBgmSource.volume = 0f;
             _currentBgmSource.Stop();
         }
 
@@ -112,8 +154,14 @@ namespace Velora.Core
             if (_isDisposed) return;
             _isDisposed = true;
 
-            _bgmSourceA.DOKill();
-            _bgmSourceB.DOKill();
+            CancelBgmFade();
+        }
+
+        private void CancelBgmFade()
+        {
+            _bgmCts?.Cancel();
+            _bgmCts?.Dispose();
+            _bgmCts = null;
         }
 
         private void LoadVolumeSettings()

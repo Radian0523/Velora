@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Velora.Data
@@ -23,10 +24,14 @@ namespace Velora.Data
         [Header("Health")]
         [SerializeField] private AudioClip _healthPickupSound;
 
+        [Header("BGM")]
+        [SerializeField] private AudioClip[] _bgmClips;
+
         public AudioClip PlayerDamageSound => _playerDamageSound;
         public AudioClip PlayerDeathSound => _playerDeathSound;
         public AudioClip WaveClearSound => _waveClearSound;
         public AudioClip AmmoPickupSound => _ammoPickupSound;
         public AudioClip HealthPickupSound => _healthPickupSound;
+        public IReadOnlyList<AudioClip> BgmClips => _bgmClips;
     }
 }
