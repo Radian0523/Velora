@@ -20,9 +20,13 @@ namespace Velora.Data
         [Header("Ammo")]
         [SerializeField] private AudioClip _ammoPickupSound;
 
+        [Header("Health")]
+        [SerializeField] private AudioClip _healthPickupSound;
+
         public AudioClip PlayerDamageSound => _playerDamageSound;
         public AudioClip PlayerDeathSound => _playerDeathSound;
         public AudioClip WaveClearSound => _waveClearSound;
         public AudioClip AmmoPickupSound => _ammoPickupSound;
+        public AudioClip HealthPickupSound => _healthPickupSound;
     }
 }

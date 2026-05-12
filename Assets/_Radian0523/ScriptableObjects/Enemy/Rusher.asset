@@ -39,3 +39,4 @@ MonoBehaviour:
   _spawnEffectPrefab: {fileID: 3377181292992421420, guid: 12820c008196d478f9a2cd51dcd7c625, type: 3}
   _spawnWeight: 1
   _scoreValue: 100
+  _dropTable: {fileID: 11400000, guid: ad92cbebff7954527a6036f03589fcd4, type: 2}

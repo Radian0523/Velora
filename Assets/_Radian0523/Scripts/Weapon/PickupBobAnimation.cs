@@ -11,7 +11,7 @@ namespace Velora.Weapon
     {
         private const float RotationSpeed = 90f;
         private const float BobAmplitude = 0.15f;
-        private const float BobFrequency = 1.5f;
+        private const float BobFrequency = 0.5f;
 
         private Vector3 _startPosition;
 

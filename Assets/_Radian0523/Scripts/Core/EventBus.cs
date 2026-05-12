@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Velora.Data;
 
 namespace Velora.Core
 {
@@ -110,12 +111,14 @@ namespace Velora.Core
         public int ScoreValue { get; }
         public Vector3 Position { get; }
         public string EnemyName { get; }
+        public DropTableData DropTable { get; }
 
-        public EnemyDiedEvent(int scoreValue, Vector3 position, string enemyName)
+        public EnemyDiedEvent(int scoreValue, Vector3 position, string enemyName, DropTableData dropTable)
         {
             ScoreValue = scoreValue;
             Position = position;
             EnemyName = enemyName;
+            DropTable = dropTable;
         }
     }
 
@@ -146,6 +149,8 @@ namespace Velora.Core
     }
 
     public readonly struct AmmoPickedUpEvent { }
+
+    public readonly struct HealthPickedUpEvent { }
 
     public readonly struct FontThemeChangedEvent
     {

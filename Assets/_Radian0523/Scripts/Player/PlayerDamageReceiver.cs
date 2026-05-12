@@ -36,6 +36,12 @@ namespace Velora.Player
             EventBus.Publish(new PlayerDamagedEvent(damage, hitPoint));
         }
 
+        public void Heal(float amount)
+        {
+            if (_playerModel == null || _playerModel.IsDead) return;
+            _playerModel.Heal(amount);
+        }
+
         private void HandleHealthChanged(float current, float max)
         {
             EventBus.Publish(new PlayerHealthChangedEvent(current, max));

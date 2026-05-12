@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84c938354986f42329f0969758d61d16, type: 3}
+  m_Name: DropTableData_Default
+  m_EditorClassIdentifier: Assembly-CSharp::Velora.Data.DropTableData
+  _dropRate: 0.7
+  _entries:
+  - _pickupPrefab: {fileID: 5374023437616797281, guid: 749fa60f7ac8f47a6b1bc63a26333401, type: 3}
+    _weight: 1
+  - _pickupPrefab: {fileID: 2320177135116393078, guid: 49a64ed7675f144df8b2645c2ad11d11, type: 3}
+    _weight: 1
+  - _pickupPrefab: {fileID: 4042533220606570031, guid: 9c29de43e7b2d4940bab31d43a65dc71, type: 3}
+    _weight: 1
+  - _pickupPrefab: {fileID: 2385315941414648780, guid: 88cdfcefe618747a383f33f5cf991eab, type: 3}
+    _weight: 1

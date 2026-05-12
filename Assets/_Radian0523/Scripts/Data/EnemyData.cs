@@ -63,6 +63,9 @@ namespace Velora.Data
         [SerializeField] private float _spawnWeight = 1f;
         [SerializeField] private int _scoreValue = 100;
 
+        [Header("ドロップ")]
+        [SerializeField] private DropTableData _dropTable;
+
         public string EnemyName => _enemyName;
         public EnemyBehaviorType BehaviorType => _behaviorType;
         public float MaxHealth => _maxHealth;
@@ -90,5 +93,6 @@ namespace Velora.Data
         public GameObject SpawnEffectPrefab => _spawnEffectPrefab;
         public float SpawnWeight => _spawnWeight;
         public int ScoreValue => _scoreValue;
+        public DropTableData DropTable => _dropTable;
     }
 }
