@@ -13,7 +13,6 @@ namespace Velora.UI
         [SerializeField] private WeaponSlotView[] _slots;
 
         private int _currentSelectedIndex = -1;
-        private int _assignedCount;
 
         /// <summary>
         /// 全スロットを空状態にリセットする。
@@ -21,7 +20,6 @@ namespace Velora.UI
         /// </summary>
         public void Initialize()
         {
-            _assignedCount = 0;
             _currentSelectedIndex = -1;
 
             for (int i = 0; i < _slots.Length; i++)
@@ -31,20 +29,20 @@ namespace Velora.UI
         }
 
         /// <summary>
-        /// 次の空スロットに武器アイコンを割り当てる。
-        /// 呼び出し順で左から順に埋まっていく。
+        /// 指定スロットに武器アイコンを割り当てる。
+        /// WeaponData.SlotIndex で決まる固定位置に配置することで、
+        /// キー入力（1-5）との対応を常に一致させる。
         /// </summary>
-        public void AssignWeapon(Sprite icon)
+        public void AssignWeapon(int slotIndex, Sprite icon)
         {
-            if (_assignedCount >= _slots.Length) return;
+            if (slotIndex < 0 || slotIndex >= _slots.Length) return;
 
-            _slots[_assignedCount].AssignWeapon(icon);
-            _assignedCount++;
+            _slots[slotIndex].AssignWeapon(icon);
         }
 
         public void SelectSlot(int index)
         {
-            if (index < 0 || index >= _assignedCount) return;
+            if (index < 0 || index >= _slots.Length) return;
 
             if (_currentSelectedIndex >= 0 && _currentSelectedIndex < _slots.Length)
             {

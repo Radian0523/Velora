@@ -54,11 +54,15 @@ namespace Velora.UI
             _weaponController.OnWeaponSwitched += HandleWeaponSwitched;
             _weaponController.OnWeaponAdded += HandleWeaponAdded;
 
-            // 空スロットを生成した後、所持済み武器のアイコンを左から順に割り当てる
+            // 空スロットを生成した後、所持済み武器を SlotIndex に基づいて割り当てる
             _hudView.InitializeWeaponBar();
-            foreach (var weapon in _weaponController.Weapons)
+            for (int i = 0; i < _weaponController.Weapons.Count; i++)
             {
-                _hudView.AssignWeaponToSlot(weapon.Icon);
+                var weapon = _weaponController.Weapons[i];
+                if (weapon != null)
+                {
+                    _hudView.AssignWeaponToSlot(i, weapon.Icon);
+                }
             }
             _hudView.SelectWeaponSlot(_weaponController.CurrentWeaponIndex);
 
@@ -134,7 +138,7 @@ namespace Velora.UI
 
         private void HandleWeaponAdded(WeaponData weaponData)
         {
-            _hudView.AssignWeaponToSlot(weaponData.Icon);
+            _hudView.AssignWeaponToSlot(weaponData.SlotIndex, weaponData.Icon);
         }
 
         private void HandleWaveStarted(WaveStartedEvent e)

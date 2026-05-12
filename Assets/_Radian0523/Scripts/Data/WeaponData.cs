@@ -47,6 +47,10 @@ namespace Velora.Data
         [SerializeField] private string _weaponName;
         [SerializeField] private WeaponType _weaponType;
 
+        [Header("UI スロット")]
+        [Tooltip("武器バーでの固定表示位置（0始まり）。キー入力 1-5 と対応する。")]
+        [SerializeField] private int _slotIndex;
+
         [Header("弾薬タイプ")]
         [SerializeField] private AmmoType _ammoType;
 
@@ -104,6 +108,7 @@ namespace Velora.Data
 
         public string WeaponName => _weaponName;
         public WeaponType WeaponType => _weaponType;
+        public int SlotIndex => _slotIndex;
         public AmmoType AmmoType => _ammoType;
         public GameObject ModelPrefab => _modelPrefab;
         public float Damage => _damage;

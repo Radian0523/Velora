@@ -54,9 +54,9 @@ namespace Velora.UI
             _weaponBar.Initialize();
         }
 
-        public void AssignWeaponToSlot(Sprite icon)
+        public void AssignWeaponToSlot(int slotIndex, Sprite icon)
         {
-            _weaponBar.AssignWeapon(icon);
+            _weaponBar.AssignWeapon(slotIndex, icon);
         }
 
         public void SelectWeaponSlot(int index)

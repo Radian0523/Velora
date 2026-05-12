@@ -26,9 +26,11 @@ namespace Velora.Weapon
         [Header("武器データ（初期装備）")]
         [SerializeField] private WeaponData[] _initialWeapons;
 
-        // ランタイムで管理する所持武器リスト。
-        // 初期装備 + ピックアップで追加された武器を保持する。
-        private readonly List<WeaponData> _ownedWeapons = new();
+        // スロットインデックスに対応した固定長配列。
+        // WeaponData.SlotIndex で決まる位置に武器を格納し、
+        // キー入力（1-5）と配列インデックスを直接対応させる。
+        private const int SlotCount = 5;
+        private readonly WeaponData[] _weaponSlots = new WeaponData[SlotCount];
 
         [Header("リザーブ弾薬（タイプ別初期値）")]
         [SerializeField] private int _initialLightReserve = 120;
@@ -87,7 +89,7 @@ namespace Velora.Weapon
             _playerModel = playerModel;
         }
         public WeaponData CurrentWeaponData => _currentWeaponData;
-        public IReadOnlyList<WeaponData> Weapons => _ownedWeapons;
+        public IReadOnlyList<WeaponData> Weapons => _weaponSlots;
         public int CurrentWeaponIndex => _currentWeaponIndex;
         public bool IsAiming => _isAiming;
         public int CurrentAmmo => _ammoManager.CurrentAmmo;
@@ -95,8 +97,8 @@ namespace Velora.Weapon
 
         /// <summary>
         /// 初期武器の登録を Awake で行い、他スクリプトの Start() より先に
-        /// _ownedWeapons を確定させる。BattleSceneDirector.Start() → HudPresenter.Initialize()
-        /// が Weapons を参照する時点で武器リストが空にならないことを保証する。
+        /// _weaponSlots を確定させる。BattleSceneDirector.Start() → HudPresenter.Initialize()
+        /// が Weapons を参照する時点で武器スロットが空にならないことを保証する。
         /// </summary>
         private void Awake()
         {
@@ -120,10 +122,8 @@ namespace Velora.Weapon
 
         private void Start()
         {
-            if (_ownedWeapons.Count > 0)
-            {
-                EquipWeapon(0);
-            }
+            int first = FindFirstOccupiedSlot();
+            if (first >= 0) EquipWeapon(first);
         }
 
         private void Update()
@@ -200,7 +200,7 @@ namespace Velora.Weapon
         public void OnWeaponScroll(InputValue value)
         {
             float scroll = value.Get<float>();
-            if (scroll == 0f || _ownedWeapons.Count <= 1) return;
+            if (scroll == 0f) return;
 
             // macOS の慣性スクロールやバウンスで符号が反転するイベントが
             // 連続発生するため、クールダウンで誤切替を防ぐ
@@ -208,9 +208,10 @@ namespace Velora.Weapon
             if (Time.unscaledTime - _lastScrollTime < scrollCooldown) return;
             _lastScrollTime = Time.unscaledTime;
 
+            // 空スロットをスキップして次の武器を見つける
             int direction = scroll > 0f ? -1 : 1;
-            int nextIndex = (_currentWeaponIndex + direction + _ownedWeapons.Count) % _ownedWeapons.Count;
-            EquipWeapon(nextIndex);
+            int nextSlot = FindNextOccupiedSlot(_currentWeaponIndex, direction);
+            if (nextSlot >= 0) EquipWeapon(nextSlot);
         }
 
         public void OnWeapon1(InputValue value) { if (value.isPressed) EquipWeapon(0); }
@@ -219,6 +220,31 @@ namespace Velora.Weapon
         public void OnWeapon4(InputValue value) { if (value.isPressed) EquipWeapon(3); }
         public void OnWeapon5(InputValue value) { if (value.isPressed) EquipWeapon(4); }
         public void OnWeapon6(InputValue value) { if (value.isPressed) EquipWeapon(5); }
+
+        // --- スロット検索 ---
+
+        /// <summary>
+        /// 現在のスロットから指定方向に巡回し、次に武器が入っているスロットを返す。
+        /// 全スロットが空（自分以外）の場合は -1 を返す。
+        /// </summary>
+        private int FindNextOccupiedSlot(int currentSlot, int direction)
+        {
+            for (int i = 1; i < SlotCount; i++)
+            {
+                int candidate = (currentSlot + direction * i + SlotCount) % SlotCount;
+                if (_weaponSlots[candidate] != null) return candidate;
+            }
+            return -1;
+        }
+
+        private int FindFirstOccupiedSlot()
+        {
+            for (int i = 0; i < SlotCount; i++)
+            {
+                if (_weaponSlots[i] != null) return i;
+            }
+            return -1;
+        }
 
         // --- 武器登録・追加 ---
 
@@ -236,14 +262,16 @@ namespace Velora.Weapon
         }
 
         /// <summary>
-        /// 武器をランタイムリストに登録し、モデルを生成して _modelRegistry に追加する。
-        /// Start() からの初期登録と AddWeapon() からのピックアップ追加で共用する。
+        /// 武器を SlotIndex に基づいてスロット配列に登録し、モデルを生成して _modelRegistry に追加する。
+        /// Awake() からの初期登録と AddWeapon() からのピックアップ追加で共用する。
         /// </summary>
         private void RegisterWeapon(WeaponData weaponData)
         {
-            if (_ownedWeapons.Contains(weaponData)) return;
+            int slot = weaponData.SlotIndex;
+            if (slot < 0 || slot >= SlotCount) return;
+            if (_weaponSlots[slot] != null) return;
 
-            _ownedWeapons.Add(weaponData);
+            _weaponSlots[slot] = weaponData;
 
             if (weaponData.ModelPrefab != null)
             {
@@ -263,26 +291,27 @@ namespace Velora.Weapon
         public bool AddWeapon(WeaponData weaponData)
         {
             if (weaponData == null) return false;
-            if (_ownedWeapons.Contains(weaponData)) return false;
+            int slot = weaponData.SlotIndex;
+            if (slot < 0 || slot >= SlotCount) return false;
+            if (_weaponSlots[slot] != null) return false;
 
             RegisterWeapon(weaponData);
             OnWeaponAdded?.Invoke(weaponData);
 
-            // 追加した武器に即座に切り替える
-            EquipWeapon(_ownedWeapons.Count - 1);
+            EquipWeapon(slot);
             return true;
         }
 
         // --- 武器切替 ---
 
-        private void EquipWeapon(int index)
+        private void EquipWeapon(int slotIndex)
         {
             if (_isSwitching) return;
-            if (index < 0 || index >= _ownedWeapons.Count) return;
-            if (_ownedWeapons[index] == null) return;
-            if (_currentWeaponData == _ownedWeapons[index]) return;
+            if (slotIndex < 0 || slotIndex >= SlotCount) return;
+            if (_weaponSlots[slotIndex] == null) return;
+            if (_currentWeaponData == _weaponSlots[slotIndex]) return;
 
-            SwitchWeapon(index).Forget();
+            SwitchWeapon(slotIndex).Forget();
         }
 
         /// <summary>
@@ -306,7 +335,7 @@ namespace Velora.Weapon
             var previousModelView = _activeModelView;
 
             _currentWeaponIndex = index;
-            _currentWeaponData = _ownedWeapons[index];
+            _currentWeaponData = _weaponSlots[index];
             _ammoManager.LoadAmmo(_currentWeaponData);
             _lastFireTime = 0f;
 
