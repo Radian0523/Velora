@@ -2,6 +2,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 using Velora.Core;
+using Velora.Data;
 
 namespace Velora.UI
 {
@@ -22,7 +23,7 @@ namespace Velora.UI
         [SerializeField] private float _displayRadius = 120f;
         [SerializeField] private float _arcWidth = 60f;
         [SerializeField] private float _arcThickness = 6f;
-        [SerializeField] private Color _arcColor = new Color(0.8f, 0f, 0f, 0.9f);
+        [SerializeField] private UIColorThemeData _colorTheme;
 
         [Header("表示パラメータ")]
         [SerializeField] private float _fadeDuration = 0.8f;
@@ -73,7 +74,7 @@ namespace Velora.UI
                 arcRect.anchoredPosition = new Vector2(0f, _displayRadius);
                 arcRect.sizeDelta = new Vector2(_arcWidth, _arcThickness);
 
-                var color = _arcColor;
+                var color = _colorTheme.DamageDirectionColor;
                 color.a = 0f;
                 arcImage.color = color;
                 _arcImages[i] = arcImage;
@@ -138,7 +139,7 @@ namespace Velora.UI
             _pivots[index].localRotation = Quaternion.Euler(0f, 0f, -angle);
 
             var image = _arcImages[index];
-            image.color = _arcColor;
+            image.color = _colorTheme.DamageDirectionColor;
 
             _fadeTweens[index] = DOTween.ToAlpha(
                 () => image.color,

@@ -3254,7 +3254,7 @@ MonoBehaviour:
   _displayRadius: 120
   _arcWidth: 60
   _arcThickness: 6
-  _arcColor: {r: 0.8, g: 0, b: 0, a: 0.9}
+  _colorTheme: {fileID: 11400000, guid: 7975d4d429776414cac7aac869e7b1b5, type: 2}
   _fadeDuration: 0.8
 --- !u!1 &747728534
 GameObject:
@@ -4336,9 +4336,7 @@ MonoBehaviour:
   _mainFill: {fileID: 884527004}
   _trailFill: {fileID: 655811089}
   _healthText: {fileID: 823887732}
-  _healthyColor: {r: 0.2, g: 0.85, b: 0.3, a: 1}
-  _warningColor: {r: 0.95, g: 0.85, b: 0.1, a: 1}
-  _criticalColor: {r: 0.9, g: 0.15, b: 0.15, a: 1}
+  _colorTheme: {fileID: 11400000, guid: 7975d4d429776414cac7aac869e7b1b5, type: 2}
   _warningThreshold: 0.5
   _criticalThreshold: 0.25
   _mainBarDuration: 0.3
@@ -4660,7 +4658,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95f593a8ba3e049768efb75051b8ee62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.DamageVignetteView
-  _color: {r: 0.88, g: 0.22, b: 0.22, a: 1}
+  _colorTheme: {fileID: 11400000, guid: 7975d4d429776414cac7aac869e7b1b5, type: 2}
   _intensity: 0.45
   _smoothness: 0.4
   _flashDuration: 0.4
@@ -5010,8 +5008,7 @@ MonoBehaviour:
   _canvas: {fileID: 1283294686}
   _floatDistance: 80
   _duration: 1
-  _normalHitColor: {r: 1, g: 1, b: 1, a: 1}
-  _headshotColor: {r: 1, g: 0, b: 0, a: 1}
+  _colorTheme: {fileID: 11400000, guid: 7975d4d429776414cac7aac869e7b1b5, type: 2}
 --- !u!114 &1283294685
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5201,9 +5198,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Velora.UI.HudPresenter
   _hudView: {fileID: 1308589436}
-  _lightAmmoColor: {r: 0, g: 0.91849303, b: 1, a: 1}
-  _energyAmmoColor: {r: 0.99765015, g: 1, b: 0, a: 1}
-  _explosiveAmmoColor: {r: 1, g: 0.188, b: 0.188, a: 1}
+  _colorTheme: {fileID: 11400000, guid: 7975d4d429776414cac7aac869e7b1b5, type: 2}
 --- !u!114 &1308589436
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -2,6 +2,7 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Velora.Data;
 
 namespace Velora.UI
 {
@@ -21,9 +22,7 @@ namespace Velora.UI
         [SerializeField] private TextMeshProUGUI _healthText;
 
         [Header("色設定")]
-        [SerializeField] private Color _healthyColor = new Color(0.2f, 0.85f, 0.3f);
-        [SerializeField] private Color _warningColor = new Color(0.95f, 0.85f, 0.1f);
-        [SerializeField] private Color _criticalColor = new Color(0.9f, 0.15f, 0.15f);
+        [SerializeField] private UIColorThemeData _colorTheme;
         [SerializeField] private float _warningThreshold = 0.5f;
         [SerializeField] private float _criticalThreshold = 0.25f;
 
@@ -158,11 +157,11 @@ namespace Velora.UI
             if (normalized > _warningThreshold)
             {
                 float t = Mathf.InverseLerp(1f, _warningThreshold, normalized);
-                return Color.Lerp(_healthyColor, _warningColor, t);
+                return Color.Lerp(_colorTheme.HealthyColor, _colorTheme.WarningColor, t);
             }
 
             float t2 = Mathf.InverseLerp(_warningThreshold, _criticalThreshold, normalized);
-            return Color.Lerp(_warningColor, _criticalColor, t2);
+            return Color.Lerp(_colorTheme.WarningColor, _colorTheme.CriticalColor, t2);
         }
 
         /// <summary>

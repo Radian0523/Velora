@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Velora.Core;
+using Velora.Data;
 
 namespace Velora.UI
 {
@@ -20,9 +21,7 @@ namespace Velora.UI
         [SerializeField] private float _floatDistance = 80f;
         [SerializeField] private float _duration = 1f;
 
-        [Header("カラー設定")]
-        [SerializeField] private Color _normalHitColor = Color.white;
-        [SerializeField] private Color _headshotColor = Color.red;
+        [SerializeField] private UIColorThemeData _colorTheme;
 
         private Camera _mainCamera;
         private RectTransform _canvasRect;
@@ -61,7 +60,7 @@ namespace Velora.UI
             instance.DOKill();
             instance.alpha = 1f;
             instance.text = Mathf.RoundToInt(damage).ToString();
-            instance.color = isHeadshot ? _headshotColor : _normalHitColor;
+            instance.color = isHeadshot ? _colorTheme.HeadshotColor : _colorTheme.NormalHitColor;
 
             // WorldToScreenPoint でスクリーン座標を得て Canvas のローカル座標に変換する。
             // Screen Space Overlay Canvas では Camera.main を null で渡す。

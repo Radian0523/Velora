@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using Velora.Core;
+using Velora.Data;
 
 namespace Velora.UI
 {
@@ -15,7 +16,7 @@ namespace Velora.UI
     public class DamageVignetteView : MonoBehaviour
     {
         [Header("ビネット設定")]
-        [SerializeField] private Color _color = new Color(0.88f, 0.22f, 0.22f);
+        [SerializeField] private UIColorThemeData _colorTheme;
         [SerializeField] private float _intensity = 0.45f;
         [SerializeField] private float _smoothness = 0.4f;
 
@@ -41,7 +42,7 @@ namespace Velora.UI
             _runtimeProfile = ScriptableObject.CreateInstance<VolumeProfile>();
 
             var vignette = _runtimeProfile.Add<Vignette>();
-            vignette.color.Override(_color);
+            vignette.color.Override(_colorTheme.DamageVignetteColor);
             vignette.intensity.Override(_intensity);
             vignette.smoothness.Override(_smoothness);
 

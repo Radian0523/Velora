@@ -15,11 +15,7 @@ namespace Velora.UI
     public class HudPresenter : MonoBehaviour
     {
         [SerializeField] private HudView _hudView;
-
-        [Header("弾薬タイプ別テキスト色")]
-        [SerializeField] private Color _lightAmmoColor = new Color(1f, 0.843f, 0f);
-        [SerializeField] private Color _energyAmmoColor = new Color(0f, 0.898f, 1f);
-        [SerializeField] private Color _explosiveAmmoColor = new Color(1f, 0.188f, 0.188f);
+        [SerializeField] private UIColorThemeData _colorTheme;
 
         private PlayerModel _playerModel;
         private WeaponController _weaponController;
@@ -148,13 +144,7 @@ namespace Velora.UI
 
         private Color GetAmmoTypeColor(AmmoType ammoType)
         {
-            return ammoType switch
-            {
-                AmmoType.Light => _lightAmmoColor,
-                AmmoType.Energy => _energyAmmoColor,
-                AmmoType.Explosive => _explosiveAmmoColor,
-                _ => Color.white
-            };
+            return _colorTheme.GetAmmoTypeColor(ammoType);
         }
     }
 }
