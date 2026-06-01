@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using VContainer;
 using Velora.Core;
 using Velora.Data;
 using Velora.Player;
@@ -60,6 +61,7 @@ namespace Velora.Weapon
 
         // PlayerModel への参照は、firerateアップなどで必要になるため保持する。
         private PlayerModel _playerModel;
+        private AudioManager _audioManager;
 
         // 武器モデル管理: WeaponData → 生成済み WeaponModelView のマッピング。
         // Start 時に全武器分を生成し、切替時は SetActive で表示を切り替える。
@@ -84,10 +86,17 @@ namespace Velora.Weapon
         public event Action<bool> OnAimStateChanged;
         public event Action OnFired;
 
+        [Inject]
+        public void Construct(AudioManager audioManager)
+        {
+            _audioManager = audioManager;
+        }
+
         public void Initialize(PlayerModel playerModel)
         {
             _playerModel = playerModel;
         }
+
         public WeaponData CurrentWeaponData => _currentWeaponData;
         public IReadOnlyList<WeaponData> Weapons => _weaponSlots;
         public int CurrentWeaponIndex => _currentWeaponIndex;
@@ -472,22 +481,22 @@ namespace Velora.Weapon
 
         private void PlaySwitchSound()
         {
-            AudioHelper.PlaySE(_currentWeaponData?.SwitchSound);
+            _audioManager?.PlaySE(_currentWeaponData?.SwitchSound);
         }
 
         private void PlayFireSound()
         {
-            AudioHelper.PlaySE(_currentWeaponData?.FireSound);
+            _audioManager?.PlaySE(_currentWeaponData?.FireSound);
         }
 
         private void PlayReloadStartSound()
         {
-            AudioHelper.PlaySE(_currentWeaponData?.ReloadStartSound);
+            _audioManager?.PlaySE(_currentWeaponData?.ReloadStartSound);
         }
 
         private void PlayReloadEndSound()
         {
-            AudioHelper.PlaySE(_currentWeaponData?.ReloadEndSound);
+            _audioManager?.PlaySE(_currentWeaponData?.ReloadEndSound);
         }
 
         // --- リロード ---

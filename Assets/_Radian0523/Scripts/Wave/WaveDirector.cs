@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
+using VContainer;
+using VContainer.Unity;
 using Velora.Battle;
 using Velora.Core;
 using Velora.Data;
@@ -28,6 +30,7 @@ namespace Velora.Wave
         private readonly Transform _playerTransform;
         private readonly IDamageable _playerDamageable;
         private readonly ObjectPool<EnemyController> _enemyPool;
+        private readonly IObjectResolver _resolver;
 
         private int _currentWaveIndex;
         private int _activeEnemyCount;
@@ -56,12 +59,14 @@ namespace Velora.Wave
             Transform playerTransform,
             IDamageable playerDamageable,
             EnemyController prefab,
-            Transform poolParent)
+            Transform poolParent,
+            IObjectResolver resolver)
         {
             _waveDataList = waveDataList;
             _spawnPointManager = spawnPointManager;
             _playerTransform = playerTransform;
             _playerDamageable = playerDamageable;
+            _resolver = resolver;
 
             _activeWaveNumber = _waveDataList.Count > 0 ? _waveDataList[0].WaveNumber : 1;
 
@@ -173,6 +178,10 @@ namespace Velora.Wave
         {
             var enemy = _enemyPool.Get();
             enemy.SetReturnCallback(HandleEnemyReturnedToPool);
+
+            // プールから取得した敵に VContainer の依存を注入する。
+            // EnemyController の [Inject] Construct が呼ばれ、AudioManager 等が渡される。
+            _resolver.InjectGameObject(enemy.gameObject);
 
             Vector3 spawnPosition = _spawnPointManager.GetSpawnPosition(_playerTransform.position);
             enemy.transform.position = spawnPosition;

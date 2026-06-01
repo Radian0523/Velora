@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using VContainer;
 using VContainer.Unity;
 using Velora.Data;
 using Velora.Player;
@@ -34,6 +35,8 @@ namespace Velora.Core
         private readonly GameFlowManager _gameFlowManager;
         private readonly BattleConfig _config;
         private readonly AIDirector _aiDirector;
+        private readonly AudioManager _audioManager;
+        private readonly IObjectResolver _resolver;
 
         private readonly PlayerDamageReceiver _playerDamageReceiver;
         private readonly FPSController _fpsController;
@@ -57,6 +60,8 @@ namespace Velora.Core
             GameFlowManager gameFlowManager,
             BattleConfig config,
             AIDirector aiDirector,
+            AudioManager audioManager,
+            IObjectResolver resolver,
             PlayerDamageReceiver playerDamageReceiver,
             FPSController fpsController,
             WeaponController weaponController,
@@ -73,6 +78,8 @@ namespace Velora.Core
             _gameFlowManager = gameFlowManager;
             _config = config;
             _aiDirector = aiDirector;
+            _audioManager = audioManager;
+            _resolver = resolver;
             _playerDamageReceiver = playerDamageReceiver;
             _fpsController = fpsController;
             _weaponController = weaponController;
@@ -123,13 +130,15 @@ namespace Velora.Core
         {
             // WaveDirector はプレイヤーの Transform や IDamageable など
             // ランタイム固有の参照が必要なため、DI コンテナではなくここで手動生成する。
+            // IObjectResolver を渡すことで、敵生成時に VContainer の依存注入を適用できる。
             _waveDirector = new WaveDirector(
                 _config.WaveDataList,
                 _spawnPointManager,
                 _playerDamageReceiver.transform,
                 _playerDamageReceiver,
                 _config.EnemyPrefab,
-                _config.PoolParent);
+                _config.PoolParent,
+                _resolver);
         }
 
         private void InitializePresenters()
@@ -265,7 +274,7 @@ namespace Velora.Core
 
         private void HandlePlayerDeath()
         {
-            AudioHelper.StopBGM();
+            _audioManager.StopBGM().Forget();
             PlayBattleSound(_config.BattleSoundData?.PlayerDeathSound);
             _gameFlowManager.ChangeState(GameState.GameOver).Forget();
         }
@@ -302,7 +311,7 @@ namespace Velora.Core
 
             int index = PickRandomIndex(clips.Count, _lastBgmIndex);
             _lastBgmIndex = index;
-            AudioHelper.PlayBGM(clips[index]);
+            _audioManager.PlayBGM(clips[index]).Forget();
         }
 
         private static int PickRandomIndex(int count, int excludeIndex)
@@ -321,7 +330,7 @@ namespace Velora.Core
 
         private void PlayBattleSound(AudioClip clip)
         {
-            AudioHelper.PlaySE(clip);
+            _audioManager.PlaySE(clip);
         }
     }
 }

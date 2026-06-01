@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 using Cysharp.Threading.Tasks;
+using VContainer;
 using Velora.Battle;
 using Velora.Core;
 using Velora.Data;
@@ -54,6 +55,7 @@ namespace Velora.Enemy
         private Collider _collider;
         private Action<EnemyController> _returnCallback;
         private float _lookAtWeight;
+        private AudioManager _audioManager;
 
         /// <summary>
         /// プール返却時のコールバックを設定する。WaveDirector が生成直後に呼び出す。
@@ -61,6 +63,12 @@ namespace Velora.Enemy
         public void SetReturnCallback(Action<EnemyController> callback)
         {
             _returnCallback = callback;
+        }
+
+        [Inject]
+        public void Construct(AudioManager audioManager)
+        {
+            _audioManager = audioManager;
         }
 
         /// <summary>
@@ -144,7 +152,17 @@ namespace Velora.Enemy
         private void PlayHitSound(bool isHeadshot)
         {
             var clip = isHeadshot ? Data.HeadshotHitSound : Data.HitSound;
-            AudioHelper.PlaySE(clip);
+            _audioManager?.PlaySE(clip);
+        }
+
+        /// <summary>
+        /// 攻撃サウンドを再生する。IAttackBehavior から呼び出される。
+        /// サウンド再生の責務を EnemyController に集約することで、
+        /// 攻撃ロジッククラスは AudioManager への依存を持たない。
+        /// </summary>
+        public void PlayAttackSound()
+        {
+            _audioManager?.PlaySE(Data.AttackSound);
         }
 
         // --- 外部 API ---
