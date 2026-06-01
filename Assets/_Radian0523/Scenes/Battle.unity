@@ -4337,8 +4337,6 @@ MonoBehaviour:
   _trailFill: {fileID: 655811089}
   _healthText: {fileID: 823887732}
   _colorTheme: {fileID: 11400000, guid: 7975d4d429776414cac7aac869e7b1b5, type: 2}
-  _warningThreshold: 0.5
-  _criticalThreshold: 0.25
   _mainBarDuration: 0.3
   _trailDelay: 0.2
   _trailDuration: 0.2
@@ -4662,7 +4660,6 @@ MonoBehaviour:
   _intensity: 0.45
   _smoothness: 0.4
   _flashDuration: 0.4
-  _criticalThreshold: 0.25
   _criticalPulseMin: 0.15
   _criticalPulseMax: 0.4
   _criticalPulseDuration: 0.8

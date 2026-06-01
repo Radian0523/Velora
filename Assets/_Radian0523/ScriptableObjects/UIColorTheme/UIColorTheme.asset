@@ -20,5 +20,7 @@ MonoBehaviour:
   _healthyColor: {r: 0.2, g: 0.85, b: 0.3, a: 1}
   _warningColor: {r: 0.95, g: 0.85, b: 0.1, a: 1}
   _criticalColor: {r: 0.9, g: 0.15, b: 0.15, a: 1}
+  _warningThreshold: 0.5
+  _criticalThreshold: 0.25
   _damageDirectionColor: {r: 0.8, g: 0, b: 0, a: 0.9}
   _damageVignetteColor: {r: 0.88, g: 0.22, b: 0.22, a: 1}

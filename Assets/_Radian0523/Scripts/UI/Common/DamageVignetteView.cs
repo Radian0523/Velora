@@ -24,7 +24,6 @@ namespace Velora.UI
         [SerializeField] private float _flashDuration = 0.4f;
 
         [Header("瀕死演出")]
-        [SerializeField] private float _criticalThreshold = 0.25f;
         [SerializeField] private float _criticalPulseMin = 0.15f;
         [SerializeField] private float _criticalPulseMax = 0.4f;
         [SerializeField] private float _criticalPulseDuration = 0.8f;
@@ -98,7 +97,7 @@ namespace Velora.UI
         {
             float normalized = e.Max > 0f ? e.Current / e.Max : 0f;
             bool wasCritical = _isCritical;
-            _isCritical = normalized <= _criticalThreshold && normalized > 0f;
+            _isCritical = normalized <= _colorTheme.CriticalThreshold && normalized > 0f;
 
             // ダメージフラッシュ再生中はフラッシュの OnComplete で制御するため、
             // ここではパルスの開始/停止を行わない

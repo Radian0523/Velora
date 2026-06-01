@@ -24,6 +24,8 @@ namespace Velora.Data
         [SerializeField] private Color _healthyColor = new Color(0.2f, 0.85f, 0.3f);
         [SerializeField] private Color _warningColor = new Color(0.95f, 0.85f, 0.1f);
         [SerializeField] private Color _criticalColor = new Color(0.9f, 0.15f, 0.15f);
+        [SerializeField] private float _warningThreshold = 0.5f;
+        [SerializeField] private float _criticalThreshold = 0.25f;
 
         [Header("被弾演出")]
         [SerializeField] private Color _damageDirectionColor = new Color(0.8f, 0f, 0f, 0.9f);
@@ -34,6 +36,8 @@ namespace Velora.Data
         public Color HealthyColor => _healthyColor;
         public Color WarningColor => _warningColor;
         public Color CriticalColor => _criticalColor;
+        public float WarningThreshold => _warningThreshold;
+        public float CriticalThreshold => _criticalThreshold;
         public Color DamageDirectionColor => _damageDirectionColor;
         public Color DamageVignetteColor => _damageVignetteColor;
 

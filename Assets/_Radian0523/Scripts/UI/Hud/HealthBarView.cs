@@ -23,8 +23,6 @@ namespace Velora.UI
 
         [Header("色設定")]
         [SerializeField] private UIColorThemeData _colorTheme;
-        [SerializeField] private float _warningThreshold = 0.5f;
-        [SerializeField] private float _criticalThreshold = 0.25f;
 
         [Header("アニメーション")]
         [SerializeField] private float _mainBarDuration = 0.3f;
@@ -154,13 +152,13 @@ namespace Velora.UI
         /// </summary>
         private Color EvaluateHealthColor(float normalized)
         {
-            if (normalized > _warningThreshold)
+            if (normalized > _colorTheme.WarningThreshold)
             {
-                float t = Mathf.InverseLerp(1f, _warningThreshold, normalized);
+                float t = Mathf.InverseLerp(1f, _colorTheme.WarningThreshold, normalized);
                 return Color.Lerp(_colorTheme.HealthyColor, _colorTheme.WarningColor, t);
             }
 
-            float t2 = Mathf.InverseLerp(_warningThreshold, _criticalThreshold, normalized);
+            float t2 = Mathf.InverseLerp(_colorTheme.WarningThreshold, _colorTheme.CriticalThreshold, normalized);
             return Color.Lerp(_colorTheme.WarningColor, _colorTheme.CriticalColor, t2);
         }
 
@@ -170,7 +168,7 @@ namespace Velora.UI
         /// </summary>
         private void UpdateCriticalPulse(float normalized)
         {
-            bool isCritical = normalized <= _criticalThreshold && normalized > 0f;
+            bool isCritical = normalized <= _colorTheme.CriticalThreshold && normalized > 0f;
 
             if (isCritical)
             {
