@@ -24,7 +24,7 @@ namespace Velora.Weapon
             _pool = pool;
         }
 
-        private void OnEnable()
+        public void Play()
         {
             _particleSystem.Play();
         }

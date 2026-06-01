@@ -40,6 +40,7 @@ namespace Velora.Weapon
             var effect = _impactEffectPool.Get();
             effect.Initialize(_impactEffectPool);
             effect.transform.SetPositionAndRotation(hitPoint, Quaternion.LookRotation(hitNormal));
+            effect.Play();
         }
 
         /// <summary>

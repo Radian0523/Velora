@@ -190,6 +190,7 @@ namespace Velora.Weapon
             var effect = _explosionEffectPool.Get();
             effect.Initialize(_explosionEffectPool);
             effect.transform.SetPositionAndRotation(position, Quaternion.identity);
+            effect.Play();
         }
 
         private void SpawnImpactEffect(Collision collision)
@@ -198,9 +199,11 @@ namespace Velora.Weapon
 
             var contact = collision.GetContact(0);
             var effect = _impactEffectPool.Get();
+            effect.Initialize(_impactEffectPool);
             effect.transform.SetPositionAndRotation(
                 contact.point,
                 Quaternion.LookRotation(contact.normal));
+            effect.Play();
         }
 
         private void ReturnToPool()
