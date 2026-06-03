@@ -12,6 +12,7 @@ namespace Velora.Player
     /// </summary>
     public class PlayerModel
     {
+        private readonly PlayerConfig _config;
         private float _maxHealth;
         private float _currentHealth;
         private readonly List<UpgradeData> _appliedUpgrades = new();
@@ -31,10 +32,11 @@ namespace Velora.Player
         public event Action<float> OnDamaged;
         public event Action<UpgradeData> OnUpgradeApplied;
 
-        public PlayerModel(float maxHealth)
+        public PlayerModel(PlayerConfig config)
         {
-            _maxHealth = maxHealth;
-            _currentHealth = maxHealth;
+            _config = config;
+            _maxHealth = config.InitialMaxHealth;
+            _currentHealth = _maxHealth;
         }
 
         public void TakeDamage(float amount)
@@ -97,10 +99,10 @@ namespace Velora.Player
         /// <summary>
         /// ゲーム開始時の初期化。全状態をリセットする。
         /// </summary>
-        public void Reset(float maxHealth)
+        public void Reset()
         {
-            _maxHealth = maxHealth;
-            _currentHealth = maxHealth;
+            _maxHealth = _config.InitialMaxHealth;
+            _currentHealth = _maxHealth;
             _appliedUpgrades.Clear();
             DamageMultiplier = 1f;
             FireRateMultiplier = 1f;

@@ -26,7 +26,7 @@ namespace Velora.Core
         [Header("プレイヤー")]
         [SerializeField] private PlayerDamageReceiver _playerDamageReceiver;
         [SerializeField] private FPSController _fpsController;
-        [SerializeField] private float _playerMaxHealth = 100f;
+        [SerializeField] private PlayerConfig _playerConfig;
 
         [Header("武器")]
         [SerializeField] private WeaponController _weaponController;
@@ -57,10 +57,12 @@ namespace Velora.Core
 
         protected override void Configure(IContainerBuilder builder)
         {
+            // --- 設定 ScriptableObject ---
+            builder.RegisterInstance(_playerConfig);
+
             // --- Pure C# サービス ---
-            // PlayerModel: プレイヤーの状態管理（maxHealth をコンストラクタ引数に渡す）
-            builder.Register<PlayerModel>(Lifetime.Scoped)
-                .WithParameter(_playerMaxHealth);
+            // PlayerModel: プレイヤーの状態管理（PlayerConfig から設定を取得）
+            builder.Register<PlayerModel>(Lifetime.Scoped);
 
             builder.Register<ScoreManager>(Lifetime.Scoped);
 
