@@ -16,6 +16,7 @@ namespace Velora.UI
 
         private EnemyModel _model;
         private RectTransform _fillRect;
+        private Camera _mainCamera;
 
         /// <summary>
         /// EnemyController.Initialize から呼び出す。
@@ -45,11 +46,18 @@ namespace Velora.UI
         private void LateUpdate()
         {
             // ビルボード：カメラの forward と同じ向きにすることで、
-            // どの角度から見ても HP バーが正面を向く
-            var cam = Camera.main;
-            if (cam != null)
+            // どの角度から見ても HP バーが正面を向く。
+            // Camera.main は内部的に FindGameObjectsWithTag を呼ぶため、
+            // 敵の数 × 毎フレームの Find を避けるべくキャッシュする
+            // （シーン再ロードでカメラが破棄された場合は Unity の null 判定で再取得される）。
+            if (_mainCamera == null)
             {
-                transform.forward = cam.transform.forward;
+                _mainCamera = Camera.main;
+            }
+
+            if (_mainCamera != null)
+            {
+                transform.forward = _mainCamera.transform.forward;
             }
         }
 
