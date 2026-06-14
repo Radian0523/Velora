@@ -48,6 +48,13 @@ namespace Velora.Enemy
         public EnemyDissolveController DissolveController { get; private set; }
         public Vector3 SpawnPosition { get; private set; }
 
+        /// <summary>
+        /// 自身からプレイヤーまでの距離。検知・攻撃射程・後退判定で
+        /// 各ステートと攻撃ビヘイビアが共通して参照する（距離計算の単一定義）。
+        /// </summary>
+        public float DistanceToPlayer() =>
+            Vector3.Distance(transform.position, PlayerTransform.position);
+
         [SerializeField] private Transform _headBone;
 
         private EnemyStateMachine _stateMachine;
@@ -245,7 +252,7 @@ namespace Velora.Enemy
         /// </summary>
         private void ApplyColorOffset(EnemyData data)
         {
-            float x = ColorColumnOffsets[Mathf.Clamp(data.ColorColumn, 0, 2)];
+            float x = ColorColumnOffsets[Mathf.Clamp(data.ColorColumn, 0, ColorColumnOffsets.Length - 1)];
             float y = data.ColorRow * ColorRowStep;
             var offset = new Vector4(x, y, 0f, 0f);
 

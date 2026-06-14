@@ -1,6 +1,5 @@
 using System;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 
 namespace Velora.Enemy
 {
@@ -20,9 +19,7 @@ namespace Velora.Enemy
 
             if (controller.Model.IsDead) return;
 
-            float distance = Vector3.Distance(
-                controller.transform.position,
-                controller.PlayerTransform.position);
+            float distance = controller.DistanceToPlayer();
 
             if (distance <= controller.Data.AttackRange)
             {
