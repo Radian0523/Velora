@@ -90,6 +90,10 @@ namespace Velora.UI
 
         private void HandleAmmoChanged(int current, int max)
         {
+            // 武器未装備時（AddReserveAmmo 等）にも発火しうるため、
+            // HandleReloadStateChanged と同様に CurrentWeaponData を必ずガードする。
+            if (_weaponController.CurrentWeaponData == null) return;
+
             _hudView.UpdateAmmoDisplay(
                 current, max, _weaponController.ReserveAmmo, _isReloading,
                 GetAmmoTypeColor(_weaponController.CurrentWeaponData.AmmoType));
