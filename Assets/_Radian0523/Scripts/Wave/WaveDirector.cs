@@ -32,7 +32,6 @@ namespace Velora.Wave
         private readonly ObjectPool<EnemyController> _enemyPool;
         private readonly IObjectResolver _resolver;
 
-        private int _currentWaveIndex;
         private int _activeEnemyCount;
         private int _activeWaveNumber;
         private RuntimeWaveConfig _pendingConfig;
@@ -44,11 +43,8 @@ namespace Velora.Wave
         /// </summary>
         public int CurrentWaveNumber => _activeWaveNumber;
 
-        public bool HasNextWave => _currentWaveIndex + 1 < _waveDataList.Count;
-
         public event Action<int> OnWaveStarted;
         public event Action<int> OnWaveCleared;
-        public event Action OnAllWavesComplete;
 
         private const int PoolInitialSize = 10;
         private const int PoolMaxSize = 20;
@@ -87,51 +83,23 @@ namespace Velora.Wave
 
         /// <summary>
         /// 現在のウェーブを開始し、敵を順次スポーンする。
-        /// _pendingConfig が設定されていればそれを使用し（AI Director 経由）、
-        /// なければ _waveDataList の現在インデックスから読み取る（Wave 1 用）。
+        /// _pendingConfig が設定されていればそれを使用し（AI Director 経由、Wave 2 以降）、
+        /// なければ先頭の WaveData をベースに RuntimeWaveConfig へ正規化する（Wave 1 用）。
+        /// Wave 2 以降は AI Director が SetPendingWaveConfig で構成を差し込むため、
+        /// 固定 WaveData リストは Wave 1 の初期構成としてのみ参照する。
+        /// いずれの経路も ExecuteWave に集約し、スポーン処理を一本化する。
         /// </summary>
         public async UniTask StartWave(CancellationToken cancellationToken)
         {
-            if (_pendingConfig != null)
+            RuntimeWaveConfig config = _pendingConfig;
+            if (config == null)
             {
-                await StartWaveFromConfig(_pendingConfig, cancellationToken);
-                _pendingConfig = null;
-                return;
+                if (_waveDataList.Count == 0) return;
+                config = RuntimeWaveConfig.FromWaveData(_waveDataList[0]);
             }
 
-            if (_currentWaveIndex >= _waveDataList.Count) return;
-
-            var waveData = _waveDataList[_currentWaveIndex];
-            _activeEnemyCount = waveData.TotalEnemyCount;
-            _activeWaveNumber = waveData.WaveNumber;
-
-            OnWaveStarted?.Invoke(_activeWaveNumber);
-            EventBus.Publish(new WaveStartedEvent(_activeWaveNumber));
-
-            foreach (var entry in waveData.SpawnEntries)
-            {
-                for (int i = 0; i < entry.Count; i++)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    SpawnEnemy(entry.EnemyData);
-
-                    if (i < entry.Count - 1 && entry.SpawnDelay > 0f)
-                    {
-                        await UniTask.Delay(
-                            TimeSpan.FromSeconds(entry.SpawnDelay),
-                            cancellationToken: cancellationToken);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// 次ウェーブへインデックスを進める。BattleFlowEntryPoint が WaveCleared 後に呼ぶ。
-        /// </summary>
-        public void AdvanceToNextWave()
-        {
-            _currentWaveIndex++;
+            _pendingConfig = null;
+            await ExecuteWave(config, cancellationToken);
         }
 
         public void Dispose()
@@ -144,11 +112,12 @@ namespace Velora.Wave
         }
 
         /// <summary>
-        /// RuntimeWaveConfig に基づいてウェーブを実行する。
-        /// AI Director が生成したエンドレスウェーブや、修正済み base wave に対応する。
+        /// RuntimeWaveConfig に基づいてウェーブを実行する唯一のスポーン経路。
+        /// Wave 1 の WaveData も、AI Director 生成のエンドレス/修正済み base wave も
+        /// すべて RuntimeWaveConfig に正規化してからここを通る。
         /// HealthMultiplier を SpawnEnemy に渡すことで、敵の HP スケーリングを適用する。
         /// </summary>
-        private async UniTask StartWaveFromConfig(RuntimeWaveConfig config, CancellationToken cancellationToken)
+        private async UniTask ExecuteWave(RuntimeWaveConfig config, CancellationToken cancellationToken)
         {
             _activeEnemyCount = config.TotalEnemyCount;
             _activeWaveNumber = config.WaveNumber;
