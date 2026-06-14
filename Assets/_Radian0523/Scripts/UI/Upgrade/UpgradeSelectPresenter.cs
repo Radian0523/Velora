@@ -1,6 +1,6 @@
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using Cysharp.Threading.Tasks;
 using Velora.Data;
 using Velora.Player;
 using Velora.Upgrade;

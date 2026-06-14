@@ -1,6 +1,6 @@
+using UnityEngine;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using UnityEngine;
 
 namespace Velora.UI
 {

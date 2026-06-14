@@ -1,7 +1,7 @@
-using DG.Tweening;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
+using TMPro;
 using Velora.Data;
 
 namespace Velora.UI
