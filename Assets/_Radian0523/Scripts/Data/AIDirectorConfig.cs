@@ -30,6 +30,12 @@ namespace Velora.Data
         [Tooltip("基準クリア速度（秒/体）。この速度でクリアするとスピードスコアが 1.0")]
         [SerializeField] private float _expectedClearTimePerEnemy = 3.0f;
 
+        [Tooltip("命中率スコアが 1.0 に飽和する基準命中率。これ以上は難易度を頭打ちにする")]
+        [SerializeField, Range(0.1f, 1f)] private float _targetAccuracy = 0.70f;
+
+        [Tooltip("ヘッドショットスコアが 1.0 に飽和する基準ヘッドショット率")]
+        [SerializeField, Range(0.05f, 1f)] private float _targetHeadshotRatio = 0.30f;
+
         [Header("難易度スケーリング")]
         [Tooltip("敵数の倍率範囲。x=低パフォーマンス時, y=高パフォーマンス時")]
         [SerializeField] private Vector2 _enemyCountScaleRange = new(0.7f, 1.5f);
@@ -59,6 +65,8 @@ namespace Velora.Data
         public float HealthWeight => _healthWeight;
         public float HeadshotWeight => _headshotWeight;
         public float ExpectedClearTimePerEnemy => _expectedClearTimePerEnemy;
+        public float TargetAccuracy => _targetAccuracy;
+        public float TargetHeadshotRatio => _targetHeadshotRatio;
         public Vector2 EnemyCountScaleRange => _enemyCountScaleRange;
         public Vector2 SpawnDelayScaleRange => _spawnDelayScaleRange;
         public Vector2 HealthScaleRange => _healthScaleRange;

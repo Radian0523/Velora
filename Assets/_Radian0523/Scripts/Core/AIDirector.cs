@@ -32,15 +32,18 @@ namespace Velora.Core
         private const float EndlessMinDelayFactor = 0.1f;
         private const float EndlessHealthGrowthPerWave = 0.1f;
 
+        // メトリクスが計測不能なとき（初回ウェーブ等）に用いる中立スコア。
+        // 高すぎず低すぎない 0.5 から EMA で実測値へ収束させる。
+        private const float NeutralPerformanceScore = 0.5f;
+
         private int _shotsFired;
         private int _hitsLanded;
         private int _headshots;
-        private float _damageTaken;
         private float _waveStartTime;
         private float _waveClearTime;
         private int _waveEnemyCount;
 
-        private float _smoothedPerformance = 0.5f;
+        private float _smoothedPerformance = NeutralPerformanceScore;
         private bool _isDisposed;
 
         /// <summary>
@@ -61,9 +64,10 @@ namespace Velora.Core
             // Wave 1 の敵数を初期値として設定（BuildNextWaveConfig を経由しないため）
             _waveEnemyCount = _baseWaves.Count > 0 ? _baseWaves[0].TotalEnemyCount : 1;
 
+            // 被ダメージは healthScore（残り体力 / 最大体力）に集約されるため、
+            // PlayerDamagedEvent を個別に購読する必要はない。
             EventBus.Subscribe<WeaponFiredEvent>(HandleWeaponFired);
             EventBus.Subscribe<EnemyDamagedEvent>(HandleEnemyDamaged);
-            EventBus.Subscribe<PlayerDamagedEvent>(HandlePlayerDamaged);
             EventBus.Subscribe<WaveStartedEvent>(HandleWaveStarted);
             EventBus.Subscribe<WaveClearedEvent>(HandleWaveCleared);
         }
@@ -101,7 +105,6 @@ namespace Velora.Core
             _shotsFired = 0;
             _hitsLanded = 0;
             _headshots = 0;
-            _damageTaken = 0f;
         }
 
         public bool IsEndlessPhase(int waveIndex) => waveIndex >= _baseWaves.Count;
@@ -113,7 +116,6 @@ namespace Velora.Core
 
             EventBus.Unsubscribe<WeaponFiredEvent>(HandleWeaponFired);
             EventBus.Unsubscribe<EnemyDamagedEvent>(HandleEnemyDamaged);
-            EventBus.Unsubscribe<PlayerDamagedEvent>(HandlePlayerDamaged);
             EventBus.Unsubscribe<WaveStartedEvent>(HandleWaveStarted);
             EventBus.Unsubscribe<WaveClearedEvent>(HandleWaveCleared);
         }
@@ -127,21 +129,21 @@ namespace Velora.Core
         /// </summary>
         private float CalculateAndUpdatePerformance()
         {
-            float accuracy = _shotsFired > 0 ? (float)_hitsLanded / _shotsFired : 0.5f;
+            float accuracy = _shotsFired > 0 ? (float)_hitsLanded / _shotsFired : NeutralPerformanceScore;
             float headshotRatio = _hitsLanded > 0 ? (float)_headshots / _hitsLanded : 0f;
 
-            float accuracyScore = Mathf.Clamp01(accuracy / 0.70f);
+            float accuracyScore = Mathf.Clamp01(accuracy / _config.TargetAccuracy);
 
             float expectedTime = _waveEnemyCount * _config.ExpectedClearTimePerEnemy;
             float speedScore = _waveClearTime > 0f
                 ? Mathf.Clamp01(expectedTime / _waveClearTime)
-                : 0.5f;
+                : NeutralPerformanceScore;
 
             float healthScore = _playerModel.MaxHealth > 0f
                 ? _playerModel.CurrentHealth / _playerModel.MaxHealth
                 : 0f;
 
-            float headshotScore = Mathf.Clamp01(headshotRatio / 0.30f);
+            float headshotScore = Mathf.Clamp01(headshotRatio / _config.TargetHeadshotRatio);
 
             float wavePerformance =
                 accuracyScore * _config.AccuracyWeight +
@@ -249,8 +251,6 @@ namespace Velora.Core
             _hitsLanded++;
             if (e.IsHeadshot) _headshots++;
         }
-
-        private void HandlePlayerDamaged(PlayerDamagedEvent e) => _damageTaken += e.Damage;
 
         private void HandleWaveStarted(WaveStartedEvent e) => _waveStartTime = Time.time;
 
