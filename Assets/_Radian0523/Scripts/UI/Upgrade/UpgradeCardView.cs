@@ -1,9 +1,9 @@
 using System;
-using DG.Tweening;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using DG.Tweening;
+using TMPro;
 using Velora.Data;
 
 namespace Velora.UI
@@ -32,6 +32,7 @@ namespace Velora.UI
         private const float HoverDuration = 0.15f;
 
         private UpgradeData _upgradeData;
+        private Tween _hoverTween;
 
         public event Action<UpgradeData> OnSelected;
 
@@ -73,17 +74,33 @@ namespace Velora.UI
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            transform.DOScale(HoverScale, HoverDuration).SetEase(Ease.OutBack);
+            PlayHoverScale(HoverScale, Ease.OutBack);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            transform.DOScale(1f, HoverDuration).SetEase(Ease.OutQuad);
+            PlayHoverScale(1f, Ease.OutQuad);
+        }
+
+        /// <summary>
+        /// ホバーのスケール tween を再生する。
+        /// カードはウェーブ毎に生成/破棄されるため、前の tween を Kill してから再生し、
+        /// ホバー中に破棄されても tween が transform を掴み続けないようにする。
+        /// </summary>
+        private void PlayHoverScale(float targetScale, Ease ease)
+        {
+            _hoverTween?.Kill();
+            _hoverTween = transform.DOScale(targetScale, HoverDuration).SetEase(ease);
         }
 
         private void HandleClick()
         {
             OnSelected?.Invoke(_upgradeData);
+        }
+
+        private void OnDestroy()
+        {
+            _hoverTween?.Kill();
         }
     }
 }

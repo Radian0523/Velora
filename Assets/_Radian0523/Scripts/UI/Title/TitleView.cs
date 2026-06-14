@@ -1,7 +1,7 @@
 using System;
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 namespace Velora.UI
 {
@@ -31,14 +31,23 @@ namespace Velora.UI
 
         public void Show()
         {
+            // Show/Hide 連打での tween 競合を防ぐため、直前の tween を必ず止めてから開始する。
+            _canvasGroup.DOKill();
             _canvasGroup.DOFade(1f, FadeDuration)
                 .SetUpdate(true);
         }
 
         public void Hide()
         {
+            _canvasGroup.DOKill();
             _canvasGroup.DOFade(0f, FadeDuration)
                 .SetUpdate(true);
+        }
+
+        private void OnDestroy()
+        {
+            // 破棄後に tween が CanvasGroup を掴み続けないよう解放する。
+            _canvasGroup.DOKill();
         }
     }
 }
