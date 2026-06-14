@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using VContainer;
 using Velora.Core;
 using Velora.Data;
@@ -228,7 +228,6 @@ namespace Velora.Weapon
         public void OnWeapon3(InputValue value) { if (value.isPressed) EquipWeapon(2); }
         public void OnWeapon4(InputValue value) { if (value.isPressed) EquipWeapon(3); }
         public void OnWeapon5(InputValue value) { if (value.isPressed) EquipWeapon(4); }
-        public void OnWeapon6(InputValue value) { if (value.isPressed) EquipWeapon(5); }
 
         // --- スロット検索 ---
 

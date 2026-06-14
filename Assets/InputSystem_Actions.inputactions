@@ -124,15 +124,6 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Weapon6",
-                    "type": "Button",
-                    "id": "a1b2c3d4-1111-4444-aaaa-000000000010",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Pause",
                     "type": "Button",
                     "id": "a1b2c3d4-1111-4444-aaaa-000000000011",
@@ -327,17 +318,6 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "Weapon5",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "b1000001-0010-4000-a000-000000000001",
-                    "path": "<Keyboard>/6",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "Weapon6",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
